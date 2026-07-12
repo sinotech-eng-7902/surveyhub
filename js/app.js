@@ -235,6 +235,21 @@ function isCreatedByCurrentUser(f){let email=normalizeEmail(currentUser?.email||
 function canDeleteFormDirectly(formOrId){let f=typeof formOrId==='string'?forms.find(x=>x.id===formOrId):formOrId;return !!f&&(isSystemAdmin||isCreatedByCurrentUser(f))}
 
 function formCreatorLabel(f){let email=formCreatedByEmail(f),member=findMemberByGoogleEmail(email);return memberDisplayName(member)||f?.createdByName||email||'未紀錄'}
+function formCreatorMember(f){
+  var email=formCreatedByEmail(f),byEmail=findMemberByGoogleEmail(email);
+  if(byEmail)return byEmail;
+  var recorded=String((f&&f.createdByName)||'').replace(/\s+/g,' ').trim();
+  if(!recorded)return null;
+  return members.find(function(member){
+    var full=memberDisplayName(member).replace(/\s+/g,' ').trim(),name=String(member.name||'').trim();
+    return full===recorded||name===recorded||(name&&recorded.endsWith(' '+name));
+  })||null;
+}
+function formCreatorContact(f){
+  var member=formCreatorMember(f),label=memberDisplayName(member)||String((f&&f.createdByName)||'').trim()||'問卷建立者',employeeNo=memberEmployeeNo(member);
+  return label+(employeeNo?'（分機0'+employeeNo+'）':'');
+}
+function formCorrectionContactText(f){return '如需更正，請洽'+formCreatorContact(f)+'。'}
 
 function creatorSelectOptions(currentEmail=''){let current=normalizeEmail(currentEmail);return members.filter(m=>m.active!==false&&memberGoogleEmail(m)).map(m=>{let email=memberGoogleEmail(m);return `<option value="${attr(email)}" ${email===current?'selected':''}>${esc(memberDisplayName(m)||m.name||'未命名人員')}</option>`}).join('')}
 
@@ -576,16 +591,16 @@ async function submitResponse(event){
   var answers;
   try{answers=collectAnswers(event.target,f)}catch(e){return notify(e.message||'請確認填寫內容','warn')}
   var responseKey=f.identityMode==='member'?f.id+'__'+identity.memberId:'';
-  if(!await confirmDialog('確認送出這份問卷嗎？送出後如需更正，請洽管理員。','確認送出'))return;
+  if(!await confirmDialog('確認送出這份問卷嗎？送出後'+formCorrectionContactText(f),'確認送出'))return;
   var btn=$('submitBtn');btn.disabled=true;btn.textContent='送出中';setPageLoading(true,'正在送出問卷');
   var payload=Object.assign({formId:f.id,formTitle:f.title},identity,{answers:answers,submissionMethod:'self',submittedAt:firebase.firestore.FieldValue.serverTimestamp(),submittedAtText:new Date().toLocaleString('zh-TW')});
   try{
     await writeResponseWithLock(f,responseKey,payload,responseKey?{formId:f.id,memberId:identity.memberId,submissionMethod:'self',createdAt:firebase.firestore.FieldValue.serverTimestamp()}:null);
-    frontMain.innerHTML='<div class="successCard submitSuccessCard"><h2>填寫成功</h2><p>已收到您的填寫內容。每位同仁限填一次；如需更正請洽管理員。</p><button class="btn primary" onclick="location.reload()">返回問卷</button></div>';
+    frontMain.innerHTML='<div class="successCard submitSuccessCard"><h2>填寫成功</h2><p>已收到您的填寫內容。每位同仁限填一次；'+esc(formCorrectionContactText(f))+'</p><button class="btn primary" onclick="location.reload()">返回問卷</button></div>';
     toast('填寫成功','success');
   }catch(e){
     console.error(e);
-    var message=e.message==='duplicate-response'||e.code==='permission-denied'?'您已填寫過這份問卷，無法重複送出。如需更正，請洽管理員。':'送出失敗，請檢查網路後再試一次';
+    var message=e.message==='duplicate-response'||e.code==='permission-denied'?'您已填寫過這份問卷，無法重複送出。'+formCorrectionContactText(f):'送出失敗，請檢查網路後再試一次';
     if(note){note.textContent=message;note.classList.add('submitError');note.hidden=false;note.scrollIntoView({behavior:'smooth',block:'center'})}
     notify(message,e.message==='duplicate-response'?'warn':'error');
     btn.disabled=false;btn.textContent='確認並送出';
