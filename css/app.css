@@ -3975,3 +3975,38 @@ body>.modalMask[style*="display: grid"]{
     max-height:calc(100vh - 20px);
   }
 }
+
+/* v1.49 front submit warning placement */
+.frontSubmitNotice{
+  width:100%;
+  margin:10px 0 0;
+}
+.frontSubmitNotice.submitError{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  width:100%;
+  padding:14px 16px;
+  border:1px solid #fecaca;
+  border-radius:12px;
+  background:#fff5f5;
+  color:#b42318!important;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.7;
+}
+.frontSubmitNotice.submitError::before{
+  content:"!";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 22px;
+  width:22px;
+  height:22px;
+  margin-top:2px;
+  border-radius:999px;
+  background:#fee2e2;
+  color:#b42318;
+  font-size:14px;
+  font-weight:900;
+}
