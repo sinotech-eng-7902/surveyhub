@@ -1,0 +1,139 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>公司通用問卷調查系統 v1.48</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="css/app.css?v=1.48">
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div id="front" class="frontShell">
+    <main id="frontMain" class="frontMain"><div class="loading">正在載入問卷…</div></main>
+    <header class="frontHeader" hidden><img src="assets/company-logo.png" alt="環興科技股份有限公司"><div class="frontActions"><span id="formStatus" class="statusPill">載入中</span><button class="ghostBtn" onclick="openAdmin()">管理登入</button></div></header>
+  </div>
+
+  <div id="loginMask" class="modalMask">
+    <div class="loginCard"><img src="assets/company-logo.png" alt="環興科技股份有限公司"><button id="loginBtn" class="btn primary wide" onclick="loginGoogle()">使用 Google 登入</button><button class="btn link" onclick="closeLogin()">取消</button><p id="loginMsg" class="errorText"></p></div>
+  </div>
+
+  <div id="admin" class="adminShell admin">
+    <div class="layout">
+    <aside class="sidebar side topNav">
+      <div class="ab"><img class="topBrandLogo" src="assets/company-logo.png" alt="環興科技股份有限公司"></div>
+      <div class="topNavLinks">
+        <button class="nav active" onclick="showPanel('dashboardPanel',this)">儀表板</button>
+        <details class="navGroup topNavGroup">
+          <summary>問卷作業 <span class="navChevron topNavChevron"></span></summary>
+          <div class="navMenu topNavMenu">
+            <button class="nav" onclick="showPanel('formsPanel',this)">問卷管理</button>
+            <button class="nav" onclick="openNewFormSafely(this)">建立或編輯問卷</button>
+            <button class="nav" onclick="showPanel('resultsPanel',this)">填寫結果</button>
+            <button class="nav" onclick="openMissingList()">未填寫名單</button>
+            <button class="nav navExport" onclick="exportResults()">Excel 匯出</button>
+          </div>
+        </details>
+        <details class="navGroup topNavGroup">
+          <summary>系統管理 <span class="navChevron topNavChevron"></span></summary>
+          <div class="navMenu topNavMenu">
+            <button class="nav" onclick="showPanel('membersPanel',this)">人員管理</button>
+            <button id="permissionsNav" class="nav" onclick="showPanel('permissionsPanel',this);loadFormManagers()">權限管理</button>
+          </div>
+        </details>
+      </div>
+      <div class="adminIdentity topUserArea">
+        <span class="topUserIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.6-4 3.1-6 7-6s6.4 2 7 6"></path></svg></span>
+        <div class="topUserLabels"><b id="adminUserName">公司通用問卷調查系統</b><small id="adminUser"></small></div>
+        <button class="topLogout" onclick="logout()">登出</button>
+      </div>
+    </aside>
+    <main class="adminMain main">
+      <header class="adminHead adminPageHead compactAdminToolbar">
+        <div><h1 id="panelTitle">儀表板</h1><p id="activeFormLabel" class="srOnly">尚未選擇問卷</p></div>
+        <div class="adminTools headActions">
+          <select id="activeFormSelect" onchange="selectForm(this.value)"></select>
+          <button id="refreshAdminBtn" class="toolBtn iconOnlyButton" onclick="refreshAdminView()" title="重新整理資料" aria-label="重新整理資料"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"></path><path d="M19 11a7.5 7.5 0 1 0 .2 3"></path></svg></button>
+          <details id="adminMoreMenu" class="adminMoreMenu">
+            <summary title="更多操作" aria-label="更多操作">•••</summary>
+            <div class="adminMoreMenuPanel">
+              <button class="btn" onclick="copyFormLink();document.getElementById('adminMoreMenu').open=false">複製問卷前台網址</button>
+              <button class="btn" onclick="copyAdminLink();document.getElementById('adminMoreMenu').open=false">複製本問卷後台網址</button>
+            </div>
+          </details>
+          <button class="toolBtn frontViewButton" onclick="showFront()">查看前台</button>
+        </div>
+      </header>
+
+      <section id="dashboardPanel" class="panel active">
+        <div class="summaryGrid dashboardMetrics"><div class="metric"><span>填寫份數</span><b id="dashResponseCount">0</b></div><div class="metric"><span>應填人數</span><b id="dashExpectedCount">—</b></div><div class="metric"><span>完成率</span><b id="dashCompletionRate">—</b></div><div class="metric"><span>未填人數</span><b id="dashMissingCount">—</b></div></div>
+        <div class="dashboardGrid">
+          <div class="card dashboardCurrentCard"><div class="sectionHead"><div><h2>目前問卷</h2><p id="dashCurrentNote">請先選擇問卷。</p></div></div><div id="dashboardCurrent"></div><div class="buttonRow dashboardActions"><button class="btn primary" onclick="openNewFormSafely()">建立或編輯問卷</button><button class="btn success" onclick="showPanel('resultsPanel')">查看填寫結果</button></div></div>
+        </div>
+      </section>
+
+      <section id="formsPanel" class="panel">
+        <div class="card manageIntro"><div><h2>問卷管理</h2><p>問卷依權限分為「我建立的問卷」與「被分享的問卷」；自己建立的問卷可管理內容與結果，被分享的問卷依授權角色管理或檢視。</p></div><button class="btn primary" onclick="openNewFormSafely()">＋ 新增問卷</button></div>
+        <div class="card"><div class="sectionHead"><div><h2>問卷列表</h2><p>目前使用中、已關閉與系統內問卷可分開管理。</p></div><div class="buttonRow"><button class="btn" onclick="createUniformTemplate()">建立外套尺寸範本</button></div></div><div id="formsTable"></div></div>
+      </section>
+
+      <section id="editorPanel" class="panel">
+        <div class="card"><div class="sectionHead"><div><h2 id="editorHeading">新增問卷</h2><p>可建立文字、選項、下拉與圖片說明題目。</p></div><span id="editorMode" class="modeBadge">新增模式</span></div>
+          <div class="formBlock"><h3>基本設定</h3><div class="formGrid"><label>問卷標題<span>*</span><input id="formTitle" placeholder="例如：員工制服尺寸調查"></label><label>截止時間<input id="formDeadline" type="datetime-local"></label><label>狀態<select id="formState"><option value="draft">草稿</option><option value="open">開放填寫</option><option value="closed">已關閉</option></select></label></div>
+          <label>問卷說明<textarea id="formDescription" placeholder="請輸入填寫目的、期間與注意事項"></textarea></label><div class="themeSettings"><h4>問卷主題</h4><input id="formTheme" type="hidden" value="appleWhite"><div id="themeChoices" class="themeChoices"></div></div></div>
+          <div class="formBlock"><h3>填寫對象</h3><div class="identitySettings"><label>填寫者身分資料<select id="identityMode" onchange="renderTargetDepartments()"><option value="member">使用公司人員資料庫</option><option value="none">不收集／自行設計題目</option></select></label><div><b>開放填寫部門</b><p>請至少選擇一個部門，避免問卷誤開放給非本次調查對象。</p><div id="targetDepartmentBox" class="departmentChoices"></div></div></div></div>
+          <div class="formBlock"><h3>參考圖片</h3><div class="driveImageField"><label>頁首參考圖片網址<input id="formImageUrl" placeholder="貼上 Google Drive 分享網址或一般圖片網址" oninput="previewHeaderImage()"></label><p>Google Drive 檔案請設為「知道連結的使用者皆可查看」，分享網址可直接貼入。</p><div id="headerImagePreview" class="imagePreview"></div></div></div>
+          <div class="questionHead"><h3>題目設定</h3></div><div id="questionEditor"></div>
+          <div class="buttonRow stickyActions"><button id="saveFormBtn" class="btn primary" onclick="saveForm()">建立問卷</button><button class="btn" onclick="cancelEdit()">取消</button></div>
+        </div>
+      </section>
+
+      <section id="membersPanel" class="panel">
+        <div class="card"><div class="sectionHead"><div><h2>人員管理</h2><p>與行政部活動調查系統共用同一份人員名單；此處異動會同步反映到兩套系統。</p></div><div class="buttonRow"><button class="btn" onclick="downloadMemberTemplate()">下載標準範本</button><button class="btn" onclick="chooseMemberImport()">匯入 Excel</button><button class="btn success" onclick="exportMembers()">匯出名單</button><button class="btn primary" onclick="startNewMember()">＋ 新增人員</button><input id="memberImportInput" class="hiddenFileInput" type="file" accept=".xlsx,.xls,.csv" onchange="importMembers(this.files[0]);this.value=''" aria-label="匯入人員名單"></div></div>
+          <div id="memberEditor" class="memberEditor"><div class="sectionHead"><div><h3 id="memberEditorHeading">新增人員</h3><p id="memberEditorMode">新增模式</p></div></div><div class="memberFormGrid"><label>部門<select id="memberDepartment"></select></label><label>姓名<input id="memberName"></label><label>員工編號<input id="memberEmployeeNo"></label><label>Google 帳號<input id="memberGoogleEmail" type="email" placeholder="name@gmail.com"></label><label>狀態<select id="memberActive"><option value="true">啟用</option><option value="false">停用</option></select></label></div><div class="buttonRow"><button id="saveMemberBtn" class="btn primary" onclick="saveMember()">新增人員</button><button class="btn" onclick="cancelMemberEdit()">取消</button></div></div>
+          <div id="memberImportResult" class="memberImportResult"></div><div class="memberListTools"><input id="memberSearch" placeholder="搜尋部門、姓名或員工編號" oninput="renderMemberPanel()"><span id="memberCountLabel"></span></div><div id="membersTable"></div>
+        </div>
+      </section>
+
+      <section id="resultsPanel" class="panel">
+        <div class="card"><div class="sectionHead"><div><h2>填寫結果</h2><p id="resultCaption">請先選擇問卷。</p></div><div class="buttonRow"><button class="btn" onclick="copyFormLink()">複製問卷網址</button><button class="btn success" onclick="exportResults()">Excel 匯出</button></div></div><div id="resultAnalysis"></div><div class="resultDetailHead"><h3>逐筆填寫明細</h3><p>管理員可修正或刪除個別回覆。</p></div><div id="resultsTable"></div></div>
+      </section>
+    </main>
+    </div>
+  </div>
+
+  <div id="assistedFillMask" class="modalMask">
+    <div class="responseEditCard assistedFillCard">
+      <div class="sectionHead"><div><h2 id="assistedFillTitle">協助填寫問卷</h2><p id="assistedFillCaption"></p></div><button class="btn" type="button" onclick="closeAssistedFill()">關閉</button></div>
+      <div id="assistedFillBody"></div>
+    </div>
+  </div>
+  <div id="responseEditMask" class="modalMask">
+    <div class="responseEditCard">
+      <div class="sectionHead"><div><h2>編輯填寫結果</h2><p id="responseEditCaption"></p></div><button class="btn" type="button" onclick="closeResponseEditor()">關閉</button></div>
+      <form id="responseEditForm" onsubmit="saveEditedResponse(event)"><div id="responseEditBody"></div><div class="buttonRow modalActions"><button id="saveResponseBtn" class="btn primary" type="submit">儲存變更</button><button class="btn" type="button" onclick="closeResponseEditor()">取消</button></div></form>
+    </div>
+  </div>
+  <div id="dialogMask" class="modalMask">
+    <div class="dialogCard" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+      <div class="modalHeader"><h3 id="dialogTitle">確認操作</h3><button class="modalClose" type="button" onclick="closeDialog(false)">×</button></div>
+      <div id="dialogMessage" class="dialogMessage"></div>
+      <label id="dialogInputWrap" class="dialogInputWrap">確認文字<input id="dialogInput"></label>
+      <div class="modalActions"><button id="dialogCancel" class="btn" type="button" onclick="closeDialog(false)">取消</button><button id="dialogConfirm" class="btn primary" type="button" onclick="closeDialog(true)">確定</button></div>
+    </div>
+  </div>
+  <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
+  <script src="js/config.js?v=1.48"></script>
+  <script src="js/app.js?v=1.48"></script>
+  <script src="js/app-guards.js?v=1.48"></script>
+</body>
+</html>
+
+
+
+
+
+
