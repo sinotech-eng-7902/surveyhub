@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>公司通用問卷調查系統 v1.51</title>
+  <title>公司通用問卷調查系統 v1.52</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.51">
+  <link rel="stylesheet" href="css/app.css?v=1.52">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -125,10 +125,27 @@
       <div class="modalActions"><button id="dialogCancel" class="btn" type="button" onclick="closeDialog(false)">取消</button><button id="dialogConfirm" class="btn primary" type="button" onclick="closeDialog(true)">確定</button></div>
     </div>
   </div>
+  <div id="memberImportModeMask" class="modalMask memberImportModalMask">
+    <div class="dialogCard memberImportModeCard" role="dialog" aria-modal="true" aria-labelledby="memberImportModeTitle">
+      <div class="modalHeader"><div><h3 id="memberImportModeTitle">選擇人員匯入方式</h3><p>請依這份 Excel 的範圍選擇，避免把未列入的同仁誤判為離職。</p></div><button class="modalClose" type="button" onclick="closeMemberImportMode()" aria-label="關閉">×</button></div>
+      <div class="memberImportModeChoices">
+        <label class="memberImportModeChoice"><input type="radio" name="memberImportMode" value="partial" checked><span><b>部分名單更新</b><small>只新增或更新 Excel 內的人員，不檢查其他既有人員。</small></span></label>
+        <label class="memberImportModeChoice"><input type="radio" name="memberImportMode" value="full"><span><b>完整名單核對</b><small>比對整份公司名單，列出本次未出現的啟用人員，再由您決定是否停用。</small></span></label>
+      </div>
+      <div class="modalActions"><button class="btn" type="button" onclick="closeMemberImportMode()">取消</button><button class="btn primary" type="button" onclick="continueMemberImport()">選擇 Excel</button></div>
+    </div>
+  </div>
+  <div id="memberImportReviewMask" class="modalMask memberImportModalMask">
+    <div class="dialogCard memberImportReviewCard" role="dialog" aria-modal="true" aria-labelledby="memberImportReviewTitle">
+      <div class="modalHeader"><div><h3 id="memberImportReviewTitle">確認人員名單差異</h3><p id="memberImportReviewCaption"></p></div><button class="modalClose" type="button" onclick="closeMemberImportReview()" aria-label="關閉">×</button></div>
+      <div id="memberImportReviewBody"></div>
+      <div class="modalActions"><button class="btn" type="button" onclick="closeMemberImportReview()">取消</button><button id="confirmMemberImportBtn" class="btn primary" type="button" onclick="confirmMemberImport()">匯入名單</button></div>
+    </div>
+  </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
-  <script src="js/config.js?v=1.51"></script>
-  <script src="js/app.js?v=1.51"></script>
-  <script src="js/app-guards.js?v=1.51"></script>
+  <script src="js/config.js?v=1.52"></script>
+  <script src="js/app.js?v=1.52"></script>
+  <script src="js/app-guards.js?v=1.52"></script>
 </body>
 </html>
 

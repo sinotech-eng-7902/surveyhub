@@ -1,4 +1,5 @@
 ﻿let app,auth,db,currentUser=null,isAdmin=false,isSystemAdmin=false,formAssignments=[],formManagers=[],forms=[],responses=[],departments=[],members=[],memberAccounts=[],activeFormId='',editMode='new',editingId='',draftQuestions=[],editingResponseId='',memberEditMode='view',editingMemberId='',submissionLocksPrepared=false,loginPurpose='admin',formDirty=false,activeFormSection='mine';
+let memberImportMode='partial',pendingMemberImport=null;
 const $=id=>document.getElementById(id);
 const front=$('front'),frontMain=$('frontMain'),formStatus=$('formStatus'),admin=$('admin'),loginMask=$('loginMask'),loginBtn=$('loginBtn'),loginMsg=$('loginMsg'),adminUser=$('adminUser'),activeFormSelect=$('activeFormSelect'),activeFormLabel=$('activeFormLabel'),formsTable=$('formsTable'),resultsTable=$('resultsTable'),questionEditor=$('questionEditor');
 
@@ -40,7 +41,7 @@ async function init(){
   document.addEventListener('click',e=>{if(!e.target.closest('.adminMoreMenu')){let more=$('adminMoreMenu');if(more)more.open=false}if(!e.target.closest('.topNavGroup'))closeTopNavGroups()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){let more=$('adminMoreMenu');if(more)more.open=false;closeTopNavGroups()}});
   document.querySelectorAll('.topNavGroup').forEach(group=>{group.addEventListener('mouseenter',()=>{clearTimeout(window.__topNavCloseTimer)});group.addEventListener('mouseleave',()=>{clearTimeout(window.__topNavCloseTimer);window.__topNavCloseTimer=setTimeout(()=>group.removeAttribute('open'),280)});group.querySelectorAll('.nav').forEach(item=>item.addEventListener('click',()=>closeTopNavGroups()))});
-  auth.onAuthStateChanged(async user=>{currentUser=user;isAdmin=false;isSystemAdmin=false;formAssignments=[];if(user){try{await loadMemberAccounts();isSystemAdmin=await checkAdmin(user);formAssignments=await loadCurrentAssignments(user);let member=findMemberByGoogleEmail(user.email),hasMemberAccount=!!member;isAdmin=isSystemAdmin||hasMemberAccount||formAssignments.some(x=>x.enabled!==false);if(isAdmin){let name=memberDisplayName(member)||user.displayName||'後台使用者';if($('adminUserName'))$('adminUserName').textContent=name;adminUser.textContent=(user.email||'')+(isSystemAdmin?'・系統管理員':'');loginMask.style.display='none';await loadAdminData()}else if(loginPurpose==='response'){loginMask.style.display='none'}else loginMsg.textContent='此 Google 帳號尚未建立於人員管理或問卷權限中，請聯絡系統管理員。'}catch(e){console.error('admin auth failed',e);loginMsg.textContent='後台登入檢查失敗，請確認 Firestore 規則與人員 Google 帳號設定。'}}else{memberAccounts=[]}applyRoute()});
+  auth.onAuthStateChanged(async user=>{currentUser=user;isAdmin=false;isSystemAdmin=false;formAssignments=[];if(user){try{await loadMemberAccounts();isSystemAdmin=await checkAdmin(user);formAssignments=await loadCurrentAssignments(user);let member=findMemberByGoogleEmail(user.email),memberDisabled=member?.active===false,hasMemberAccount=!!member&&!memberDisabled;isAdmin=isSystemAdmin||(!memberDisabled&&(hasMemberAccount||formAssignments.some(x=>x.enabled!==false)));if(isAdmin){let name=memberDisplayName(member)||user.displayName||'後台使用者';if($('adminUserName'))$('adminUserName').textContent=name;adminUser.textContent=(user.email||'')+(isSystemAdmin?'・系統管理員':'');loginMask.style.display='none';await loadAdminData()}else if(loginPurpose==='response'){loginMask.style.display='none'}else loginMsg.textContent=memberDisabled?'此人員帳號目前已停用，如有疑問請聯絡系統管理員。':'此 Google 帳號尚未建立於人員管理或問卷權限中，請聯絡系統管理員。'}catch(e){console.error('admin auth failed',e);loginMsg.textContent='後台登入檢查失敗，請確認 Firestore 規則與人員 Google 帳號設定。'}}else{memberAccounts=[]}applyRoute()});
   await loadPublicData();applyRoute();
 }
 
@@ -182,7 +183,53 @@ function editMember(id){let m=members.find(x=>x.id===id);if(!m)return;memberEdit
 function cancelMemberEdit(){memberEditMode='view';editingMemberId='';$('memberEditor').style.display='none'}
 
 async function deleteMember(id){let m=members.find(x=>x.id===id);if(!m)return;let ok=await confirmDialog(`確定刪除 ${m.name||'這位人員'}（${m.employeeNo||m.empNo||''}）？\n建議優先使用「停用」，以保留歷史資料關聯。`,'刪除人員',true);if(!ok)return;ok=await confirmDialog('再次確認永久刪除這筆共用人員資料？兩套系統都會同步消失。','永久刪除人員',true);if(!ok)return;setPageLoading(true,'正在刪除人員資料…');try{await doc('members',id).delete();let account=await doc('memberAccounts',id).get();if(account.exists)await doc('memberAccounts',id).delete();await loadAdminData();showPanel('membersPanel');toast('共用人員資料已刪除','success')}catch(e){console.error(e);notify('人員資料刪除失敗，請確認權限或網路狀態','error')}finally{setPageLoading(false)}}
-function chooseMemberImport(){$('memberImportInput').click()}
+function chooseMemberImport(){
+  pendingMemberImport=null;
+  document.querySelectorAll('input[name="memberImportMode"]').forEach(input=>{input.checked=input.value==='partial'});
+  $('memberImportModeMask').style.display='grid';
+}
+
+function closeMemberImportMode(){$('memberImportModeMask').style.display='none'}
+
+function continueMemberImport(){
+  let selected=document.querySelector('input[name="memberImportMode"]:checked');
+  memberImportMode=selected?.value==='full'?'full':'partial';
+  closeMemberImportMode();
+  $('memberImportInput').click();
+}
+
+function closeMemberImportReview(){
+  $('memberImportReviewMask').style.display='none';
+  pendingMemberImport=null;
+}
+
+function setMissingMemberSelection(checked){
+  document.querySelectorAll('.missingMemberImportCheck').forEach(input=>{input.checked=checked});
+  updateMemberImportConfirmLabel();
+}
+
+function selectedMissingMemberIds(){
+  return [...document.querySelectorAll('.missingMemberImportCheck:checked')].map(input=>input.value);
+}
+
+function updateMemberImportConfirmLabel(){
+  let count=selectedMissingMemberIds().length,button=$('confirmMemberImportBtn');
+  if(button)button.textContent=count?`匯入並停用 ${count} 人`:'匯入名單';
+}
+
+function renderMemberImportReview(review){
+  let {fileName,mode,addCount,updateCount,errors,missing}=review;
+  $('memberImportReviewCaption').textContent=`${fileName}・${mode==='full'?'完整名單核對':'部分名單更新'}`;
+  let summary=`<div class="memberImportSummary"><span>可匯入 <b>${review.items.length}</b> 筆</span><span>新增 <b>${addCount}</b> 筆</span><span>更新 <b>${updateCount}</b> 筆</span><span>錯誤 <b>${errors.length}</b> 筆</span></div>`;
+  let errorsHtml=errors.length?`<details class="memberImportErrors"><summary>${errors.length} 筆資料有誤，將略過</summary><ul>${errors.map(error=>`<li>${esc(error)}</li>`).join('')}</ul></details>`:'';
+  let missingHtml='';
+  if(mode==='full'){
+    missingHtml=missing.length?`<section class="memberImportMissing"><div class="memberImportMissingHead"><div><h4>本次名單未出現的啟用人員</h4><p>可能為離職、調職或名單遺漏。系統不會自動停用，請確認後自行勾選。</p></div><div class="buttonRow"><button class="btn" type="button" onclick="setMissingMemberSelection(true)">全選</button><button class="btn" type="button" onclick="setMissingMemberSelection(false)">取消全選</button></div></div><div class="memberImportMissingTable"><table><thead><tr><th>停用</th><th>部門</th><th>姓名</th><th>員工編號</th><th>Google 帳號</th></tr></thead><tbody>${missing.map(member=>`<tr><td><input class="missingMemberImportCheck" type="checkbox" value="${attr(member.id)}" onchange="updateMemberImportConfirmLabel()" aria-label="停用 ${attr(member.name||'此人員')}"></td><td>${esc(memberDepartmentName(member))}</td><td><b>${esc(member.name||'')}</b></td><td>${esc(memberEmployeeNo(member))}</td><td>${esc(memberGoogleEmail(member)||'未設定')}</td></tr>`).join('')}</tbody></table></div></section>`:`<div class="memberImportNoMissing">完整名單核對完成，沒有發現本次缺少的啟用人員。</div>`;
+  }
+  $('memberImportReviewBody').innerHTML=summary+errorsHtml+missingHtml;
+  $('memberImportReviewMask').style.display='grid';
+  updateMemberImportConfirmLabel();
+}
 
 function memberWorkbook(rows,sheetName='人員名單'){let wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(rows,{header:['部門','姓名','員工編號','Google帳號','狀態']});ws['!cols']=[{wch:16},{wch:14},{wch:14},{wch:28},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,sheetName);return wb}
 
@@ -193,6 +240,78 @@ function exportMembers(){let rows=members.map(m=>({'部門':m.department||m.depa
 function memberCell(row,names){let keys=Object.keys(row);for(let name of names){let key=keys.find(k=>String(k).replace(/^\uFEFF/,'').trim()===name);if(key!==undefined)return row[key]}return''}
 
 async function importMembers(file){if(!file)return;let result=$('memberImportResult');result.className='memberImportResult';result.style.display='block';result.textContent=`正在讀取 ${file.name}…`;setPageLoading(true,'正在讀取匯入檔…');try{let data=await file.arrayBuffer(),wb=XLSX.read(data,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});if(!rows.length)throw new Error('檔案內沒有可匯入的資料');let validDepartments=new Set(departments.map(d=>d.name||d.departmentName||d.department||'').filter(Boolean)),existingByNo=new Map(members.map(m=>[String(m.employeeNo||m.empNo||'').trim(),m]).filter(x=>x[0])),seen=new Set(),seenEmails=new Set(),errors=[],items=[];rows.forEach((row,index)=>{let line=index+2,department=String(memberCell(row,['部門'])).trim(),name=String(memberCell(row,['姓名'])).trim(),employeeNo=String(memberCell(row,['員工編號','員編'])).trim(),googleEmail=normalizeEmail(memberCell(row,['Google帳號','Google 帳號','Google Email','Email','電子郵件'])),status=String(memberCell(row,['狀態'])).trim();if(!department||!name||!employeeNo){errors.push(`第 ${line} 列：部門、姓名與員工編號為必填`);return}if(!validDepartments.has(department)){errors.push(`第 ${line} 列：找不到部門「${department}」`);return}if(seen.has(employeeNo)){errors.push(`第 ${line} 列：員工編號 ${employeeNo} 在檔案中重複`);return}seen.add(employeeNo);if(googleEmail&&!/^\S+@\S+\.\S+$/.test(googleEmail)){errors.push(`第 ${line} 列：Google 帳號格式不正確`);return}if(googleEmail&&seenEmails.has(googleEmail)){errors.push(`第 ${line} 列：Google 帳號 ${googleEmail} 在檔案中重複`);return}if(googleEmail)seenEmails.add(googleEmail);let existing=existingByNo.get(employeeNo)||null,owner=members.find(m=>memberGoogleEmail(m)===googleEmail&&m.id!==existing?.id);if(googleEmail&&owner){errors.push(`第 ${line} 列：Google 帳號已由 ${owner.name||'其他人員'} 使用`);return}let active=!['停用','否','false','0','no'].includes(status.toLowerCase());items.push({existing,googleEmail,data:{department,name,employeeNo,active,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}})});let addCount=items.filter(x=>!x.existing).length,updateCount=items.length-addCount,summary=`可匯入 ${items.length} 筆（新增 ${addCount}、更新 ${updateCount}）`+(errors.length?`\n另有 ${errors.length} 筆錯誤將略過：\n${errors.slice(0,8).join('\n')}${errors.length>8?'\n…':''}`:'');result.textContent=summary;if(!items.length){result.className='memberImportResult error';notify(summary,'warn');return}if(!await confirmDialog(summary+'\n\n確定寫入共用人員名單嗎？兩套系統會同步使用。','確認匯入人員')){result.textContent='已取消匯入';return}setPageLoading(true,'正在寫入人員名單…');for(let item of items){let memberId;if(item.existing){memberId=item.existing.id;await doc('members',memberId).set(item.data,{merge:true})}else{item.data.createdAt=firebase.firestore.FieldValue.serverTimestamp();memberId=(await col('members').add(item.data)).id}if(item.googleEmail)await doc('memberAccounts',memberId).set({memberId,email:item.googleEmail,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});else{let account=await doc('memberAccounts',memberId).get();if(account.exists)await doc('memberAccounts',memberId).delete()}}await loadAdminData();showPanel('membersPanel');result=$('memberImportResult');result.className='memberImportResult success';result.textContent=`匯入完成：新增 ${addCount} 筆、更新 ${updateCount} 筆${errors.length?'，略過 '+errors.length+' 筆錯誤':''}`;toast('共用人員名單匯入完成','success')}catch(e){console.error(e);result.className='memberImportResult error';result.textContent='匯入失敗：'+(e.message||e);notify('人員名單匯入失敗','error')}finally{setPageLoading(false)}}
+
+async function importMembersV152(file){
+  if(!file)return;
+  let result=$('memberImportResult');
+  result.className='memberImportResult';
+  result.style.display='block';
+  result.textContent=`正在讀取 ${file.name}…`;
+  setPageLoading(true,'正在讀取匯入檔…');
+  try{
+    let data=await file.arrayBuffer(),wb=XLSX.read(data,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    if(!rows.length)throw new Error('檔案內沒有可匯入的資料');
+    let googleHeaders=['Google帳號','Google 帳號','Google Email','Email','電子郵件'],hasGoogleColumn=Object.keys(rows[0]||{}).some(key=>googleHeaders.includes(String(key).replace(/^\uFEFF/,'').trim())),validDepartments=new Set(departments.map(d=>d.name||d.departmentName||d.department||'').filter(Boolean)),existingByNo=new Map(members.map(m=>[String(m.employeeNo||m.empNo||'').trim(),m]).filter(x=>x[0])),seen=new Set(),uploadedEmployeeNos=new Set(),seenEmails=new Set(),errors=[],items=[];
+    rows.forEach((row,index)=>{
+      let line=index+2,department=String(memberCell(row,['部門'])).trim(),name=String(memberCell(row,['姓名'])).trim(),employeeNo=String(memberCell(row,['員工編號','員編'])).trim(),googleEmail=normalizeEmail(memberCell(row,['Google帳號','Google 帳號','Google Email','Email','電子郵件'])),status=String(memberCell(row,['狀態'])).trim();
+      if(employeeNo)uploadedEmployeeNos.add(employeeNo);
+      if(!department||!name||!employeeNo){errors.push(`第 ${line} 列：部門、姓名與員工編號為必填`);return}
+      if(!validDepartments.has(department)){errors.push(`第 ${line} 列：找不到部門「${department}」`);return}
+      if(seen.has(employeeNo)){errors.push(`第 ${line} 列：員工編號 ${employeeNo} 在檔案中重複`);return}
+      seen.add(employeeNo);
+      if(googleEmail&&!/^\S+@\S+\.\S+$/.test(googleEmail)){errors.push(`第 ${line} 列：Google 帳號格式不正確`);return}
+      if(googleEmail&&seenEmails.has(googleEmail)){errors.push(`第 ${line} 列：Google 帳號 ${googleEmail} 在檔案中重複`);return}
+      if(googleEmail)seenEmails.add(googleEmail);
+      let existing=existingByNo.get(employeeNo)||null,owner=members.find(m=>memberGoogleEmail(m)===googleEmail&&m.id!==existing?.id);
+      if(googleEmail&&owner){errors.push(`第 ${line} 列：Google 帳號已由 ${owner.name||'其他人員'} 使用`);return}
+      let active=!['停用','否','false','0','no'].includes(status.toLowerCase());
+      items.push({existing,googleEmail,hasGoogleColumn,data:{department,name,employeeNo,active,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}});
+    });
+    let addCount=items.filter(item=>!item.existing).length,updateCount=items.length-addCount,missing=memberImportMode==='full'?members.filter(member=>member.active!==false&&!uploadedEmployeeNos.has(memberEmployeeNo(member))):[];
+    if(!items.length){let summary=`沒有可匯入的資料${errors.length?'，共 '+errors.length+' 筆錯誤':''}`;result.className='memberImportResult error';result.textContent=summary;notify(summary,'warn');return}
+    pendingMemberImport={fileName:file.name,mode:memberImportMode,items,errors,missing,addCount,updateCount};
+    result.textContent=`已讀取 ${items.length} 筆，請在差異核對視窗確認。`;
+    renderMemberImportReview(pendingMemberImport);
+  }catch(e){
+    console.error(e);result.className='memberImportResult error';result.textContent='匯入失敗：'+(e.message||e);notify('人員名單匯入失敗','error');
+  }finally{setPageLoading(false)}
+}
+
+async function confirmMemberImport(){
+  let review=pendingMemberImport;
+  if(!review)return;
+  let disableIds=review.mode==='full'?selectedMissingMemberIds():[],button=$('confirmMemberImportBtn');
+  button.disabled=true;
+  setPageLoading(true,'正在寫入人員名單…');
+  try{
+    for(let item of review.items){
+      let memberId;
+      if(item.existing){memberId=item.existing.id;await doc('members',memberId).set(item.data,{merge:true})}
+      else{item.data.createdAt=firebase.firestore.FieldValue.serverTimestamp();memberId=(await col('members').add(item.data)).id}
+      if(item.hasGoogleColumn){
+        if(item.googleEmail)await doc('memberAccounts',memberId).set({memberId,email:item.googleEmail,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        else{let account=await doc('memberAccounts',memberId).get();if(account.exists)await doc('memberAccounts',memberId).delete()}
+      }
+    }
+    for(let memberId of disableIds){
+      let member=members.find(item=>item.id===memberId);
+      if(!member||member.active===false)continue;
+      await doc('members',memberId).set({active:false,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),deactivatedAt:firebase.firestore.FieldValue.serverTimestamp(),deactivatedByEmail:normalizeEmail(currentUser?.email||''),deactivationReason:'full-roster-import-missing'},{merge:true});
+    }
+    let {addCount,updateCount,errors}=review;
+    closeMemberImportReview();
+    await loadAdminData();
+    showPanel('membersPanel');
+    let result=$('memberImportResult');
+    result.className='memberImportResult success';
+    result.textContent=`匯入完成：新增 ${addCount} 筆、更新 ${updateCount} 筆${disableIds.length?'、停用 '+disableIds.length+' 人':''}${errors.length?'，略過 '+errors.length+' 筆錯誤':''}`;
+    toast(disableIds.length?'人員名單已匯入並完成停用核對':'共用人員名單匯入完成','success');
+  }catch(e){
+    console.error(e);notify('人員名單寫入失敗，請確認權限或網路狀態','error');
+  }finally{setPageLoading(false);button.disabled=false;updateMemberImportConfirmLabel()}
+}
+
+importMembers=importMembersV152;
 
 function openResponseEditor(id){let f=activeForm(),r=responses.find(x=>x.id===id);if(!f||!r)return;editingResponseId=id;$('responseEditCaption').textContent=`${r.memberName||'未具名'} ${r.employeeNo?`（${r.employeeNo}）`:''}`;let identity='';if(f.identityMode==='member'){let deps=departments.map(d=>d.name||d.departmentName||d.department||'').filter(Boolean);identity=`<div class="editIdentityGrid"><label>部門<select id="editDepartment" onchange="refreshEditMemberOptions(this.value)"><option value="">請選擇部門</option>${deps.map(d=>`<option value="${attr(d)}" ${d===r.departmentName?'selected':''}>${esc(d)}</option>`).join('')}</select></label><label>姓名<select id="editMember" onchange="refreshEditEmployee()"><option value="">請選擇姓名</option>${editMemberOptions(r.departmentName||'',r.memberId||'')}</select></label><label>員工編號<input id="editEmployeeNo" value="${attr(r.employeeNo||'')}" readonly></label></div>`}let questions=(f.questions||[]).filter(q=>q.type!=='image').map(q=>editQuestionHtml(q,r.answers?.[q.id])).join('');$('responseEditBody').innerHTML=identity+questions;$('responseEditMask').style.display='grid'}
 

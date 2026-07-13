@@ -91,7 +91,7 @@ if(saveEditedResponseV144Base){
   };
 }
 function topOpenModalV144(){
-  var selectors=['.deleteFormModalV136','#creatorDialogMask','#dialogMask','#responseEditMask','#assistedFillMask'];
+  var selectors=['.deleteFormModalV136','#memberImportReviewMask','#memberImportModeMask','#creatorDialogMask','#dialogMask','#responseEditMask','#assistedFillMask'];
   for(var i=0;i<selectors.length;i++){
     var el=document.querySelector(selectors[i]);
     if(el&&getComputedStyle(el).display!=='none')return el;
@@ -104,6 +104,8 @@ document.addEventListener('keydown',async function(event){
   if(!modal||modalBusyV144)return;
   event.preventDefault();
   if(modal.classList.contains('deleteFormModalV136'))return;
+  if(modal.id==='memberImportReviewMask')return closeMemberImportReview();
+  if(modal.id==='memberImportModeMask')return closeMemberImportMode();
   if(modal.id==='dialogMask')return closeDialog(false);
   if(modal.id==='creatorDialogMask'&&typeof closeCreatorDialog==='function')return closeCreatorDialog('');
   if(modal.id==='assistedFillMask')return closeAssistedFill(false);
