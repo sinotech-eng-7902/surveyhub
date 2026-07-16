@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>公司通用問卷調查系統 v1.52</title>
+  <title>公司通用問卷調查系統 v1.54</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.52">
+  <link rel="stylesheet" href="css/app.css?v=1.54">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -85,7 +86,7 @@
           <div class="formBlock"><h3>基本設定</h3><div class="formGrid"><label>問卷標題<span>*</span><input id="formTitle" placeholder="例如：員工制服尺寸調查"></label><label>截止時間<input id="formDeadline" type="datetime-local"></label><label>狀態<select id="formState"><option value="draft">草稿</option><option value="open">開放填寫</option><option value="closed">已關閉</option></select></label></div>
           <label>問卷說明<textarea id="formDescription" placeholder="請輸入填寫目的、期間與注意事項"></textarea></label><div class="themeSettings"><h4>問卷主題</h4><input id="formTheme" type="hidden" value="appleWhite"><div id="themeChoices" class="themeChoices"></div></div></div>
           <div class="formBlock"><h3>填寫對象</h3><div class="identitySettings"><label>填寫者身分資料<select id="identityMode" onchange="renderTargetDepartments()"><option value="member">使用公司人員資料庫</option><option value="none">不收集／自行設計題目</option></select></label><div><b>開放填寫部門</b><p>請至少選擇一個部門，避免問卷誤開放給非本次調查對象。</p><div id="targetDepartmentBox" class="departmentChoices"></div></div></div></div>
-          <div class="formBlock"><h3>參考圖片</h3><div class="driveImageField"><label>頁首參考圖片網址<input id="formImageUrl" placeholder="貼上 Google Drive 分享網址或一般圖片網址" oninput="previewHeaderImage()"></label><p>Google Drive 檔案請設為「知道連結的使用者皆可查看」，分享網址可直接貼入。</p><div id="headerImagePreview" class="imagePreview"></div></div></div>
+          <div class="formBlock"><h3>參考圖片</h3><div class="imageSourceField"><div class="imageSourceTabs" role="group" aria-label="頁首圖片來源"><button id="headerUploadTab" class="imageSourceTab active" type="button" onclick="setHeaderImageSourceMode('upload')">上傳圖片</button><button id="headerUrlTab" class="imageSourceTab" type="button" onclick="setHeaderImageSourceMode('url')">貼上網址</button></div><div id="headerUploadPanel" class="imageSourcePanel"><input id="formImageFile" class="hiddenFileInput" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleHeaderImageFile(this.files[0]);this.value=''" aria-label="上傳頁首參考圖片"><div class="imageUploadRow"><button class="btn" type="button" onclick="chooseHeaderImageFile()">選擇圖片</button><span id="headerImageFileName" class="imageFileName">支援 JPG、PNG、WebP，檔案上限 10 MB</span></div></div><div id="headerUrlPanel" class="imageSourcePanel" hidden><label>圖片網址<input id="formImageUrl" placeholder="貼上 Google Drive 分享網址或一般圖片網址" oninput="updateHeaderImageUrl(this.value)"></label><p>Google Drive 檔案請設為「知道連結的使用者皆可查看」。</p></div><div class="imagePreviewToolbar"><span id="headerImageSourceStatus" class="imageSourceStatus">尚未選擇圖片</span><button id="clearHeaderImageBtn" class="btn danger" type="button" onclick="clearHeaderImage()" hidden>移除圖片</button></div><div id="headerImagePreview" class="imagePreview"></div></div></div>
           <div class="questionHead"><h3>題目設定</h3></div><div id="questionEditor"></div>
           <div class="buttonRow stickyActions"><button id="saveFormBtn" class="btn primary" onclick="saveForm()">建立問卷</button><button class="btn" onclick="cancelEdit()">取消</button></div>
         </div>
@@ -143,9 +144,9 @@
     </div>
   </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
-  <script src="js/config.js?v=1.52"></script>
-  <script src="js/app.js?v=1.52"></script>
-  <script src="js/app-guards.js?v=1.52"></script>
+  <script src="js/config.js?v=1.54"></script>
+  <script src="js/app.js?v=1.54"></script>
+  <script src="js/app-guards.js?v=1.54"></script>
 </body>
 </html>
 

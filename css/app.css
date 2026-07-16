@@ -4045,3 +4045,51 @@ body>.modalMask[style*="display: grid"]{
   .memberImportMissingHead .buttonRow{width:auto}
   .memberImportReviewCard{max-height:calc(100vh - 24px)}
 }
+
+/* Firebase Storage and URL image sources */
+.imageSourceField{display:grid;gap:12px;margin-top:12px}
+.imageSourceTabs{display:inline-flex;width:max-content;padding:3px;border:1px solid var(--line);border-radius:8px;background:#f3f6f9}
+.imageSourceTab{min-height:38px;padding:8px 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
+.imageSourceTab.active{background:#fff;color:#135da7;box-shadow:0 1px 3px rgba(15,42,70,.12)}
+.imageSourcePanel[hidden]{display:none!important}
+.imageUploadRow{display:flex;align-items:center;gap:12px;min-height:48px}
+.imageFileName{color:var(--muted);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.imagePreviewToolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px}
+.imageSourceStatus{color:var(--muted);font-size:13px;font-weight:700}
+.imageSourceField .imagePreview{margin-top:0}
+.imageSourceField .imagePreview img{max-width:min(100%,520px)}
+.questionImageField.imageSourceField{grid-column:1/-1;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.questionImageField.imageSourceField>p,.imageSourcePanel>p{margin:6px 0 0;color:var(--muted);font-size:12px}
+@media(max-width:700px){
+  .imageUploadRow,.imagePreviewToolbar{align-items:flex-start;flex-direction:column}
+  .imageSourceTabs{width:100%}
+  .imageSourceTab{flex:1}
+}
+
+/* v1.54 response files and expanded front themes */
+.frontShell .identityGrid select,.frontShell .identityGrid select option{font-weight:400}
+.fileQuestionSettingsV154{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:10px;background:#f7f9fc}
+.fileQuestionSettingsV154 label{margin:0}
+.fileDropFieldV154{position:relative;display:flex;align-items:center;gap:13px;min-height:86px;padding:16px;border:1px dashed #9ab8da;border-radius:10px;background:#f7fbff;color:#163f70;cursor:pointer}
+.fileDropFieldV154:hover{border-color:#2d6cdf;background:#eef6ff}
+.fileDropFieldV154 input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.fileDropFieldV154 span{display:grid;gap:2px}
+.fileDropFieldV154 small{color:var(--muted);font-size:13px;font-weight:400}
+.fileDropIconV154{display:grid!important;place-items:center;width:38px;height:38px;border-radius:50%;background:#e5f0ff;color:#1b64bb;font-size:24px;font-weight:400}
+.storedFileListV154{display:grid;gap:8px;margin-bottom:12px}
+.storedFileItemV154{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #d6e2ef;border-radius:9px;background:#fff}
+.storedFileLinkV154{display:flex;align-items:center;gap:8px;min-width:0;border:0;background:transparent;color:#155ca8;font:inherit;text-align:left;cursor:pointer}
+.storedFileLinkV154 span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.storedFileLinkV154 small{color:var(--muted);white-space:nowrap}
+.storedFileRemoveV154{display:flex;align-items:center;gap:6px;margin:0!important;color:#a93429;font-size:13px;white-space:nowrap}
+.storedFileRemoveV154 input{width:18px!important;height:18px;margin:0!important}
+.resultFileLinksV154{display:grid;gap:5px;min-width:170px}
+.resultFileLinksV154 .storedFileLinkV154{width:max-content;max-width:100%;padding:4px 0}
+body[data-front-theme="oceanBlue"]{--front-bg:#f2f8fc;--front-hero-bg:#155f91;--front-hero-text:#fff;--front-accent:#1976a8;--front-pill-bg:#e9f5fb;--front-pill-text:#125e89;--front-deadline-bg:#fff;--front-deadline-border:#b9d9eb;--front-deadline-text:#134e70}
+body[data-front-theme="forestGreen"]{--front-bg:#f3f8f4;--front-hero-bg:#276749;--front-hero-text:#fff;--front-accent:#2f7d55;--front-pill-bg:#eaf6ee;--front-pill-text:#21613f;--front-deadline-bg:#fff;--front-deadline-border:#b9dec8;--front-deadline-text:#1f593b}
+body[data-front-theme="sunnyOrange"]{--front-bg:#fff8ef;--front-hero-bg:#bc5b16;--front-hero-text:#fff;--front-accent:#cf681d;--front-pill-bg:#fff1df;--front-pill-text:#9b4810;--front-deadline-bg:#fff;--front-deadline-border:#f0c79e;--front-deadline-text:#8b4210}
+body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue"] .formHero p,body[data-front-theme="forestGreen"] .formHero h1,body[data-front-theme="forestGreen"] .formHero p,body[data-front-theme="sunnyOrange"] .formHero h1,body[data-front-theme="sunnyOrange"] .formHero p{color:#fff}
+@media(max-width:700px){
+  .fileQuestionSettingsV154{grid-template-columns:1fr}
+  .storedFileItemV154{align-items:flex-start;flex-direction:column}
+}
