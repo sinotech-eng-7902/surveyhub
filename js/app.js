@@ -103,7 +103,6 @@ function moveQuestion(i,delta){let j=i+delta;if(j<0||j>=draftQuestions.length)re
 async function removeQuestion(i){if(await confirmDialog('確定移除此題？','移除題目',true)){var q=draftQuestions[i];if(q){revokeObjectUrl(pendingQuestionImagePreviewUrls.get(q.id));pendingQuestionImageFiles.delete(q.id);pendingQuestionImagePreviewUrls.delete(q.id)}draftQuestions.splice(i,1);markFormDirty();renderQuestionEditor()}}
 function renderQuestionEditor(){questionEditor.innerHTML=draftQuestions.map((q,i)=>`<div class="questionEdit"><div class="questionGrid"><label>題目名稱<input value="${attr(q.title)}" oninput="updateQuestion(${i},'title',this.value)"></label><label>題型<select onchange="updateQuestion(${i},'type',this.value);renderQuestionEditor()">${[['short','簡答'],['long','長文'],['single','單選'],['multiple','複選'],['dropdown','下拉選單'],['department','部門選單'],['image','圖片／說明']].map(x=>`<option value="${x[0]}" ${q.type===x[0]?'selected':''}>${x[1]}</option>`).join('')}</select></label><label>必填<select onchange="updateQuestion(${i},'required',this.value==='true')"><option value="false" ${!q.required?'selected':''}>否</option><option value="true" ${q.required?'selected':''}>是</option></select></label></div>${['single','multiple','dropdown'].includes(q.type)?`<label class="optionsField">選項（每行一個）<textarea oninput="updateQuestion(${i},'options',this.value)">${esc((q.options||[]).join('\n'))}</textarea></label>`:''}<div class="questionGrid"><label>說明文字<input value="${attr(q.help||'')}" oninput="updateQuestion(${i},'help',this.value)"></label><div class="questionImageField"><label>參考圖片網址<input value="${attr(q.imageUrl||'')}" placeholder="可貼 Google Drive 分享網址" oninput="updateQuestionImage(${i},this.value)"></label><p>Drive 圖片需開啟「知道連結的使用者皆可查看」。</p><div id="questionImagePreview_${i}" class="imagePreview">${imagePreviewHtml(q.imageUrl,q.title||'參考圖片預覽')}</div></div></div><div class="miniActions"><button class="btn" onclick="moveQuestion(${i},-1)">上移</button><button class="btn" onclick="moveQuestion(${i},1)">下移</button><button class="btn danger" onclick="removeQuestion(${i})">移除</button></div></div>`).join('')||'<div class="questionHelp">尚未建立題目，請按「新增題目」。</div>'}
 
-async function saveForm(){let title=$('formTitle').value.trim();if(!title)return notify('請輸入問卷標題');if(!draftQuestions.length)return notify('請至少建立一個題目');if(draftQuestions.some(q=>!q.title.trim()))return notify('每一題都需要題目名稱');if(draftQuestions.some(q=>['single','multiple','dropdown'].includes(q.type)&&!(q.options||[]).length))return notify('選擇題至少需要一個選項');let identityMode=$('identityMode').value,targetDepartments=identityMode==='member'?[...document.querySelectorAll('.targetDepartment:checked')].map(x=>x.value):[];if(identityMode==='member'&&!targetDepartments.length)return notify('請至少選擇一個開放填寫部門');let id=editMode==='edit'?editingId:'form_'+Date.now(),data={title,description:$('formDescription').value.trim(),deadline:$('formDeadline').value,state:$('formState').value,imageUrl:$('formImageUrl').value.trim(),identityMode,targetDepartments,questions:draftQuestions,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByEmail:normalizeEmail(currentUser?.email||'')};if(editMode==='new'){data.createdAt=firebase.firestore.FieldValue.serverTimestamp();data.createdByEmail=normalizeEmail(currentUser?.email||'');data.createdByName=currentUser?.displayName||currentUser?.email||''}let btn=$('saveFormBtn');btn.disabled=true;btn.textContent='儲存中…';setPageLoading(true,'正在儲存問卷…');try{await doc('universalForms',id).set(data,{merge:true});formDirty=false;activeFormId=id;await loadAdminData();showPanel('formsPanel');toast(editMode==='edit'?'問卷變更已儲存':'問卷已建立','success')}catch(e){console.error(e);notify('問卷儲存失敗，請確認權限或網路狀態','error')}finally{setPageLoading(false);btn.disabled=false;btn.textContent=editMode==='edit'?'儲存變更':'建立問卷'}}
 async function createUniformTemplate(){if(forms.some(f=>f.templateKey==='uniform-jacket')&&!await confirmDialog('已經有外套尺寸範本，仍要再建立一份嗎？','建立範本'))return;let id='uniform_'+Date.now(),questions=[{id:'size',type:'dropdown',title:'選擇您的外套尺寸',required:true,options:['XS','S','M','L','XL','2XL','3XL','4XL'],help:'請參考下方尺寸資訊選擇'},{id:'reference',type:'image',title:'外套款式、尺寸表與丈量位置參考',required:false,options:[],imageUrl:'assets/uniform-survey-reference.jpg',help:'目前使用原 Google 問卷截圖；取得原始圖片後可在後台替換。'}],data={title:'【環興科技】立領撞色外套尺寸調查表',description:'為統計同仁外套尺寸，請依照尺寸表與丈量方式選擇合適尺寸。\n請於期限內完成填寫，如有疑問請洽承辦人。',deadline:'',state:'draft',imageUrl:'',identityMode:'member',targetDepartments:[],questions,templateKey:'uniform-jacket',createdByEmail:normalizeEmail(currentUser?.email||''),createdByName:currentUser?.displayName||currentUser?.email||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};setPageLoading(true,'正在建立範本…');try{await doc('universalForms',id).set(data);activeFormId=id;await loadAdminData();editForm(id);toast('已建立外套尺寸調查範本，請選擇開放部門並設定截止時間','success')}catch(e){console.error(e);notify('建立範本失敗，請確認權限或網路狀態','error')}finally{setPageLoading(false)}}
 async function copyFormLink(id=activeFormId){if(!id)return notify('請先選擇問卷');let url=location.href.split('#')[0]+'#form/'+encodeURIComponent(id);if(navigator.clipboard?.writeText)try{await navigator.clipboard.writeText(url);toast('問卷網址已複製','success');return}catch(e){}await showCopyDialog('複製問卷網址',url)}
 function formRoleLabel(f){let a=assignmentFor(f&&f.id);if(isSystemAdmin){if(isCreatedByCurrentUser(f))return'發起人／系統管理員';if(a?.role==='manager')return'問卷管理者／系統管理員';if(a?.role==='viewer')return'結果檢視者／系統管理員';return'系統管理員'}if(isCreatedByCurrentUser(f))return'發起人';return a?.role==='manager'?'問卷管理者':'檢視者'}
@@ -494,8 +493,8 @@ function setQuestionSettings(i,key,value){draftQuestions[i]=normalizeQuestion(dr
 function setQuestionValidation(i,key,value){draftQuestions[i]=normalizeQuestion(draftQuestions[i]);draftQuestions[i].validation[key]=value}
 function updateQuestion(i,key,value){draftQuestions[i]=normalizeQuestion(draftQuestions[i]);if(['options','rows','columns'].includes(key))draftQuestions[i][key]=splitLines(value);else if(key==='description'||key==='help'){draftQuestions[i].description=value;draftQuestions[i].help=value}else draftQuestions[i][key]=value}
 function applyBulkOptions(i,target){target=target||'options';var items=uniqueLines(($('bulk_'+target+'_'+i)||{}).value||'');if(!items.length)return toast('請先貼上項目內容','warn');draftQuestions[i]=normalizeQuestion(draftQuestions[i]);draftQuestions[i][target]=items;renderQuestionEditor();toast('已批次建立 '+items.length+' 個項目','success')}
-function startNewForm(){resetPendingImages();formDirty=false;editMode='new';editingId='';draftQuestions=[];$('editorHeading').textContent='新增問卷';$('editorMode').textContent='新增模式';$('saveFormBtn').textContent='建立問卷';$('formTitle').value='';$('formDescription').value='';$('formDeadline').value='';$('formState').value='draft';$('formImageUrl').value='';setHeaderImageSourceMode('upload');previewHeaderImage();$('identityMode').value='member';renderThemeChoices('appleWhite');renderTargetDepartments([]);renderQuestionEditor()}
-function editForm(id){var f=forms.find(function(x){return x.id===id});if(!f)return;resetPendingImages();formDirty=false;editMode='edit';editingId=id;draftQuestions=normalizeQuestions(JSON.parse(JSON.stringify(f.questions||[])));$('editorHeading').textContent='編輯問卷：'+f.title;$('editorMode').textContent='編輯模式';$('saveFormBtn').textContent='儲存變更';$('formTitle').value=f.title||'';$('formDescription').value=f.description||'';$('formDeadline').value=(f.deadline||'').slice(0,16);$('formState').value=f.state||'draft';$('formImageUrl').value=f.imageUrl||'';setHeaderImageSourceMode(f.imageStoragePath||!f.imageUrl?'upload':'url');previewHeaderImage();$('identityMode').value=f.identityMode||'none';renderThemeChoices(formTheme(f));renderTargetDepartments(f.targetDepartments||[]);renderQuestionEditor();showPanel('editorPanel')}
+function startNewForm(){resetPendingImages();resetReferenceFilesV156([]);setDescriptionEditorV156({});formDirty=false;editMode='new';editingId='';draftQuestions=[];$('editorHeading').textContent='新增問卷';$('editorMode').textContent='新增模式';$('saveFormBtn').textContent='建立問卷';$('formTitle').value='';$('formDeadline').value='';$('formState').value='draft';$('formImageUrl').value='';setHeaderImageSourceMode('upload');previewHeaderImage();$('identityMode').value='member';renderThemeChoices('appleWhite');renderTargetDepartments([]);renderQuestionEditor()}
+function editForm(id){var f=forms.find(function(x){return x.id===id});if(!f)return;resetPendingImages();resetReferenceFilesV156(f.referenceFiles||[]);setDescriptionEditorV156(f);formDirty=false;editMode='edit';editingId=id;draftQuestions=normalizeQuestions(JSON.parse(JSON.stringify(f.questions||[])));$('editorHeading').textContent='編輯問卷：'+f.title;$('editorMode').textContent='編輯模式';$('saveFormBtn').textContent='儲存變更';$('formTitle').value=f.title||'';$('formDeadline').value=(f.deadline||'').slice(0,16);$('formState').value=f.state||'draft';$('formImageUrl').value=f.imageUrl||'';setHeaderImageSourceMode(f.imageStoragePath||!f.imageUrl?'upload':'url');previewHeaderImage();$('identityMode').value=f.identityMode||'none';renderThemeChoices(formTheme(f));renderTargetDepartments(f.targetDepartments||[]);renderQuestionEditor();showPanel('editorPanel')}
 function formQuestionsValid(){for(var q of normalizeQuestions(draftQuestions)){if(!q.title.trim())return'每一題都需要題目名稱';if(['single','multiple','dropdown'].includes(q.type)&&!(q.options||[]).length)return'選擇題至少需要一個選項';if(MATRIX_TYPES_V132.includes(q.type)&&(!(q.rows||[]).length||!(q.columns||[]).length))return'矩陣題至少需要列項目與欄選項';if(q.type==='linearScale'&&Number(q.settings.max)<=Number(q.settings.min))return'線性刻度的結束數字必須大於起始數字'}return''}
 function validateTextAnswer(q,value){var v=String(value==null?'':value),rule=q.validation||{},type=rule.type||'';if(!type)return'';var n=Number(v),min=Number(rule.min),max=Number(rule.max),msg=rule.message||'回答格式不符合規則';if(type==='number'&&v&&Number.isNaN(n))return msg;if(type==='integer'&&v&&!Number.isInteger(n))return msg;if(type==='email'&&v&&!/^\S+@\S+\.\S+$/.test(v))return msg;if(type==='phone'&&v&&!/^[0-9+\-#()\s]{6,20}$/.test(v))return msg;if(type==='minLength'&&v.length<min)return msg;if(type==='maxLength'&&v.length>max)return msg;if(type==='gt'&&!(n>min))return msg;if(type==='lt'&&!(n<max))return msg;if(type==='range'&&(Number.isNaN(n)||n<min||n>max))return msg;if(type==='regex'&&rule.pattern){try{if(!new RegExp(rule.pattern).test(v))return msg}catch(e){return'自訂正規表示式格式錯誤'}}return''}
 function responseFilesV154(value){var list=Array.isArray(value)?value:(value&&typeof value==='object'?[value]:[]);return list.filter(function(file){return file&&file.path&&file.name}).map(function(file){return {name:String(file.name),path:String(file.path),size:Number(file.size||0),type:String(file.type||'application/octet-stream')}})}
@@ -566,7 +565,7 @@ var resultDetailState={search:'',department:'',sort:'department'};
 function cleanUiText(value){return String(value==null?'':value).replace(/\\r\\n|\\r|\\n|r'n/g,' ').replace(/\s{2,}/g,' ').trim()}
 function esc(v){return cleanUiText(v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function frontTopHtml(f,closed){var statusLabel=f?(closed?'問卷已關閉':'問卷開放中'):'請使用完整網址';return '<header class="frontHeader"><img src="assets/company-logo.png" alt="環興科技股份有限公司"><div class="frontActions"><span id="formStatus" class="statusPill">'+statusLabel+'</span>'+(isAdmin?'':'<button class="ghostBtn" onclick="openAdmin()">管理登入</button>')+'</div></header>'}
-function renderFront(){var route=formRouteId(),publicForms=forms.filter(function(x){return x.deleted!==true});if(!route){activeFormId='';document.body.removeAttribute('data-front-theme');formStatus.textContent='請使用完整問卷網址';frontMain.innerHTML=frontPreviewBannerHtml()+frontTopHtml(null,true)+'<div class="successCard"><h2>請使用完整問卷網址</h2><p>請由問卷管理者提供的正式連結進入，網址後方需包含 #form/問卷代碼。</p></div>';return}var f=publicForms.find(function(x){return x.id===route});if(!f){activeFormId='';document.body.removeAttribute('data-front-theme');formStatus.textContent='找不到問卷';frontMain.innerHTML=frontPreviewBannerHtml()+frontTopHtml(null,true)+'<div class="successCard"><h2>找不到這份問卷</h2><p>請確認問卷網址是否完整，或洽問卷管理者重新提供連結。</p></div>';return}activeFormId=f.id;applyFormTheme(f);var closed=f.state!=='open'||deadlinePassed(f.deadline),heroImage=imageUrl(f.imageUrl),description=String(f.description||'').trim();formStatus.textContent=closed?'問卷已關閉':'問卷開放中';frontMain.innerHTML=frontPreviewBannerHtml()+frontTopHtml(f,closed)+'<section class="formHero"><h1>'+esc(f.title)+'</h1>'+(description?'<p>'+esc(description)+'</p>':'')+(f.deadline?'<span class="deadlineBadge">請於 '+esc(formatDeadline(f.deadline))+' 前完成</span>':'')+(heroImage?'<img class="referenceImage" src="'+attr(heroImage)+'" alt="問卷參考圖片">':'')+'</section>'+(closed?'<div class="successCard" style="margin-top:18px"><h2>本問卷目前未開放填寫</h2></div>':'<form id="publicForm" class="questionList frontFormStack" onsubmit="submitResponse(event)"><div class="frontFormHeading"><h2>填寫問卷</h2></div>'+(f.identityMode==='member'?renderIdentityBlock(f):'')+normalizeQuestions(f.questions||[]).map(function(q){return renderPublicQuestion(q)}).join('')+'<div id="submitNotice" class="frontSubmitNotice questionHelp" hidden aria-live="polite"></div><div class="submitArea"><button id="submitBtn" class="btn primary" type="submit">確認並送出</button></div></form>')}
+function renderFront(){var route=formRouteId(),publicForms=forms.filter(function(x){return x.deleted!==true});if(!route){activeFormId='';document.body.removeAttribute('data-front-theme');formStatus.textContent='請使用完整問卷網址';frontMain.innerHTML=frontPreviewBannerHtml()+frontTopHtml(null,true)+'<div class="successCard"><h2>請使用完整問卷網址</h2><p>請由問卷管理者提供的正式連結進入，網址後方需包含 #form/問卷代碼。</p></div>';return}var f=publicForms.find(function(x){return x.id===route});if(!f){activeFormId='';document.body.removeAttribute('data-front-theme');formStatus.textContent='找不到問卷';frontMain.innerHTML=frontPreviewBannerHtml()+frontTopHtml(null,true)+'<div class="successCard"><h2>找不到這份問卷</h2><p>請確認問卷網址是否完整，或洽問卷管理者重新提供連結。</p></div>';return}activeFormId=f.id;applyFormTheme(f);var closed=f.state!=='open'||deadlinePassed(f.deadline),heroImage=imageUrl(f.imageUrl),descriptionHtml=frontDescriptionHtmlV156(f),referenceFiles=frontReferenceFilesHtmlV156(f);formStatus.textContent=closed?'問卷已關閉':'問卷開放中';frontMain.innerHTML=frontPreviewBannerHtml()+frontTopHtml(f,closed)+'<section class="formHero"><h1>'+esc(f.title)+'</h1>'+descriptionHtml+(heroImage?'<img class="referenceImage" src="'+attr(heroImage)+'" alt="問卷參考圖片">':'')+referenceFiles+(f.deadline?'<span class="deadlineBadge">請於 '+esc(formatDeadline(f.deadline))+' 前完成</span>':'')+'</section>'+(closed?'<div class="successCard" style="margin-top:18px"><h2>本問卷目前未開放填寫</h2></div>':'<form id="publicForm" class="questionList frontFormStack" onsubmit="submitResponse(event)"><div class="frontFormHeading"><h2>填寫問卷</h2></div>'+(f.identityMode==='member'?renderIdentityBlock(f):'')+normalizeQuestions(f.questions||[]).map(function(q){return renderPublicQuestion(q)}).join('')+'<div id="submitNotice" class="frontSubmitNotice questionHelp" hidden aria-live="polite"></div><div class="submitArea"><button id="submitBtn" class="btn primary" type="submit">確認並送出</button></div></form>')}
 function formRowHtml(f){var manage=canManageForm(f.id),canDelete=canDeleteFormDirectly(f),id=attr(f.id),role=formRoleLabel(f);var buttons=[manage?actionButton('編輯',"editForm('"+id+"')"):'',actionButton('結果',"openResults('"+id+"')"),manage?actionButton('複製',"duplicateForm('"+id+"')"):'',canDelete?actionButton('刪除',"deleteForm('"+id+"')",'danger'):''];return '<tr><td><b>'+esc(f.title)+'</b><br><small>'+(f.questions||[]).length+' 題・'+esc(f.id)+'</small></td><td>'+statePillHtml(effectiveState(f))+'</td><td>'+esc(role)+'</td><td>'+creatorCellHtml(f)+'</td><td>'+esc(formatDeadline(f.deadline)||'未設定')+'</td><td>'+countPillHtml(responseCountForForm(f.id))+'</td><td>'+actionGroup(buttons)+'</td></tr>'}
 function creatorCellHtml(f){var label=esc(formCreatorLabel(f));if(!isSystemAdmin)return label;return '<button type="button" class="creatorNameButton" onclick="changeFormCreator(\''+attr(f.id)+'\')" title="變更問卷建立者">'+label+'</button>'}
 function renderFormManagers(){var rows=formManagers.map(function(m){var id=attr(m.id),enabled=m.enabled!==false,role=m.role==='manager'?'問卷管理者':'結果檢視者';var actions=[actionButton(enabled?'停用':'啟用',"toggleFormManager('"+id+"',"+(enabled?'false':'true')+")"),actionButton('移除',"removeFormManager('"+id+"')",'danger')];return '<tr><td><b>'+esc(managerPersonLabel(m.email))+'</b></td><td>'+esc(role)+'</td><td><span class="statePill '+(enabled?'state-open':'state-closed')+'">'+(enabled?'啟用':'停用')+'</span></td><td>'+actionGroup(actions)+'</td></tr>'});$('formManagersTable').innerHTML=table(['分享成員','權限','狀態','操作'],rows,'尚無資料')}
@@ -918,7 +917,7 @@ async function duplicateForm(id){
   var source=forms.find(function(x){return x.id===id});
   if(!source)return notify('找不到要複製的問卷','error');
   if(!canManageForm(id))return toast('您沒有複製此問卷的權限','error');
-  var targetIds=formTargetMemberIdsV140(source),newId='form_'+Date.now(),copiedQuestions=normalizeQuestions(JSON.parse(JSON.stringify(source.questions||[])));copiedQuestions.forEach(function(q){q.imageStoragePath=''});var data={title:(source.title||'未命名問卷')+'（複製）',description:source.description||'',deadline:'',state:'draft',imageUrl:source.imageUrl||'',imageStoragePath:'',theme:formTheme(source),identityMode:source.identityMode||'member',targetDepartments:[].concat(source.targetDepartments||[]),questions:copiedQuestions,createdByUid:(currentUser&&currentUser.uid)||'',createdByEmail:normalizeEmail((currentUser&&currentUser.email)||''),createdByName:adminDisplayName()||(currentUser&&currentUser.displayName)||(currentUser&&currentUser.email)||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByUid:(currentUser&&currentUser.uid)||'',updatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),updatedByName:adminDisplayName()};
+  var targetIds=formTargetMemberIdsV140(source),newId='form_'+Date.now(),copiedQuestions=normalizeQuestions(JSON.parse(JSON.stringify(source.questions||[])));copiedQuestions.forEach(function(q){q.imageStoragePath=''});var data={title:(source.title||'未命名問卷')+'（複製）',description:source.description||'',descriptionHtml:source.descriptionHtml||'',descriptionFontSize:normalizeDescriptionFontSizeV156(source.descriptionFontSize),descriptionAlign:normalizeDescriptionAlignV156(source.descriptionAlign),deadline:'',state:'draft',imageUrl:source.imageUrl||'',imageStoragePath:'',referenceFiles:[],theme:formTheme(source),identityMode:source.identityMode||'member',targetDepartments:[].concat(source.targetDepartments||[]),questions:copiedQuestions,createdByUid:(currentUser&&currentUser.uid)||'',createdByEmail:normalizeEmail((currentUser&&currentUser.email)||''),createdByName:adminDisplayName()||(currentUser&&currentUser.displayName)||(currentUser&&currentUser.email)||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByUid:(currentUser&&currentUser.uid)||'',updatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),updatedByName:adminDisplayName()};
   if(targetIds.length){data.targetMemberIds=targetIds;data.targetMemberMode=source.targetMemberMode||'custom'}
   setPageLoading(true,'正在複製問卷');
   try{
@@ -1066,25 +1065,137 @@ async function prepareStoredImagesV153(formId,existing,questions){
     return {headerUrl:headerUrl,headerPath:headerPath,questions:questions,uploaded:uploaded,obsolete:Array.from(new Set(obsolete))};
   }catch(e){await Promise.all(uploaded.map(function(path){return deleteStoragePathV153(path).catch(function(){})}));throw e}
 }
+
+/* v1.56: rich survey description and survey-level reference files. */
+var pendingReferenceFilesV156=[];
+var retainedReferenceFilesV156=[];
+var descriptionSelectionV156=null;
+function normalizeDescriptionFontSizeV156(value){value=Number(value);return [14,16,18,20].includes(value)?value:16}
+function normalizeDescriptionAlignV156(value){return value==='center'?'center':'left'}
+function safeRichHrefV156(value){value=String(value||'').trim();return /^(https?:\/\/|mailto:)/i.test(value)?value:''}
+function richTextToHtmlV156(value){return esc(String(value||'')).replace(/\r?\n/g,'<br>')}
+function sanitizeRichHtmlV156(html){
+  var source=document.createElement('div'),output=document.createElement('div'),allowed=new Set(['B','STRONG','UL','OL','LI','A','BR','DIV','P']);
+  source.innerHTML=String(html||'');
+  function appendNode(node,parent){
+    if(node.nodeType===Node.TEXT_NODE){parent.appendChild(document.createTextNode(node.nodeValue||''));return}
+    if(node.nodeType!==Node.ELEMENT_NODE)return;
+    var tag=node.tagName.toUpperCase();
+    if(!allowed.has(tag)){Array.from(node.childNodes).forEach(function(child){appendNode(child,parent)});return}
+    var element=document.createElement(tag==='STRONG'?'strong':tag.toLowerCase());
+    if(tag==='A'){
+      var href=safeRichHrefV156(node.getAttribute('href'));
+      if(!href){Array.from(node.childNodes).forEach(function(child){appendNode(child,parent)});return}
+      element.setAttribute('href',href);element.setAttribute('target','_blank');element.setAttribute('rel','noopener noreferrer');
+    }
+    Array.from(node.childNodes).forEach(function(child){appendNode(child,element)});parent.appendChild(element);
+  }
+  Array.from(source.childNodes).forEach(function(node){appendNode(node,output)});
+  return output.innerHTML;
+}
+function descriptionDataV156(){
+  var editor=$('formDescriptionEditor'),html=sanitizeRichHtmlV156(editor?editor.innerHTML:''),plain=String(editor?editor.innerText:'').replace(/\u00a0/g,' ').trim();
+  if($('formDescription'))$('formDescription').value=plain;
+  return {description:plain,descriptionHtml:html,descriptionFontSize:normalizeDescriptionFontSizeV156($('formDescriptionFontSize')&&$('formDescriptionFontSize').value),descriptionAlign:normalizeDescriptionAlignV156($('formDescriptionAlign')&&$('formDescriptionAlign').value)};
+}
+function setDescriptionEditorV156(form){
+  form=form||{};var editor=$('formDescriptionEditor'),html=form.descriptionHtml?sanitizeRichHtmlV156(form.descriptionHtml):richTextToHtmlV156(form.description||'');
+  if(editor)editor.innerHTML=html;if($('formDescription'))$('formDescription').value=String(form.description||'');
+  if($('formDescriptionFontSize'))$('formDescriptionFontSize').value=String(normalizeDescriptionFontSizeV156(form.descriptionFontSize));
+  if($('formDescriptionAlign'))$('formDescriptionAlign').value=normalizeDescriptionAlignV156(form.descriptionAlign);
+}
+async function runDescriptionCommandV156(command){
+  var editor=$('formDescriptionEditor');if(!editor)return;
+  editor.focus();
+  if(command==='createLink'){
+    var selection=window.getSelection();descriptionSelectionV156=selection&&selection.rangeCount?selection.getRangeAt(0).cloneRange():null;
+    var rawHref=await inputConfirmDialog({title:'加入連結',message:'請輸入完整網址，例如 https://www.example.com',inputLabel:'連結網址',inputPlaceholder:'https://',confirmText:'加入連結'});
+    if(rawHref===null)return;
+    var href=safeRichHrefV156(rawHref);if(!href){notify('請輸入 http、https 或 mailto 開頭的安全連結','warn');return}
+    editor.focus();if(descriptionSelectionV156){selection=window.getSelection();selection.removeAllRanges();selection.addRange(descriptionSelectionV156)}
+    document.execCommand('createLink',false,href);
+  }else{
+    document.execCommand(command,false,null);
+    if(command==='removeFormat')document.execCommand('unlink',false,null);
+  }
+  descriptionDataV156();markFormDirty();
+}
+function initDescriptionEditorV156(){
+  if(window.__descriptionEditorV156Ready)return;window.__descriptionEditorV156Ready=true;
+  document.querySelectorAll('.richToolButtonV156[data-command]').forEach(function(button){button.addEventListener('mousedown',function(event){event.preventDefault()});button.addEventListener('click',function(){runDescriptionCommandV156(button.getAttribute('data-command'))})});
+  var editor=$('formDescriptionEditor');if(editor)editor.addEventListener('input',function(){descriptionDataV156();markFormDirty()});
+  ['formDescriptionFontSize','formDescriptionAlign'].forEach(function(id){var field=$(id);if(field)field.addEventListener('change',markFormDirty)});
+}
+function referenceFileKeyV156(file){return String((file&&file.path)||'pending:'+((file&&file.pendingId)||''))}
+function resetReferenceFilesV156(files){retainedReferenceFilesV156=[].concat(files||[]).filter(function(file){return file&&file.path});pendingReferenceFilesV156=[];renderReferenceFilesV156()}
+function chooseReferenceFilesV156(){var input=$('formReferenceFiles');if(input)input.click()}
+function handleReferenceFilesV156(fileList){
+  var files=Array.from(fileList||[]),remaining=5-retainedReferenceFilesV156.length-pendingReferenceFilesV156.length;
+  if(remaining<=0)return notify('每份問卷最多可附加 5 個參考檔案','warn');
+  var rejected=[];
+  files.slice(0,remaining).forEach(function(file){if(file.size>10*1024*1024)rejected.push(file.name);else pendingReferenceFilesV156.push({file:file,pendingId:Date.now()+'_'+Math.random().toString(36).slice(2,8)})});
+  if(files.length>remaining)notify('最多只能保留 5 個參考檔案','warn');else if(rejected.length)notify('以下檔案超過 10 MB：'+rejected.join('、'),'warn');
+  if(files.length)markFormDirty();renderReferenceFilesV156();
+}
+function removeReferenceFileV156(key){
+  retainedReferenceFilesV156=retainedReferenceFilesV156.filter(function(file){return referenceFileKeyV156(file)!==key});
+  pendingReferenceFilesV156=pendingReferenceFilesV156.filter(function(file){return referenceFileKeyV156(file)!==key});
+  markFormDirty();renderReferenceFilesV156();
+}
+function fileSizeTextV156(size){size=Number(size||0);if(size>=1048576)return (size/1048576).toFixed(size>=10485760?0:1)+' MB';if(size>=1024)return Math.round(size/1024)+' KB';return size+' B'}
+function renderReferenceFilesV156(){
+  var list=$('referenceFileListV156'),status=$('referenceFileStatusV156');if(!list||!status)return;
+  var existing=retainedReferenceFilesV156.map(function(file){return {key:referenceFileKeyV156(file),name:file.name||'參考檔案',size:file.size||0,pending:false}}),pending=pendingReferenceFilesV156.map(function(item){return {key:referenceFileKeyV156(item),name:item.file.name,size:item.file.size,pending:true}}),all=existing.concat(pending);
+  status.textContent=all.length?('已選擇 '+all.length+' 個檔案'):'尚未選擇檔案';
+  list.innerHTML=all.map(function(file){return '<div class="referenceFileItemV156"><span aria-hidden="true">📎</span><div><b>'+esc(file.name)+'</b><small>'+esc(fileSizeTextV156(file.size))+(file.pending?' · 儲存問卷時上傳':'')+'</small></div><button type="button" class="btn danger" onclick="removeReferenceFileV156(\''+attr(file.key)+'\')">移除</button></div>'}).join('');
+}
+async function uploadReferenceFileV156(formId,item){
+  if(!storage)throw new Error('Firebase Storage 尚未初始化');var file=item.file,fileName=Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+storageSafeSegmentV153(file.name),path='universal-forms/'+storageSafeSegmentV153(formId)+'/references/'+fileName,ref=storage.ref().child(path);
+  await ref.put(file,{contentType:file.type||'application/octet-stream',customMetadata:{formId:String(formId),kind:'reference',originalName:file.name,uploadedByUid:(currentUser&&currentUser.uid)||''}});
+  return {name:file.name,path:path,size:file.size,type:file.type||'application/octet-stream'};
+}
+async function prepareReferenceFilesV156(formId,existing){
+  var uploaded=[],oldFiles=[].concat((existing&&existing.referenceFiles)||[]),retainedPaths=new Set(retainedReferenceFilesV156.map(function(file){return file.path}));
+  try{for(var item of pendingReferenceFilesV156){var saved=await uploadReferenceFileV156(formId,item);uploaded.push(saved)}return {files:retainedReferenceFilesV156.concat(uploaded),uploaded:uploaded.map(function(file){return file.path}),obsolete:oldFiles.filter(function(file){return file&&file.path&&!retainedPaths.has(file.path)}).map(function(file){return file.path})}}catch(e){await Promise.all(uploaded.map(function(file){return deleteStoragePathV153(file.path).catch(function(){})}));throw e}
+}
+function frontDescriptionHtmlV156(form){
+  var html=form.descriptionHtml?sanitizeRichHtmlV156(form.descriptionHtml):richTextToHtmlV156(form.description||'');if(!html)return '';
+  return '<div class="frontDescriptionV156" style="font-size:'+normalizeDescriptionFontSizeV156(form.descriptionFontSize)+'px;text-align:'+normalizeDescriptionAlignV156(form.descriptionAlign)+'">'+html+'</div>';
+}
+function frontReferenceFilesHtmlV156(form){
+  var files=[].concat(form.referenceFiles||[]).filter(function(file){return file&&file.path});if(!files.length)return '';
+  return '<div class="frontReferenceFilesV156"><b>參考檔案</b><div>'+files.map(function(file){return '<button type="button" onclick="openReferenceFileV156(\''+attr(file.path)+'\')"><span aria-hidden="true">📎</span><span>'+esc(file.name||'參考檔案')+'</span><small>'+esc(fileSizeTextV156(file.size))+'</small></button>'}).join('')+'</div></div>';
+}
+async function openReferenceFileV156(path){try{var url=await storage.ref().child(path).getDownloadURL();window.open(url,'_blank','noopener')}catch(e){console.error(e);notify('參考檔案目前無法開啟','error')}}
+function installMobileHeaderV156(){
+  var area=document.querySelector('.adminShell .topUserArea');if(!area||$('mobileAccountMenuV156'))return;
+  var menu=document.createElement('details');menu.id='mobileAccountMenuV156';menu.className='mobileAccountMenuV156';
+  menu.innerHTML='<summary aria-label="帳號選單" title="帳號選單"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.6-4 3.1-6 7-6s6.4 2 7 6"></path></svg></summary><div class="mobileAccountPanelV156"><div class="mobileAccountIdentityV156"><strong></strong><small></small></div><button type="button" onclick="logout()">登出</button></div>';
+  area.appendChild(menu);
+  function sync(){var name=$('adminUserName'),account=$('adminUser');menu.querySelector('strong').textContent=(name&&name.textContent.trim())||'目前帳號';menu.querySelector('small').textContent=(account&&account.textContent.trim())||''}
+  sync();var observer=new MutationObserver(sync);if($('adminUserName'))observer.observe($('adminUserName'),{childList:true,subtree:true,characterData:true});if($('adminUser'))observer.observe($('adminUser'),{childList:true,subtree:true,characterData:true});
+  document.addEventListener('pointerdown',function(event){if(menu.open&&!event.target.closest('#mobileAccountMenuV156'))menu.open=false});
+}
 async function saveForm(){
   var title=$('formTitle').value.trim();if(!title)return notify('請輸入問卷標題');
   draftQuestions=normalizeQuestions(draftQuestions);if(!draftQuestions.length)return notify('請至少建立一個題目');
   var err=formQuestionsValid();if(err)return notify(err);
   var identityMode=$('identityMode').value,targetDepartments=identityMode==='member'?[].slice.call(document.querySelectorAll('.targetDepartment:checked')).map(function(x){return x.value}):[];
   if(identityMode==='member'&&!targetDepartments.length)return notify('請至少選擇一個開放填寫部門');
-  var id=editMode==='edit'?editingId:'form_'+Date.now(),existing=editMode==='edit'?forms.find(function(f){return f.id===editingId}):null,data={title:title,description:$('formDescription').value.trim(),deadline:$('formDeadline').value,state:$('formState').value,imageUrl:$('formImageUrl').value.trim(),imageStoragePath:'',theme:formTheme({theme:($('formTheme')||{}).value}),identityMode:identityMode,targetDepartments:targetDepartments,questions:draftQuestions,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByUid:(currentUser&&currentUser.uid)||'',updatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),updatedByName:adminDisplayName()};
+  var id=editMode==='edit'?editingId:'form_'+Date.now(),existing=editMode==='edit'?forms.find(function(f){return f.id===editingId}):null,descriptionData=descriptionDataV156(),data={title:title,description:descriptionData.description,descriptionHtml:descriptionData.descriptionHtml,descriptionFontSize:descriptionData.descriptionFontSize,descriptionAlign:descriptionData.descriptionAlign,deadline:$('formDeadline').value,state:$('formState').value,imageUrl:$('formImageUrl').value.trim(),imageStoragePath:'',theme:formTheme({theme:($('formTheme')||{}).value}),identityMode:identityMode,targetDepartments:targetDepartments,questions:draftQuestions,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByUid:(currentUser&&currentUser.uid)||'',updatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),updatedByName:adminDisplayName()};
   if(identityMode!=='member'){data.targetMemberIds=firebase.firestore.FieldValue.delete();data.targetMemberMode=firebase.firestore.FieldValue.delete();data.targetMemberUpdatedAt=firebase.firestore.FieldValue.delete();data.targetMemberUpdatedByEmail=firebase.firestore.FieldValue.delete();data.targetMemberUpdatedByName=firebase.firestore.FieldValue.delete()}
   if(editMode==='new'){data.createdAt=firebase.firestore.FieldValue.serverTimestamp();data.createdByUid=(currentUser&&currentUser.uid)||'';data.createdByEmail=normalizeEmail((currentUser&&currentUser.email)||'');data.createdByName=adminDisplayName()||(currentUser&&currentUser.displayName)||(currentUser&&currentUser.email)||''}
   var btn=$('saveFormBtn');btn.disabled=true;btn.textContent='儲存中';setPageLoading(true,'正在儲存問卷');
-  var createdBase=false,prepared=null;
+  var createdBase=false,prepared=null,referencePrepared=null;
   try{
     if(editMode==='new'){await doc('universalForms',id).set(data,{merge:true});createdBase=true}
     prepared=await prepareStoredImagesV153(id,existing,normalizeQuestions(JSON.parse(JSON.stringify(draftQuestions))));
     data.imageUrl=prepared.headerUrl;data.imageStoragePath=prepared.headerPath;data.questions=prepared.questions;
+    referencePrepared=await prepareReferenceFilesV156(id,existing);data.referenceFiles=referencePrepared.files;
     await doc('universalForms',id).set(data,{merge:true});
-    await Promise.all(prepared.obsolete.map(function(path){return deleteStoragePathV153(path).catch(function(e){console.warn('舊圖片清理失敗',path,e)})}));
-    resetPendingImages();formDirty=false;activeFormId=id;await loadAdminData();showPanel('formsPanel');toast(editMode==='edit'?'問卷變更已儲存':'問卷已建立','success')
-  }catch(e){console.error(e);if(prepared&&prepared.uploaded)await Promise.all(prepared.uploaded.map(function(path){return deleteStoragePathV153(path).catch(function(){})}));if(createdBase)await doc('universalForms',id).delete().catch(function(){});notify('問卷儲存失敗：'+(e&&e.message?e.message:'請確認 Storage 規則、權限或網路狀態'),'error')}finally{setPageLoading(false);btn.disabled=false;btn.textContent=editMode==='edit'?'儲存變更':'建立問卷'}
+    await Promise.all(prepared.obsolete.concat(referencePrepared.obsolete).map(function(path){return deleteStoragePathV153(path).catch(function(e){console.warn('舊附件清理失敗',path,e)})}));
+    resetPendingImages();resetReferenceFilesV156(data.referenceFiles);formDirty=false;activeFormId=id;await loadAdminData();showPanel('formsPanel');toast(editMode==='edit'?'問卷變更已儲存':'問卷已建立','success')
+  }catch(e){console.error(e);if(prepared&&prepared.uploaded)await Promise.all(prepared.uploaded.map(function(path){return deleteStoragePathV153(path).catch(function(){})}));if(referencePrepared&&referencePrepared.uploaded)await Promise.all(referencePrepared.uploaded.map(function(path){return deleteStoragePathV153(path).catch(function(){})}));if(createdBase)await doc('universalForms',id).delete().catch(function(){});notify('問卷儲存失敗：'+(e&&e.message?e.message:'請確認 Storage 規則、權限或網路狀態'),'error')}finally{setPageLoading(false);btn.disabled=false;btn.textContent=editMode==='edit'?'儲存變更':'建立問卷'}
 }
 
 var activeQuestionIndexV143=null;
@@ -1490,7 +1601,7 @@ deleteForm=async function(id){
   setPageLoading(true,'正在刪除問卷與關聯資料');
   try{
     await deleteStorageFolderV153('universal-responses/'+storageSafeSegmentV153(id));
-    var hasStorage=!!f.imageStoragePath||normalizeQuestions(f.questions||[]).some(function(q){return !!q.imageStoragePath});
+    var hasStorage=!!f.imageStoragePath||[].concat(f.referenceFiles||[]).some(function(file){return !!(file&&file.path)})||normalizeQuestions(f.questions||[]).some(function(q){return !!q.imageStoragePath});
     if(hasStorage)await deleteStorageFolderV153('universal-forms/'+storageSafeSegmentV153(id));
     var responseSnap=await col('universalResponses').where('formId','==',id).get(),lockSnap=await col('universalResponseLocks').where('formId','==',id).get(),managerSnap=await col('universalFormManagers').where('formId','==',id).get();
     await deleteSnapshotInChunks(responseSnap);await deleteSnapshotInChunks(lockSnap);await deleteSnapshotInChunks(managerSnap);await doc('universalForms',id).delete();
@@ -1509,4 +1620,6 @@ responseDetailRow=function(f,qs,r,manage){
   return '<tr>'+(formUsesMemberDatabaseV141(f)?'<td>'+esc(r.departmentName||r.respondentDepartment||'')+'</td><td>'+esc(r.memberName||r.respondentName||'')+'</td><td>'+esc(r.employeeNo||r.respondentEmployeeId||'')+'</td>':'')+qs.map(function(q){return '<td>'+resultAnswerHtmlV154(q,r)+'</td>'}).join('')+'<td>'+esc(r.submittedAtText||formatAnyDate(r.submittedAt)||'')+'</td><td>'+method+'</td><td>'+actions+'</td></tr>';
 };
 
+initDescriptionEditorV156();
+installMobileHeaderV156();
 
