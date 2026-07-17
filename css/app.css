@@ -1909,8 +1909,9 @@ body{
 }
 .adminShell .topUserArea .topUserIcon svg,
 .compactAdminToolbar .iconOnlyButton svg{
-  width:100%;
-  height:100%;
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
   fill:none;
   stroke:currentColor;
   stroke-width:1.7;
@@ -4134,5 +4135,14 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   .adminShell .topNavLinks{grid-column:1/-1;grid-row:2;order:initial;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;padding:7px 0 0;overflow:visible;border-top:1px solid #edf1f5}
   .adminShell .topNavLinks>.nav,.adminShell .topNavGroup>summary{width:100%;min-width:0;min-height:42px;padding:9px 7px;border-radius:8px;font-size:14px}
   .adminShell .topNavGroup{position:static;min-width:0}.adminShell .topNavMenu{position:absolute;top:100%;left:12px;right:12px;z-index:110;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:auto!important;min-width:0;padding:8px;border-radius:0 0 11px 11px;box-shadow:0 16px 34px rgba(30,55,85,.18)}.adminShell .topNavMenu .nav{justify-content:flex-start;width:100%;min-width:0;min-height:42px}
-  .adminShell .main{padding:16px 12px 40px}.adminShell .adminPageHead.compactAdminToolbar{display:grid;grid-template-columns:1fr;gap:11px;min-height:0}.compactAdminToolbar #panelTitle{width:100%;font-size:25px}.compactAdminToolbar .headActions{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:9px}.compactAdminToolbar #activeFormSelect{grid-column:1/-1;width:100%;max-width:none}.compactAdminToolbar .headActions>.toolBtn,.compactAdminToolbar .headActions>.adminMoreMenu{width:100%}.compactAdminToolbar .headActions>.adminMoreMenu>summary{width:100%}.compactAdminToolbar .headActions>.toolBtn:last-child{grid-column:1/-1}
+  .adminShell .main{padding:16px 12px 40px}
+  .adminShell .adminPageHead.compactAdminToolbar{display:grid;grid-template-columns:1fr;gap:11px;min-height:0}
+  .compactAdminToolbar #panelTitle{width:100%;font-size:25px}
+  .compactAdminToolbar .headActions{display:grid;grid-template-columns:56px 56px minmax(0,1fr);width:100%;gap:9px}
+  .compactAdminToolbar #activeFormSelect{grid-column:1/-1;width:100%;max-width:none}
+  .compactAdminToolbar .headActions>#refreshAdminBtn{grid-column:1;width:56px;min-width:56px;height:56px;min-height:56px;padding:17px}
+  .compactAdminToolbar .headActions>#refreshAdminBtn svg{width:22px;height:22px;flex:0 0 22px}
+  .compactAdminToolbar .headActions>.adminMoreMenu{grid-column:2;width:56px;height:56px}
+  .compactAdminToolbar .headActions>.adminMoreMenu>summary{width:56px;height:56px}
+  .compactAdminToolbar .headActions>.frontViewButton{grid-column:1/-1;width:100%}
 }
