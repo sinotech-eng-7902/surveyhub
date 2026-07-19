@@ -3,15 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>公司通用問卷調查系統 v1.59</title>
+  <title>公司通用問卷調查系統 v1.60</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.59">
+  <link rel="stylesheet" href="css/app.css?v=1.60">
 </head>
-<body>
+<body class="appBooting" aria-busy="true">
+  <div id="appBootScreen" class="appBootScreen" role="status" aria-live="polite">
+    <img src="assets/company-logo.png" alt="環興科技股份有限公司">
+    <span class="appBootSpinner" aria-hidden="true"></span>
+    <p>正在確認登入狀態…</p>
+  </div>
   <div id="toast" class="toast"></div>
   <div id="front" class="frontShell">
     <main id="frontMain" class="frontMain"><div class="loading">正在載入問卷…</div></main>
@@ -146,7 +151,7 @@
   </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
   <script src="js/config.js?v=1.58"></script>
-  <script src="js/app.js?v=1.59"></script>
+  <script src="js/app.js?v=1.60"></script>
   <script src="js/app-guards.js?v=1.58"></script>
 </body>
 </html>

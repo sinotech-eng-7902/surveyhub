@@ -4146,3 +4146,50 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   .compactAdminToolbar .headActions>.adminMoreMenu>summary{width:56px;height:56px}
   .compactAdminToolbar .headActions>.frontViewButton{grid-column:1/-1;width:100%}
 }
+/* v1.60 initial route gate: keep public/admin shells hidden until Auth and data resolve. */
+.appBooting{
+  overflow:hidden;
+}
+.appBooting #front,
+.appBooting #admin,
+.appBooting #loginMask{
+  display:none !important;
+}
+.appBootScreen{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:24px;
+  background:#f4f7fb;
+  color:#50647a;
+}
+.appBootScreen[hidden]{
+  display:none;
+}
+.appBootScreen img{
+  width:min(360px,78vw);
+  height:auto;
+}
+.appBootScreen p{
+  margin:0;
+  font-size:16px;
+}
+.appBootSpinner{
+  width:34px;
+  height:34px;
+  border:3px solid #d7e2ee;
+  border-top-color:#2d6dcc;
+  border-radius:50%;
+  animation:appBootSpin .8s linear infinite;
+}
+@keyframes appBootSpin{
+  to{transform:rotate(360deg)}
+}
+@media (prefers-reduced-motion:reduce){
+  .appBootSpinner{animation:none;border-top-color:#d7e2ee}
+}

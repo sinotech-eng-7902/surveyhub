@@ -1,5 +1,6 @@
 ﻿let app,auth,db,currentUser=null,isAdmin=false,isSystemAdmin=false,formAssignments=[],formManagers=[],forms=[],responses=[],departments=[],members=[],memberAccounts=[],activeFormId='',editMode='new',editingId='',draftQuestions=[],editingResponseId='',memberEditMode='view',editingMemberId='',submissionLocksPrepared=false,loginPurpose='admin',formDirty=false,activeFormSection='mine';
 let memberImportMode='partial',pendingMemberImport=null,storage=null;
+let initialAuthResolved=false,initialPublicDataResolved=false;
 const IMAGE_MAX_BYTES=10*1024*1024,FILE_MAX_BYTES=10*1024*1024,IMAGE_TYPES=['image/jpeg','image/png','image/webp'];
 const DOCUMENT_FILE_EXTENSIONS=['pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','zip','rar','7z'];
 const DOCUMENT_FILE_ACCEPT=['.pdf','application/pdf','.doc','application/msword','.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document','.xls','application/vnd.ms-excel','.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','.ppt','application/vnd.ms-powerpoint','.pptx','application/vnd.openxmlformats-officedocument.presentationml.presentation','.txt','text/plain','.csv','text/csv','.zip','application/zip','application/x-zip-compressed','.rar','application/vnd.rar','application/x-rar-compressed','.7z','application/x-7z-compressed'].join(',');
@@ -7,6 +8,14 @@ let pendingHeaderImageFile=null,pendingHeaderImagePreviewUrl='',headerImageSourc
 const pendingQuestionImageFiles=new Map(),pendingQuestionImagePreviewUrls=new Map();
 const $=id=>document.getElementById(id);
 const front=$('front'),frontMain=$('frontMain'),formStatus=$('formStatus'),admin=$('admin'),loginMask=$('loginMask'),loginBtn=$('loginBtn'),loginMsg=$('loginMsg'),adminUser=$('adminUser'),activeFormSelect=$('activeFormSelect'),activeFormLabel=$('activeFormLabel'),formsTable=$('formsTable'),resultsTable=$('resultsTable'),questionEditor=$('questionEditor');
+
+function syncInitialBootState(){
+  let ready=initialAuthResolved&&initialPublicDataResolved,boot=$('appBootScreen');
+  document.body.classList.toggle('appBooting',!ready);
+  document.body.setAttribute('aria-busy',ready?'false':'true');
+  if(boot)boot.hidden=ready;
+  return ready;
+}
 
 function col(name){return db.collection(name)}
 function doc(name,id){return col(name).doc(id)}
@@ -50,7 +59,7 @@ function setQuestionImageSourceMode(i,mode){var upload=$('questionImageUploadPan
 function formRouteId(){let m=location.hash.match(/^#form\/([^/?#]+)/);return m?decodeURIComponent(m[1]):''}
 
 async function init(){
-  if(!window.firebase||typeof firebaseConfig==='undefined'||!firebaseConfig.apiKey){frontMain.innerHTML='<div class="successCard"><h2>尚未設定 Firebase</h2><p>請確認 js/config.js 已正確上傳。</p></div>';return}
+  if(!window.firebase||typeof firebaseConfig==='undefined'||!firebaseConfig.apiKey){initialAuthResolved=true;initialPublicDataResolved=true;syncInitialBootState();front.style.display='block';frontMain.innerHTML='<div class="successCard"><h2>尚未設定 Firebase</h2><p>請確認 js/config.js 已正確上傳。</p></div>';return}
   app=firebase.initializeApp(firebaseConfig,'universal-survey');auth=app.auth();db=app.firestore();storage=app.storage();
   window.addEventListener('hashchange',applyRoute);
   window.addEventListener('beforeunload',e=>{if(formDirty){e.preventDefault();e.returnValue=''}});
@@ -59,8 +68,8 @@ async function init(){
   document.addEventListener('click',e=>{if(!e.target.closest('.adminMoreMenu')){let more=$('adminMoreMenu');if(more)more.open=false}if(!e.target.closest('.topNavGroup'))closeTopNavGroups()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){let more=$('adminMoreMenu');if(more)more.open=false;closeTopNavGroups()}});
   document.querySelectorAll('.topNavGroup').forEach(group=>{group.addEventListener('mouseenter',()=>{clearTimeout(window.__topNavCloseTimer)});group.addEventListener('mouseleave',()=>{clearTimeout(window.__topNavCloseTimer);window.__topNavCloseTimer=setTimeout(()=>group.removeAttribute('open'),280)});group.querySelectorAll('.nav').forEach(item=>item.addEventListener('click',()=>closeTopNavGroups()))});
-  auth.onAuthStateChanged(async user=>{currentUser=user;isAdmin=false;isSystemAdmin=false;formAssignments=[];if(user){try{await loadMemberAccounts();isSystemAdmin=await checkAdmin(user);formAssignments=await loadCurrentAssignments(user);let member=findMemberByGoogleEmail(user.email),memberDisabled=member?.active===false,hasMemberAccount=!!member&&!memberDisabled;isAdmin=isSystemAdmin||(!memberDisabled&&(hasMemberAccount||formAssignments.some(x=>x.enabled!==false)));if(isAdmin){let name=memberDisplayName(member)||user.displayName||'後台使用者';if($('adminUserName'))$('adminUserName').textContent=name;adminUser.textContent=(user.email||'')+(isSystemAdmin?'・系統管理員':'');loginMask.style.display='none';await loadAdminData()}else if(loginPurpose==='response'){loginMask.style.display='none'}else loginMsg.textContent=memberDisabled?'此人員帳號目前已停用，如有疑問請聯絡系統管理員。':'此 Google 帳號尚未建立於人員管理或問卷權限中，請聯絡系統管理員。'}catch(e){console.error('admin auth failed',e);loginMsg.textContent='後台登入檢查失敗，請確認 Firestore 規則與人員 Google 帳號設定。'}}else{memberAccounts=[]}applyRoute()});
-  await loadPublicData();applyRoute();
+  auth.onAuthStateChanged(async user=>{currentUser=user;isAdmin=false;isSystemAdmin=false;formAssignments=[];if(user){try{await loadMemberAccounts();isSystemAdmin=await checkAdmin(user);formAssignments=await loadCurrentAssignments(user);let member=findMemberByGoogleEmail(user.email),memberDisabled=member?.active===false,hasMemberAccount=!!member&&!memberDisabled;isAdmin=isSystemAdmin||(!memberDisabled&&(hasMemberAccount||formAssignments.some(x=>x.enabled!==false)));if(isAdmin){let name=memberDisplayName(member)||user.displayName||'後台使用者';if($('adminUserName'))$('adminUserName').textContent=name;adminUser.textContent=(user.email||'')+(isSystemAdmin?'・系統管理員':'');loginMask.style.display='none';await loadAdminData()}else if(loginPurpose==='response'){loginMask.style.display='none'}else loginMsg.textContent=memberDisabled?'此人員帳號目前已停用，如有疑問請聯絡系統管理員。':'此 Google 帳號尚未建立於人員管理或問卷權限中，請聯絡系統管理員。'}catch(e){console.error('admin auth failed',e);loginMsg.textContent='後台登入檢查失敗，請確認 Firestore 規則與人員 Google 帳號設定。'}}else{memberAccounts=[]}initialAuthResolved=true;applyRoute()});
+  try{await loadPublicData()}finally{initialPublicDataResolved=true;applyRoute()}
 }
 
 async function checkAdmin(user){let direct=await doc('users',user.uid).get();if(direct.exists){let u=direct.data();if(u.enabled!==false&&String(u.role||'').toLowerCase()==='admin')return true}let q=await col('users').where('email','==',user.email).limit(1).get();if(q.empty)return false;let u=q.docs[0].data();return u.enabled!==false&&String(u.role||'').toLowerCase()==='admin'}
@@ -397,7 +406,7 @@ async function loadPublicData(){let[fs,ds,ms]=await Promise.all([col('universalF
 async function loadAdminData(){await loadPublicData();await loadMemberAccounts();if(isSystemAdmin&&!submissionLocksPrepared)await prepareSubmissionLocks();await loadResponses();renderAdmin()}
 async function refreshAdminView(){let btn=$('refreshAdminBtn');if(btn)btn.disabled=true;setPageLoading(true,'正在重新整理資料…');try{await loadAdminData();toast('資料已重新整理','success')}catch(e){console.error(e);notify('重新整理失敗，請稍後再試','error')}finally{setPageLoading(false);if(btn)btn.disabled=false}}
 async function loadResponses(){if(!isAdmin||!activeFormId||!canViewForm(activeFormId)){responses=[];return}try{let q=await col('universalResponses').where('formId','==',activeFormId).get();responses=q.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0))}catch(e){console.warn(e);responses=[]}}
-function applyRoute(){let wantsAdmin=location.hash==='#admin'||location.hash.startsWith('#admin/');if(wantsAdmin&&isAdmin){front.style.display='none';admin.style.display='block';loginMask.style.display='none';let routeId=adminRouteId();if(routeId&&canViewForm(routeId)&&routeId!==activeFormId){activeFormId=routeId;loadResponses().then(renderAdmin);return}renderAdmin();return}admin.style.display='none';front.style.display='block';loginMask.style.display=wantsAdmin&&!isAdmin?'grid':'none';renderFront();if(loginPurpose==='response'&&currentUser)setTimeout(showMyResponse,0)}
+function applyRoute(){if(!syncInitialBootState()){front.style.display='none';admin.style.display='none';loginMask.style.display='none';return}let wantsAdmin=location.hash==='#admin'||location.hash.startsWith('#admin/');if(wantsAdmin&&isAdmin){front.style.display='none';admin.style.display='block';loginMask.style.display='none';let routeId=adminRouteId();if(routeId&&canViewForm(routeId)&&routeId!==activeFormId){activeFormId=routeId;loadResponses().then(renderAdmin);return}renderAdmin();return}admin.style.display='none';front.style.display='block';loginMask.style.display=wantsAdmin&&!isAdmin?'grid':'none';renderFront();if(loginPurpose==='response'&&currentUser)setTimeout(showMyResponse,0)}
 function myResponseButton(f){return f?.identityMode==='member'?'<button class="ghostBtn" type="button" onclick="startMyResponseView()">查看我的填寫結果</button>':''}
 function frontPreviewBannerHtml(){if(!isAdmin)return'';let label=adminDisplayName()||currentUser?.email||'管理員';return `<div class="frontPreviewBanner"><div><b>管理員預覽模式</b><span>${esc(label)}</span></div><div class="frontPreviewActions"><button class="btn primary" type="button" onclick="openAdmin()">返回管理後台</button><button class="btn" type="button" onclick="logout()">登出</button></div></div>`}
 function frontTopHtml(f,closed){let statusLabel=f?(closed?'問卷已關閉':'問卷開放中'):'請使用完整網址';return `<header class="frontHeader"><img src="assets/company-logo.png" alt="環興科技股份有限公司"><div class="frontActions"><span id="formStatus" class="statusPill">${statusLabel}</span>${myResponseButton(f)}${isAdmin?'':'<button class="ghostBtn" onclick="openAdmin()">管理登入</button>'}</div></header>`}
