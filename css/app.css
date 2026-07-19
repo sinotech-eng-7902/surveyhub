@@ -3161,27 +3161,33 @@ body{
   gap:12px;
 }
 .adminShell .dashboardMetrics .metric{
-  min-height:132px;
-  padding:18px;
+  align-items:flex-start;
+  justify-content:flex-start;
+  min-height:160px;
+  padding:30px 24px 22px;
   border-radius:12px;
   border-top:3px solid #5c83bf;
   box-shadow:none;
 }
 .adminShell .dashboardMetrics .metric b{
-  order:0;
+  order:1;
   margin:0;
   color:#14233b;
-  font-size:27px;
-  line-height:1.25;
+  font-size:38px;
+  font-weight:500;
+  line-height:1.15;
 }
 .adminShell .dashboardMetrics .metric span:not(.metricProgress){
+  order:2;
   display:block;
-  margin-top:6px;
+  margin-top:10px;
   color:#667085;
-  font-size:15px;
-  font-weight:700;
+  font-size:16px;
+  font-weight:500;
+  line-height:1.5;
 }
 .metricProgress{
+  order:3;
   height:8px;
   margin-top:10px;
   background:#e5e7eb;
@@ -3221,8 +3227,14 @@ body{
     font-size:24px;
   }
   .adminShell .dashboardMetrics .metric{
-    min-height:112px;
-    padding:16px;
+    min-height:132px;
+    padding:22px 18px 18px;
+  }
+  .adminShell .dashboardMetrics .metric b{
+    font-size:32px;
+  }
+  .adminShell .dashboardMetrics .metric span:not(.metricProgress){
+    margin-top:8px;
   }
 }
 

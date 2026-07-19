@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>公司通用問卷調查系統 v1.61</title>
+  <title>公司通用問卷調查系統 v1.62</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.61">
+  <link rel="stylesheet" href="css/app.css?v=1.62">
 </head>
 <body class="appBooting" aria-busy="true">
   <div id="appBootScreen" class="appBootScreen" role="status" aria-live="polite">
@@ -75,7 +75,12 @@
       </header>
 
       <section id="dashboardPanel" class="panel active">
-        <div class="summaryGrid dashboardMetrics"><div class="metric"><span>填寫份數</span><b id="dashResponseCount">0</b></div><div class="metric"><span>應填人數</span><b id="dashExpectedCount">—</b></div><div class="metric"><span>完成率</span><b id="dashCompletionRate">—</b></div><div class="metric"><span>未填人數</span><b id="dashMissingCount">—</b></div></div>
+        <div class="summaryGrid dashboardMetrics">
+          <div class="metric"><b id="dashResponseCount">0</b><span>填寫份數</span></div>
+          <div class="metric"><b id="dashExpectedCount">—</b><span>應填人數</span></div>
+          <div class="metric"><b id="dashCompletionRate">—</b><span>完成率</span></div>
+          <div class="metric"><b id="dashMissingCount">—</b><span>未填人數</span></div>
+        </div>
         <div class="dashboardGrid">
           <div class="card dashboardCurrentCard"><div class="sectionHead"><div><h2>目前問卷</h2><p id="dashCurrentNote">請先選擇問卷。</p></div></div><div id="dashboardCurrent"></div><div class="buttonRow dashboardActions"><button class="btn primary" onclick="openNewFormSafely()">建立或編輯問卷</button><button class="btn success" onclick="showPanel('resultsPanel')">查看填寫結果</button></div></div>
         </div>
@@ -151,7 +156,7 @@
   </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
   <script src="js/config.js?v=1.58"></script>
-  <script src="js/app.js?v=1.61"></script>
+  <script src="js/app.js?v=1.62"></script>
   <script src="js/app-guards.js?v=1.58"></script>
 </body>
 </html>
