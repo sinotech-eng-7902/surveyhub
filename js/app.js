@@ -51,7 +51,7 @@ function formRouteId(){let m=location.hash.match(/^#form\/([^/?#]+)/);return m?d
 
 async function init(){
   if(!window.firebase||typeof firebaseConfig==='undefined'||!firebaseConfig.apiKey){frontMain.innerHTML='<div class="successCard"><h2>尚未設定 Firebase</h2><p>請確認 js/config.js 已正確上傳。</p></div>';return}
-  app=firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();storage=firebase.storage();
+  app=firebase.initializeApp(firebaseConfig,'universal-survey');auth=app.auth();db=app.firestore();storage=app.storage();
   window.addEventListener('hashchange',applyRoute);
   window.addEventListener('beforeunload',e=>{if(formDirty){e.preventDefault();e.returnValue=''}});
   document.addEventListener('input',e=>{if($('editorPanel')?.contains(e.target))formDirty=true});
