@@ -970,6 +970,49 @@ body{
   margin-top:8px;
 }
 
+.adminShell #formManagersTable .formPermissionTableV161{
+  min-width:900px;
+  table-layout:fixed;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 th,
+.adminShell #formManagersTable .formPermissionTableV161 td{
+  text-align:center;
+  vertical-align:middle;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 th:nth-child(1),
+.adminShell #formManagersTable .formPermissionTableV161 td:nth-child(1),
+.adminShell #formManagersTable .formPermissionTableV161 th:nth-child(2),
+.adminShell #formManagersTable .formPermissionTableV161 td:nth-child(2){
+  width:16%;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 th:nth-child(3),
+.adminShell #formManagersTable .formPermissionTableV161 td:nth-child(3){
+  width:15%;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 th:nth-child(4),
+.adminShell #formManagersTable .formPermissionTableV161 td:nth-child(4){
+  width:19%;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 th:nth-child(5),
+.adminShell #formManagersTable .formPermissionTableV161 td:nth-child(5){
+  width:12%;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 th:nth-child(6),
+.adminShell #formManagersTable .formPermissionTableV161 td:nth-child(6){
+  width:22%;
+}
+
+.adminShell #formManagersTable .formPermissionTableV161 .tableActions{
+  justify-content:center;
+  flex-wrap:nowrap;
+}
+
 .trashCard{
   border-color:#f0d7d7!important;
   background:#fff!important;
