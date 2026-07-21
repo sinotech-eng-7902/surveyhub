@@ -123,17 +123,142 @@ function adminRouteId(){let m=location.hash.match(/^#admin\/([^/?#]+)/);return m
 function answerText(q,r){let v=r.answers?.[q.id];return Array.isArray(v)?v.join('、'):String(v??'')}
 const chartColors=['#287c78','#e89a5b','#5478c7','#a56cc1','#d8606f','#76a85e','#d3a72f','#4f9eaa','#8c7a6b','#6a86a3'];
 
+let currentSingleQuestionIndex = 0;
+let analysisCardsData = [];
+
+window.showChartTooltip = function(e, label, count, percent) {
+  let tip = document.getElementById('chartTooltip');
+  if(!tip) return;
+  tip.innerHTML = '<strong>' + esc(label) + '</strong><br>' + count + ' 票（' + percent + '%）';
+  tip.style.display = 'block';
+  tip.hidden = false;
+  let rect = e.target.getBoundingClientRect();
+  tip.style.left = (rect.left + rect.width / 2 + window.scrollX) + 'px';
+  tip.style.top = (rect.top + window.scrollY) + 'px';
+  tip.style.opacity = '1';
+};
+window.hideChartTooltip = function() {
+  let tip = document.getElementById('chartTooltip');
+  if(tip) {
+    tip.style.opacity = '0';
+    setTimeout(() => { tip.hidden = true; }, 150);
+  }
+};
+window.handleChartHover = function(e, containerSelector, itemClass) {
+  let container = e.target.closest(containerSelector);
+  if(container) {
+    container.querySelectorAll(itemClass).forEach(el => {
+      if(el !== e.target) el.classList.add('faded');
+    });
+    e.target.classList.add('active');
+  }
+};
+window.handleChartLeave = function(e, containerSelector, itemClass) {
+  let container = e.target.closest(containerSelector);
+  if(container) {
+    container.querySelectorAll(itemClass).forEach(el => {
+      el.classList.remove('faded', 'active');
+    });
+  }
+  window.hideChartTooltip();
+};
+
+function switchResultTab(tabId) {
+  document.querySelectorAll('.resultTab').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.resultTabContent').forEach(content => {
+    content.hidden = true;
+    content.classList.remove('active');
+  });
+  let btnMap = { 'summary': 'tabBtnSummary', 'single': 'tabBtnSingle', 'detail': 'tabBtnDetail' };
+  let contentMap = { 'summary': 'resultTabSummary', 'single': 'resultTabSingle', 'detail': 'resultTabDetail' };
+  if(document.getElementById(btnMap[tabId])) document.getElementById(btnMap[tabId]).classList.add('active');
+  let content = document.getElementById(contentMap[tabId]);
+  if(content) {
+    content.hidden = false;
+    content.classList.add('active');
+  }
+  if(tabId === 'single') renderSingleQuestionView();
+}
+window.switchResultTab = switchResultTab;
+
+function prevSingleQuestion() {
+  if (currentSingleQuestionIndex > 0) {
+    currentSingleQuestionIndex--;
+    renderSingleQuestionView();
+  }
+}
+function nextSingleQuestion() {
+  if (currentSingleQuestionIndex < analysisCardsData.length - 1) {
+    currentSingleQuestionIndex++;
+    renderSingleQuestionView();
+  }
+}
+window.prevSingleQuestion = prevSingleQuestion;
+window.nextSingleQuestion = nextSingleQuestion;
+
+function renderSingleQuestionView() {
+  let container = document.getElementById('resultAnalysisSingle');
+  let progress = document.getElementById('singleQuestionProgress');
+  if (!container || !progress) return;
+  if (!analysisCardsData || analysisCardsData.length === 0) {
+    container.innerHTML = '<div class="emptyAnalysis">目前尚無填寫資料或題目。</div>';
+    progress.textContent = '';
+    return;
+  }
+  if (currentSingleQuestionIndex >= analysisCardsData.length) currentSingleQuestionIndex = 0;
+  let current = analysisCardsData[currentSingleQuestionIndex];
+  container.innerHTML = '<div class="analysisGrid">' + current.html + '</div>';
+  progress.textContent = '第 ' + (currentSingleQuestionIndex + 1) + ' 題 / 共 ' + analysisCardsData.length + ' 題';
+}
+
+function getPieSvg(shown, total, colors) {
+  if(!shown.length) return '';
+  let sum = shown.reduce((n, x) => n + x.count, 0);
+  if(sum === 0) return '';
+  let svg = '<svg viewBox="-1 -1 2 2" style="transform: rotate(-90deg); width: 142px; height: 142px;" class="pieChartSvg">';
+  let cursor = 0;
+  shown.forEach((x, i) => {
+    let ratio = x.count / sum;
+    if (ratio === 1) {
+      svg += '<circle cx="0" cy="0" r="1" fill="' + colors[i % colors.length] + '" onmouseenter="handleChartHover(event, \'svg\', \'path, circle\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" onmouseleave="handleChartLeave(event, \'svg\', \'path, circle\')" onclick="handleChartHover(event, \'svg\', \'path, circle\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" />';
+      return;
+    }
+    let startAngle = cursor * 2 * Math.PI;
+    cursor += ratio;
+    let endAngle = cursor * 2 * Math.PI;
+    let x1 = Math.cos(startAngle), y1 = Math.sin(startAngle);
+    let x2 = Math.cos(endAngle), y2 = Math.sin(endAngle);
+    let largeArc = ratio > 0.5 ? 1 : 0;
+    let d = 'M 0 0 L ' + x1 + ' ' + y1 + ' A 1 1 0 ' + largeArc + ' 1 ' + x2 + ' ' + y2 + ' Z';
+    svg += '<path d="' + d + '" fill="' + colors[i % colors.length] + '" onmouseenter="handleChartHover(event, \'svg\', \'path\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" onmouseleave="handleChartLeave(event, \'svg\', \'path\')" onclick="handleChartHover(event, \'svg\', \'path\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" />';
+  });
+  svg += '</svg>';
+  return svg;
+}
+
 function optionCounts(q){let map=new Map((q.options||[]).map(o=>[String(o),0]));for(let r of responses){let value=r.answers?.[q.id],values=Array.isArray(value)?value:[value];for(let item of values){let key=String(item??'').trim();if(key)map.set(key,(map.get(key)||0)+1)}}return [...map.entries()].map(([label,count])=>({label,count}))}
 
-function pieHtml(title,items,denominator=responses.length){let shown=items.filter(x=>x.count>0),sum=shown.reduce((n,x)=>n+x.count,0),cursor=0,segments=shown.map((x,i)=>{let start=cursor,end=cursor+(sum?x.count/sum*100:0);cursor=end;return `${chartColors[i%chartColors.length]} ${start}% ${end}%`}).join(','),background=sum?`conic-gradient(${segments})`:'#e8eef0';return `<div class="analysisCard"><h3>${esc(title)}</h3><div class="pieLayout"><div class="pieChart" style="background:${attr(background)}" role="img" aria-label="${attr(title)}圓餅圖"></div><div class="chartLegend">${items.map((x,i)=>`<div class="legendRow"><span class="legendDot" style="background:${chartColors[i%chartColors.length]}"></span><span>${esc(x.label)}</span><strong>${x.count} 人・${percentage(x.count,denominator)}%</strong></div>`).join('')||'<span class="questionHelp">尚無資料</span>'}</div></div></div>`}
+function pieHtml(title, items, denominator) {
+  denominator = denominator || responses.length;
+  let shown = items.filter(x => x.count > 0);
+  let svg = getPieSvg(shown, denominator, chartColors);
+  let pieChartHtml = svg ? svg : '<div class="pieChart" style="background:#e8eef0"></div>';
+  return '<div class="analysisCard"><h3>' + esc(title) + ' <small style="color:var(--muted);font-size:13px;font-weight:normal;">（' + denominator + ' 份回答）</small></h3><div class="pieLayout"><div style="width:142px;height:142px;flex:0 0 142px;">' + pieChartHtml + '</div><div class="chartLegend">' + (items.map((x, i) => '<div class="legendRow"><span class="legendDot" style="background:' + chartColors[i % chartColors.length] + '"></span><span>' + esc(x.label) + '</span><strong>' + x.count + ' 人・' + percentage(x.count, denominator) + '%</strong></div>').join('') || '<span class="questionHelp">尚無資料</span>') + '</div></div></div>';
+}
 
-function multipleAnalysisHtml(q){let items=optionCounts(q),total=responses.length;return `<div class="analysisCard"><h3>${esc(q.title)}</h3><div class="barList">${items.map(x=>{let p=percentage(x.count,total);return `<div><div class="barRowHead"><span>${esc(x.label)}</span><strong>${x.count} 人・${p}%</strong></div><div class="barTrack"><div class="barFill" style="width:${p}%"></div></div></div>`}).join('')||'<span class="questionHelp">尚無資料</span>'}</div></div>`}
+function multipleAnalysisHtml(q, itemsOverride, titleOverride, totalOverride){
+  let items = itemsOverride || optionCounts(q), total = totalOverride ?? responses.length, title = titleOverride || q.title;
+  return '<div class="analysisCard"><h3>' + esc(title) + ' <small style="color:var(--muted);font-size:13px;font-weight:normal;">（' + total + ' 份回答）</small></h3><div class="barList barChartContainer">' + (items.map((x, i) => {
+    let p = percentage(x.count, total);
+    return '<div><div class="barRowHead"><span>' + esc(x.label) + '</span><strong>' + x.count + ' 人・' + p + '%</strong></div><div class="barTrack"><div class="barFill" style="width:' + p + '%; background:' + chartColors[i % chartColors.length] + '" onmouseenter="handleChartHover(event, \'.barChartContainer\', \'.barFill\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + p + '\')" onmouseleave="handleChartLeave(event, \'.barChartContainer\', \'.barFill\')" onclick="handleChartHover(event, \'.barChartContainer\', \'.barFill\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + p + '\')"></div></div></div>';
+  }).join('') || '<span class="questionHelp">尚無資料</span>') + '</div></div>';
+}
 
-function textAnalysisHtml(q){let items=responses.map(r=>({who:r.memberName||r.employeeNo||'未具名',text:String(r.answers?.[q.id]??'').trim()})).filter(x=>x.text);return `<div class="analysisCard"><h3>${esc(q.title)} <small>（${items.length} 則）</small></h3><div class="textAnswerList">${items.map(x=>`<div class="textAnswer"><b>${esc(x.who)}</b><p>${esc(x.text)}</p></div>`).join('')||'<span class="questionHelp">尚無文字回覆</span>'}</div></div>`}
-
-function renderAnalysis(f){let total=responses.length,departmentsUsed=new Set(responses.map(r=>r.departmentName).filter(Boolean)),latest=responses[0]?.submittedAtText||'—',depMap=new Map();responses.forEach(r=>{let d=r.departmentName||'未填部門';depMap.set(d,(depMap.get(d)||0)+1)});let cards=[];if(f.identityMode==='member')cards.push(pieHtml('部門分布',[...depMap].map(([label,count])=>({label,count})),total));for(let q of(f.questions||[])){if(q.type==='image')continue;if(['single','dropdown','department'].includes(q.type))cards.push(pieHtml(q.title,optionCounts(q),total));else if(q.type==='multiple')cards.push(multipleAnalysisHtml(q));else if(['short','long'].includes(q.type))cards.push(textAnalysisHtml(q))}return `<div class="analysisSummary"><div class="analysisMetric"><span>總填寫人數</span><b>${total}</b></div><div class="analysisMetric"><span>填寫部門數</span><b>${departmentsUsed.size}</b></div><div class="analysisMetric"><span>最近填寫時間</span><b style="font-size:15px">${esc(latest)}</b></div></div>${total?`<div class="analysisGrid">${cards.join('')}</div>`:'<div class="emptyAnalysis">目前尚無填寫資料，收到回覆後會自動產生統計。</div>'}`}
-
-function memberDepartmentName(member){return String(member?.department||member?.departmentName||'').trim()}
+function textAnalysisHtml(q){
+  let items=responses.map(r=>({who:r.memberName||r.employeeNo||'未具名',text:String(r.answers?.[q.id]??'').trim()})).filter(x=>x.text);
+  return '<div class="analysisCard"><h3>' + esc(q.title) + ' <small style="color:var(--muted);font-size:13px;font-weight:normal;">（' + items.length + ' 則回答）</small></h3><div class="textAnswerList">' + (items.map(x=>'<div class="textAnswer"><b>' + esc(x.who) + '</b><p>' + esc(x.text) + '</p></div>').join('')||'<span class="questionHelp">尚無文字回覆</span>') + '</div></div>';
+}
+\nfunction memberDepartmentName(member){return String(member?.department||member?.departmentName||'').trim()}
 
 function memberEmployeeNo(member){return String(member?.employeeNo||member?.empNo||'').trim()}
 
@@ -981,13 +1106,42 @@ function ensureResultDetailTools(f){
 function renderAnalysis(f){
   var total=responses.length,memberMode=formUsesMemberDatabaseV141(f),departmentsUsed=new Set(responses.map(function(r){return r.departmentName||r.respondentDepartment}).filter(Boolean)),latest=(responses[0]&&responses[0].submittedAtText)||'',depMap=new Map();
   responses.forEach(function(r){var d=r.departmentName||r.respondentDepartment||'未填部門';depMap.set(d,(depMap.get(d)||0)+1)});
-  var cards=[];
-  if(memberMode)cards.push(pieHtml('部門分布',[...depMap].map(function(x){return {label:x[0],count:x[1]}}),total));
-  for(var q of normalizeQuestions(f.questions||[])){if(q.type==='image')continue;if(['single','dropdown','department'].includes(q.type))cards.push(pieHtml(q.title,optionCounts(q),total));else if(q.type==='multiple')cards.push(multipleAnalysisHtml(q));else if(['linearScale','rating'].includes(q.type))cards.push(scaleAnalysisHtml(q));else if(MATRIX_TYPES_V132.includes(q.type))cards.push(matrixAnalysisHtml(q));else if(['short','long','time','datetime'].includes(q.type))cards.push(textAnalysisHtml(q))}
+  
+  var summaryCards=[];
+  analysisCardsData = [];
+  currentSingleQuestionIndex = 0;
+
+  if(memberMode) {
+    let depHtml = pieHtml('部門分布',[...depMap].map(function(x){return {label:x[0],count:x[1]}}),total);
+    summaryCards.push(depHtml);
+  }
+  
+  for(var q of normalizeQuestions(f.questions||[])){
+    if(q.type==='image') continue;
+    let html = '';
+    if(['single','dropdown','department','multiple'].includes(q.type)) {
+      let items = optionCounts(q);
+      if(items.length > 5 || q.type === 'multiple') html = multipleAnalysisHtml(q, items, q.title, total);
+      else html = pieHtml(q.title, items, total);
+    } else if(['linearScale','rating'].includes(q.type)) {
+      html = scaleAnalysisHtml(q);
+    } else if(MATRIX_TYPES_V132.includes(q.type)) {
+      html = matrixAnalysisHtml(q);
+    } else if(['short','long','time','datetime'].includes(q.type)) {
+      html = textAnalysisHtml(q);
+    }
+    
+    if (html) {
+      summaryCards.push(html);
+      analysisCardsData.push({ title: q.title, html: html });
+    }
+  }
+  
+  renderSingleQuestionView();
+  
   var secondLabel=memberMode?'填寫部門數':'題目數',secondValue=memberMode?departmentsUsed.size:normalizeQuestions(f.questions||[]).filter(function(q){return q.type!=='image'}).length;
-  return '<div class="analysisSummary"><div class="analysisMetric"><span>總填寫份數</span><b>'+total+'</b></div><div class="analysisMetric"><span>'+secondLabel+'</span><b>'+secondValue+'</b></div><div class="analysisMetric"><span>最近填寫時間</span><b style="font-size:15px">'+esc(latest||'尚無紀錄')+'</b></div></div>'+(total?'<div class="analysisGrid">'+cards.join('')+'</div>':'<div class="emptyAnalysis">目前尚無填寫資料，收到回覆後會自動產生統計。</div>');
-}
-function responseDetailRow(f,qs,r,manage){
+  return '<div class="analysisSummary"><div class="analysisMetric"><span>總填寫份數</span><b>'+total+'</b></div><div class="analysisMetric"><span>'+secondLabel+'</span><b>'+secondValue+'</b></div><div class="analysisMetric"><span>最近填寫時間</span><b style="font-size:15px">'+esc(latest||'尚無紀錄')+'</b></div></div>'+(total?'<div class="analysisGrid">'+summaryCards.join('')+'</div>':'<div class="emptyAnalysis">目前尚無填寫資料，收到回覆後會自動產生統計。</div>');
+}\nfunction responseDetailRow(f,qs,r,manage){
   var id=attr(r.id),method='<b>'+esc(submissionMethodLabel(r))+'</b>'+(r.submissionMethod==='assisted'?'<br><small>由 '+esc(submitterLabel(r))+' 協助填寫</small>':''),actions=manage?actionGroup([actionButton('編輯',"openResponseEditor('"+id+"')"),actionButton('刪除',"deleteResponse('"+id+"')",'danger')]):roleBadgeHtml('唯讀',false);
   return '<tr>'+(formUsesMemberDatabaseV141(f)?'<td>'+esc(r.departmentName||r.respondentDepartment||'')+'</td><td>'+esc(r.memberName||r.respondentName||'')+'</td><td>'+esc(r.employeeNo||r.respondentEmployeeId||'')+'</td>':'')+qs.map(function(q){return '<td>'+esc(answerText(q,r))+'</td>'}).join('')+'<td>'+esc(r.submittedAtText||formatAnyDate(r.submittedAt)||'')+'</td><td>'+method+'</td><td>'+actions+'</td></tr>';
 }

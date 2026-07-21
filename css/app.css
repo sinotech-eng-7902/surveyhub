@@ -4251,3 +4251,105 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
 @media (prefers-reduced-motion:reduce){
   .appBootSpinner{animation:none;border-top-color:#d7e2ee}
 }
+/* v1.66 Tabs and Chart Overrides */
+.resultTabs {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+.resultTab {
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.resultTab:hover {
+  color: var(--text);
+}
+.resultTab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.resultTabContent {
+  display: none;
+}
+.resultTabContent.active {
+  display: block;
+}
+.singleQuestionNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 16px;
+}
+#singleQuestionProgress {
+  font-weight: 500;
+  color: var(--muted);
+}
+/* analysisGrid override for 100% width vertical layout */
+.analysisGrid {
+  grid-template-columns: 1fr !important;
+}
+.analysisCard {
+  min-height: 200px;
+  padding: 24px !important;
+}
+/* SVG Pie Chart interactable slices */
+.pieChartSvg path {
+  transition: all 0.2s ease;
+  transform-origin: center;
+  cursor: pointer;
+  outline: none;
+}
+.pieChartSvg path.faded {
+  opacity: 0.3;
+}
+.pieChartSvg path.active {
+  transform: scale(1.05);
+}
+/* Bar Chart interactable fills */
+.barFill {
+  transition: width 0.5s ease, opacity 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+.barFill.faded {
+  opacity: 0.3;
+}
+.barFill.active {
+  filter: brightness(1.1);
+  transform: scaleY(1.1);
+}
+/* Tooltip */
+.chartTooltip {
+  position: absolute;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 10000;
+  white-space: pre-wrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  transition: opacity 0.15s ease;
+}
+.chartTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0.85) transparent transparent transparent;
+}
