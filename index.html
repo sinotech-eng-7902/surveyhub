@@ -9,7 +9,50 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.66.1">
+  <link rel="stylesheet" href="css/app.css?v=1.66.2">
+  <style>
+    /* Force cache bypass for v1.66 layout fixes */
+    .legendRow {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 10px !important;
+      font-size: 14.5px !important;
+      line-height: 2 !important;
+      margin-bottom: 8px !important;
+    }
+    .legendDot {
+      display: inline-block !important;
+      flex: 0 0 14px !important;
+      width: 14px !important;
+      height: 14px !important;
+      border-radius: 50% !important;
+      margin: 0 !important;
+    }
+    .legendRow span:nth-of-type(2) {
+      margin-right: 4px !important;
+    }
+    .legendRow strong {
+      text-align: left !important;
+      min-width: 0 !important;
+      color: var(--muted) !important;
+      font-weight: normal !important;
+    }
+    .analysisCard .pieLayout {
+      justify-content: flex-start;
+      gap: 80px;
+      padding: 30px 50px;
+    }
+    .pieChartSvg {
+      width: 260px !important;
+      height: 260px !important;
+    }
+    .pieLayout > div:first-child {
+      width: 260px !important;
+      height: 260px !important;
+      flex: 0 0 260px !important;
+    }
+  </style>
 </head>
 <body class="appBooting" aria-busy="true">
   <div id="appBootScreen" class="appBootScreen" role="status" aria-live="polite">
