@@ -4392,19 +4392,30 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   }
 }
 
-/* v1.66 layout fixes part 2: compact legend */
+\n/* v1.66 layout fixes part 3: Perfect Google Forms Legend */
 .legendRow {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  font-size: 14px !important;
-  line-height: 2.2;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  font-size: 14.5px !important;
+  line-height: 2 !important;
+  margin-bottom: 8px !important;
 }
-.legendRow span:nth-child(2) {
-  margin-right: 8px;
+.legendDot {
+  display: inline-block !important;
+  flex: 0 0 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  margin: 0 !important;
+}
+.legendRow span:nth-of-type(2) {
+  margin-right: 4px !important;
 }
 .legendRow strong {
   text-align: left !important;
   min-width: 0 !important;
-  color: var(--muted);
+  color: var(--muted) !important;
+  font-weight: normal !important;
 }

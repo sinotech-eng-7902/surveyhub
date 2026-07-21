@@ -121,7 +121,7 @@ function adminRouteId(){let m=location.hash.match(/^#admin\/([^/?#]+)/);return m
 
 /* Stable functional blocks retained for v1.25 final consolidation. */
 function answerText(q,r){let v=r.answers?.[q.id];return Array.isArray(v)?v.join('、'):String(v??'')}
-const chartColors=['#4285F4','#EA4335','#FBBC05','#34A853','#9C27B0','#00BCD4','#E91E63','#FF5722','#3F51B5','#8BC34A'];
+const chartColors=['#3366CC','#DC3912','#FF9900','#109618','#990099','#0099C6','#DD4477','#66AA00','#B82E2E','#316395'];
 
 let currentSingleQuestionIndex = 0;
 let analysisCardsData = [];
@@ -242,7 +242,7 @@ function getPieSvg(shown, total, colors) {
       let midAngle = (startAngle + endAngle) / 2;
       let tx = Math.cos(midAngle) * 0.6;
       let ty = Math.sin(midAngle) * 0.6;
-      let pct = Math.round(ratio * 100) + '%';
+      let pct = percentage(x.count, total) + '%';
       svg += '<text x="' + tx + '" y="' + ty + '" fill="#fff" font-size="0.18" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" pointer-events="none">' + pct + '</text>';
     }
   });
