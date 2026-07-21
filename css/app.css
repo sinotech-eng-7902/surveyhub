@@ -4391,3 +4391,20 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
     gap: 30px;
   }
 }
+
+/* v1.66 layout fixes part 2: compact legend */
+.legendRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 14px !important;
+  line-height: 2.2;
+}
+.legendRow span:nth-child(2) {
+  margin-right: 8px;
+}
+.legendRow strong {
+  text-align: left !important;
+  min-width: 0 !important;
+  color: var(--muted);
+}

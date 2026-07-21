@@ -121,7 +121,7 @@ function adminRouteId(){let m=location.hash.match(/^#admin\/([^/?#]+)/);return m
 
 /* Stable functional blocks retained for v1.25 final consolidation. */
 function answerText(q,r){let v=r.answers?.[q.id];return Array.isArray(v)?v.join('、'):String(v??'')}
-const chartColors=['#287c78','#e89a5b','#5478c7','#a56cc1','#d8606f','#76a85e','#d3a72f','#4f9eaa','#8c7a6b','#6a86a3'];
+const chartColors=['#4285F4','#EA4335','#FBBC05','#34A853','#9C27B0','#00BCD4','#E91E63','#FF5722','#3F51B5','#8BC34A'];
 
 let currentSingleQuestionIndex = 0;
 let analysisCardsData = [];
@@ -215,22 +215,36 @@ function getPieSvg(shown, total, colors) {
   if(!shown.length) return '';
   let sum = shown.reduce((n, x) => n + x.count, 0);
   if(sum === 0) return '';
-  let svg = '<svg viewBox="-1 -1 2 2" style="transform: rotate(-90deg); width: 142px; height: 142px;" class="pieChartSvg">';
+  let svg = '<svg viewBox="-1 -1 2 2" class="pieChartSvg">';
   let cursor = 0;
   shown.forEach((x, i) => {
     let ratio = x.count / sum;
     if (ratio === 1) {
       svg += '<circle cx="0" cy="0" r="1" fill="' + colors[i % colors.length] + '" onmouseenter="handleChartHover(event, \'svg\', \'path, circle\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" onmouseleave="handleChartLeave(event, \'svg\', \'path, circle\')" onclick="handleChartHover(event, \'svg\', \'path, circle\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" />';
+      svg += '<text x="0" y="0" fill="#fff" font-size="0.25" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" pointer-events="none">100%</text>';
       return;
     }
-    let startAngle = cursor * 2 * Math.PI;
+    
+    // -0.25 offset to start at 12 o'clock
+    let startAngle = (cursor - 0.25) * 2 * Math.PI;
     cursor += ratio;
-    let endAngle = cursor * 2 * Math.PI;
+    let endAngle = (cursor - 0.25) * 2 * Math.PI;
+    
     let x1 = Math.cos(startAngle), y1 = Math.sin(startAngle);
     let x2 = Math.cos(endAngle), y2 = Math.sin(endAngle);
     let largeArc = ratio > 0.5 ? 1 : 0;
     let d = 'M 0 0 L ' + x1 + ' ' + y1 + ' A 1 1 0 ' + largeArc + ' 1 ' + x2 + ' ' + y2 + ' Z';
+    
     svg += '<path d="' + d + '" fill="' + colors[i % colors.length] + '" onmouseenter="handleChartHover(event, \'svg\', \'path\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" onmouseleave="handleChartLeave(event, \'svg\', \'path\')" onclick="handleChartHover(event, \'svg\', \'path\'); showChartTooltip(event, \'' + esc(x.label) + '\', ' + x.count + ', \'' + percentage(x.count, total) + '\')" />';
+    
+    // add percentage text
+    if (ratio >= 0.05) {
+      let midAngle = (startAngle + endAngle) / 2;
+      let tx = Math.cos(midAngle) * 0.6;
+      let ty = Math.sin(midAngle) * 0.6;
+      let pct = Math.round(ratio * 100) + '%';
+      svg += '<text x="' + tx + '" y="' + ty + '" fill="#fff" font-size="0.18" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" pointer-events="none">' + pct + '</text>';
+    }
   });
   svg += '</svg>';
   return svg;
