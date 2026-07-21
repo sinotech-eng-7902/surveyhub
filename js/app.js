@@ -258,7 +258,8 @@ function textAnalysisHtml(q){
   let items=responses.map(r=>({who:r.memberName||r.employeeNo||'未具名',text:String(r.answers?.[q.id]??'').trim()})).filter(x=>x.text);
   return '<div class="analysisCard"><h3>' + esc(q.title) + ' <small style="color:var(--muted);font-size:13px;font-weight:normal;">（' + items.length + ' 則回答）</small></h3><div class="textAnswerList">' + (items.map(x=>'<div class="textAnswer"><b>' + esc(x.who) + '</b><p>' + esc(x.text) + '</p></div>').join('')||'<span class="questionHelp">尚無文字回覆</span>') + '</div></div>';
 }
-\nfunction memberDepartmentName(member){return String(member?.department||member?.departmentName||'').trim()}
+
+function memberDepartmentName(member){return String(member?.department||member?.departmentName||'').trim()}
 
 function memberEmployeeNo(member){return String(member?.employeeNo||member?.empNo||'').trim()}
 
@@ -1141,7 +1142,8 @@ function renderAnalysis(f){
   
   var secondLabel=memberMode?'填寫部門數':'題目數',secondValue=memberMode?departmentsUsed.size:normalizeQuestions(f.questions||[]).filter(function(q){return q.type!=='image'}).length;
   return '<div class="analysisSummary"><div class="analysisMetric"><span>總填寫份數</span><b>'+total+'</b></div><div class="analysisMetric"><span>'+secondLabel+'</span><b>'+secondValue+'</b></div><div class="analysisMetric"><span>最近填寫時間</span><b style="font-size:15px">'+esc(latest||'尚無紀錄')+'</b></div></div>'+(total?'<div class="analysisGrid">'+summaryCards.join('')+'</div>':'<div class="emptyAnalysis">目前尚無填寫資料，收到回覆後會自動產生統計。</div>');
-}\nfunction responseDetailRow(f,qs,r,manage){
+}
+function responseDetailRow(f,qs,r,manage){
   var id=attr(r.id),method='<b>'+esc(submissionMethodLabel(r))+'</b>'+(r.submissionMethod==='assisted'?'<br><small>由 '+esc(submitterLabel(r))+' 協助填寫</small>':''),actions=manage?actionGroup([actionButton('編輯',"openResponseEditor('"+id+"')"),actionButton('刪除',"deleteResponse('"+id+"')",'danger')]):roleBadgeHtml('唯讀',false);
   return '<tr>'+(formUsesMemberDatabaseV141(f)?'<td>'+esc(r.departmentName||r.respondentDepartment||'')+'</td><td>'+esc(r.memberName||r.respondentName||'')+'</td><td>'+esc(r.employeeNo||r.respondentEmployeeId||'')+'</td>':'')+qs.map(function(q){return '<td>'+esc(answerText(q,r))+'</td>'}).join('')+'<td>'+esc(r.submittedAtText||formatAnyDate(r.submittedAt)||'')+'</td><td>'+method+'</td><td>'+actions+'</td></tr>';
 }
