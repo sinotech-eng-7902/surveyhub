@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
@@ -9,7 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.66.1">
+  <link rel="stylesheet" href="css/app.css?v=1.64">
 </head>
 <body class="appBooting" aria-busy="true">
   <div id="appBootScreen" class="appBootScreen" role="status" aria-live="polite">
@@ -111,35 +111,7 @@
       </section>
 
       <section id="resultsPanel" class="panel">
-        <div class="card">
-          <div class="sectionHead">
-            <div><h2>填寫結果</h2><p id="resultCaption">請先選擇問卷。</p></div>
-            <div class="buttonRow">
-              <button class="btn" onclick="copyFormLink()">複製問卷網址</button>
-              <button class="btn success" onclick="exportResults()">Excel 匯出</button>
-            </div>
-          </div>
-          <div class="resultTabs">
-            <button id="tabBtnSummary" class="resultTab active" onclick="switchResultTab('summary')">摘要</button>
-            <button id="tabBtnSingle" class="resultTab" onclick="switchResultTab('single')">逐題</button>
-            <button id="tabBtnDetail" class="resultTab" onclick="switchResultTab('detail')">逐筆明細</button>
-          </div>
-          <div id="resultTabSummary" class="resultTabContent active">
-            <div id="resultAnalysis"></div>
-          </div>
-          <div id="resultTabSingle" class="resultTabContent" hidden>
-            <div class="singleQuestionNav">
-              <button class="btn" onclick="prevSingleQuestion()">上一題</button>
-              <span id="singleQuestionProgress"></span>
-              <button class="btn" onclick="nextSingleQuestion()">下一題</button>
-            </div>
-            <div id="resultAnalysisSingle"></div>
-          </div>
-          <div id="resultTabDetail" class="resultTabContent" hidden>
-            <div class="resultDetailHead"><h3>逐筆填寫明細</h3><p>管理員可修正或刪除個別回覆。</p></div>
-            <div id="resultsTable"></div>
-          </div>
-        </div>
+        <div class="card"><div class="sectionHead"><div><h2>填寫結果</h2><p id="resultCaption">請先選擇問卷。</p></div><div class="buttonRow"><button class="btn" onclick="copyFormLink()">複製問卷網址</button><button class="btn success" onclick="exportResults()">Excel 匯出</button></div></div><div id="resultAnalysis"></div><div class="resultDetailHead"><h3>逐筆填寫明細</h3><p>管理員可修正或刪除個別回覆。</p></div><div id="resultsTable"></div></div>
       </section>
     </main>
     </div>
@@ -183,7 +155,6 @@
     </div>
   </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
-  <div id="chartTooltip" class="chartTooltip" hidden></div>
   <script src="js/config.js?v=1.58"></script>
   <script src="js/app.js?v=1.64"></script>
   <script src="js/app-guards.js?v=1.58"></script>
