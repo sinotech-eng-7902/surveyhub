@@ -4353,3 +4353,41 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   border-style: solid;
   border-color: rgba(0,0,0,0.85) transparent transparent transparent;
 }
+
+/* v1.66 layout fixes for larger charts and layout */
+.analysisCard .pieLayout {
+  justify-content: flex-start;
+  gap: 80px;
+  padding: 30px 50px;
+}
+.chartLegend {
+  flex: 0 1 auto;
+}
+.legendRow {
+  grid-template-columns: 11px auto auto !important;
+  gap: 20px !important;
+  font-size: 14px !important;
+  line-height: 2.2;
+}
+.legendRow strong {
+  text-align: right;
+  min-width: 80px;
+}
+.pieChartSvg {
+  width: 260px !important;
+  height: 260px !important;
+}
+/* Ensure the inline style doesn't constrain it */
+.pieLayout > div:first-child {
+  width: 260px !important;
+  height: 260px !important;
+  flex: 0 0 260px !important;
+}
+@media(max-width: 768px) {
+  .analysisCard .pieLayout {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 10px;
+    gap: 30px;
+  }
+}
