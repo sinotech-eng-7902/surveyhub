@@ -4316,7 +4316,7 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
 .individualAnswerV170 dt{color:#38536d;font-weight:800}
 .individualAnswerV170 dd{min-width:0;margin:0;color:#152b40;overflow-wrap:anywhere;white-space:pre-line}
 @media(max-width:680px){
-  .resultViewTabsV170{display:grid;grid-template-columns:repeat(3,1fr);width:100%;border-radius:16px}
+  .resultViewTabsV170{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;border-radius:16px}
   .resultViewTabsV170 button{padding:8px 6px;border-radius:11px;font-size:13px}
   .analysisCardHeadV170{align-items:center}
   .copyChartButtonV170{padding:7px 9px}
@@ -4329,3 +4329,24 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   .individualResponseNavV170{grid-template-columns:1fr 1fr}
   .individualResponseNavV170>div{grid-column:1/-1;grid-row:1}
 }
+
+/* v1.71 conditional questions, independent progress and result-detail views */
+.conditionalBoxV171{display:grid;gap:13px;margin-top:12px;padding:14px;border:1px solid #cfe0e6;border-radius:12px;background:linear-gradient(145deg,#f7fbfb,#f4f8fc)}
+.conditionalHeadingV171{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.conditionalHeadingV171 b{color:#176f69}
+.conditionalHeadingV171 span{color:#66788a;font-size:12px}
+.conditionalBoxV171 .questionGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.conditionalValuesV171{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0;padding:12px;border:1px solid #dce5ed;border-radius:10px;background:#fff}
+.conditionalValuesV171 legend{padding:0 6px;color:#50657a;font-size:12px;font-weight:900}
+.conditionalValuesV171 label{display:inline-flex;align-items:center;gap:7px;margin:0;padding:5px 9px;border-radius:8px;background:#f4f8fa;font-weight:700}
+.conditionalValuesV171 input{width:17px;height:17px;margin:0}
+.questionCard.conditionVisibleV171{animation:conditionalRevealV171 .24s ease-out}
+@keyframes conditionalRevealV171{from{opacity:.25;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.progressMissingPanelV171{margin-top:4px;padding:18px;border:1px solid #dce5ed;border-radius:14px;background:#fbfdfe}
+#resultDetailViewV171 .resultDetailHead{margin-top:8px}
+@media(max-width:680px){
+  .conditionalHeadingV171{align-items:flex-start;flex-direction:column;gap:3px}
+  .conditionalBoxV171 .questionGrid{grid-template-columns:1fr}
+  .progressMissingPanelV171{padding:13px}
+}
+@media(prefers-reduced-motion:reduce){.questionCard.conditionVisibleV171{animation:none}}
