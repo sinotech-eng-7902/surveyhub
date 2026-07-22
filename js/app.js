@@ -1629,5 +1629,67 @@ responseDetailRow=function(f,qs,r,manage){
 };
 
 initDescriptionEditorV156();
+
+/* v1.65 result chart hover animation and Google Forms-style tooltip. */
+function chartDatumAttrsV165(label,count,percent,index){
+  return ' class="chartInteractiveV165" tabindex="0" data-chart-label="'+attr(label)+'" data-chart-count="'+Number(count||0)+'" data-chart-percent="'+Number(percent||0)+'"'+(index==null?'':' data-chart-index="'+index+'"')+' aria-label="選項 '+attr(label)+'，票數 '+Number(count||0)+'，百分比 '+Number(percent||0)+'%"';
+}
+function piePointV165(angle,radius){
+  var rad=(angle-90)*Math.PI/180;
+  return {x:64+radius*Math.cos(rad),y:64+radius*Math.sin(rad)};
+}
+function pieSlicePathV165(startAngle,endAngle){
+  var sweep=endAngle-startAngle,start=piePointV165(startAngle,60),end=piePointV165(endAngle,60);
+  if(sweep>=359.999){
+    return 'M 64 64 L 64 4 A 60 60 0 1 1 63.999 4 Z';
+  }
+  return 'M 64 64 L '+start.x.toFixed(3)+' '+start.y.toFixed(3)+' A 60 60 0 '+(sweep>180?1:0)+' 1 '+end.x.toFixed(3)+' '+end.y.toFixed(3)+' Z';
+}
+pieHtml=function(title,items,denominator){
+  denominator=denominator==null?responses.length:denominator;
+  var shown=items.map(function(x,index){return {label:x.label,count:x.count,index:index}}).filter(function(x){return x.count>0}),sum=shown.reduce(function(n,x){return n+x.count},0),cursor=0;
+  var slices=shown.map(function(x){var start=cursor,end=cursor+(sum?x.count/sum*360:0),p=percentage(x.count,denominator),path=pieSlicePathV165(start,end);cursor=end;return '<path d="'+path+'" fill="'+chartColors[x.index%chartColors.length]+'" class="chartSliceV165 chartInteractiveV165" tabindex="0" data-chart-index="'+x.index+'" data-chart-label="'+attr(x.label)+'" data-chart-count="'+x.count+'" data-chart-percent="'+p+'" aria-label="選項 '+attr(x.label)+'，票數 '+x.count+'，百分比 '+p+'%"></path>'}).join('');
+  var chart=sum?'<svg class="pieSvgV165" viewBox="0 0 128 128" role="img" aria-label="'+attr(title)+'圓餅圖">'+slices+'</svg>':'<div class="pieEmptyV165" aria-label="尚無資料"></div>';
+  var legend=items.map(function(x,i){var p=percentage(x.count,denominator);return '<div class="legendRow chartLegendInteractiveV165 chartInteractiveV165" tabindex="0" data-chart-index="'+i+'" data-chart-label="'+attr(x.label)+'" data-chart-count="'+x.count+'" data-chart-percent="'+p+'" aria-label="選項 '+attr(x.label)+'，票數 '+x.count+'，百分比 '+p+'%"><span class="legendDot" style="background:'+chartColors[i%chartColors.length]+'"></span><span>'+esc(x.label)+'</span><strong>'+x.count+' 人・'+p+'%</strong></div>'}).join('')||'<span class="questionHelp">尚無資料</span>';
+  return '<div class="analysisCard"><h3>'+esc(title)+'</h3><div class="pieLayout"><div class="pieChart pieChartV165">'+chart+'</div><div class="chartLegend">'+legend+'</div></div></div>';
+};
+multipleAnalysisHtml=function(q){
+  var items=optionCounts(q),total=responses.length;
+  return '<div class="analysisCard"><h3>'+esc(q.title)+'</h3><div class="barList">'+(items.map(function(x){var p=percentage(x.count,total);return '<div'+chartDatumAttrsV165(x.label,x.count,p)+'><div class="barRowHead"><span>'+esc(x.label)+'</span><strong>'+x.count+' 人・'+p+'%</strong></div><div class="barTrack"><div class="barFill" style="width:'+p+'%"></div></div></div>'}).join('')||'<span class="questionHelp">尚無資料</span>')+'</div></div>';
+};
+scaleAnalysisHtml=function(q){
+  var items=scaleItems(q).map(function(label){return {label:label,count:responses.filter(function(r){return String((r.answers||{})[q.id]||'')===label}).length}}),answered=responses.map(function(r){return Number((r.answers||{})[q.id])}).filter(function(n){return !Number.isNaN(n)}),denominator=answered.length||responses.length,avg=answered.length?Math.round(answered.reduce(function(a,b){return a+b},0)*10/answered.length)/10:'';
+  return '<div class="analysisCard"><h3>'+esc(q.title)+' <small>平均 '+avg+'</small></h3><div class="barList">'+items.map(function(x){var p=percentage(x.count,denominator);return '<div'+chartDatumAttrsV165(x.label,x.count,p)+'><div class="barRowHead"><span>'+esc(x.label)+'</span><strong>'+x.count+' 人・'+p+'%</strong></div><div class="barTrack"><div class="barFill" style="width:'+p+'%"></div></div></div>'}).join('')+'</div></div>';
+};
+matrixAnalysisHtml=function(q){
+  var rows=q.rows||[],cols=q.columns||[],total=responses.length;
+  return '<div class="analysisCard wideAnalysis"><h3>'+esc(q.title)+'</h3><div class="matrixScroll"><table class="matrixTable"><thead><tr><th>列項目</th>'+cols.map(function(c){return '<th>'+esc(c)+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(row){return '<tr><th>'+esc(row)+'</th>'+cols.map(function(col){var count=responses.filter(function(r){var v=r.answers&&r.answers[q.id]&&r.answers[q.id][row];return Array.isArray(v)?v.includes(col):v===col}).length,p=percentage(count,total);return '<td'+chartDatumAttrsV165(row+'－'+col,count,p)+'>'+count+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div></div>';
+};
+function ensureChartTooltipV165(){
+  var tip=$('resultChartTooltipV165');
+  if(tip)return tip;
+  tip=document.createElement('div');tip.id='resultChartTooltipV165';tip.className='resultChartTooltipV165';tip.setAttribute('role','status');tip.setAttribute('aria-live','polite');tip.innerHTML='<div><span>選項</span><b data-tip-label></b></div><div><span>票數</span><b data-tip-count></b></div><div><span>百分比</span><b data-tip-percent></b></div>';document.body.appendChild(tip);return tip;
+}
+function placeChartTooltipV165(tip,x,y){
+  var pad=12,rect=tip.getBoundingClientRect(),left=Math.min(window.innerWidth-rect.width-pad,Math.max(pad,x+14)),top=y-rect.height-14;
+  if(top<pad)top=Math.min(window.innerHeight-rect.height-pad,y+18);
+  tip.style.left=left+'px';tip.style.top=Math.max(pad,top)+'px';
+}
+function showChartTooltipV165(target,event){
+  if(!target)return;var tip=ensureChartTooltipV165(),label=target.dataset.chartLabel||'—';
+  tip.querySelector('[data-tip-label]').textContent=label;tip.querySelector('[data-tip-count]').textContent=target.dataset.chartCount||'0';tip.querySelector('[data-tip-percent]').textContent=(target.dataset.chartPercent||'0')+'%';tip.classList.add('isVisible');target.classList.add('isChartActiveV165');
+  var card=target.closest('.analysisCard'),index=target.dataset.chartIndex;if(card&&index!=null)card.querySelectorAll('[data-chart-index="'+CSS.escape(index)+'"]').forEach(function(el){el.classList.add('isChartRelatedV165')});
+  var rect=target.getBoundingClientRect(),x=event&&Number.isFinite(event.clientX)?event.clientX:rect.left+rect.width/2,y=event&&Number.isFinite(event.clientY)?event.clientY:rect.top;placeChartTooltipV165(tip,x,y);
+}
+function hideChartTooltipV165(target){
+  var tip=$('resultChartTooltipV165');if(tip)tip.classList.remove('isVisible');
+  document.querySelectorAll('.isChartActiveV165,.isChartRelatedV165').forEach(function(el){el.classList.remove('isChartActiveV165','isChartRelatedV165')});
+}
+document.addEventListener('pointerover',function(event){var target=event.target.closest&&event.target.closest('.chartInteractiveV165');if(target)showChartTooltipV165(target,event)});
+document.addEventListener('pointermove',function(event){var target=event.target.closest&&event.target.closest('.chartInteractiveV165'),tip=$('resultChartTooltipV165');if(target&&tip&&tip.classList.contains('isVisible'))placeChartTooltipV165(tip,event.clientX,event.clientY)});
+document.addEventListener('pointerout',function(event){var target=event.target.closest&&event.target.closest('.chartInteractiveV165');if(target&&!target.contains(event.relatedTarget))hideChartTooltipV165(target)});
+document.addEventListener('focusin',function(event){var target=event.target.closest&&event.target.closest('.chartInteractiveV165');if(target)showChartTooltipV165(target)});
+document.addEventListener('focusout',function(event){var target=event.target.closest&&event.target.closest('.chartInteractiveV165');if(target)hideChartTooltipV165(target)});
+document.addEventListener('pointerdown',function(event){var target=event.target.closest&&event.target.closest('.chartInteractiveV165');if(target&&event.pointerType!=='mouse'){showChartTooltipV165(target,event);window.clearTimeout(window.chartTooltipTimerV165);window.chartTooltipTimerV165=window.setTimeout(function(){hideChartTooltipV165(target)},2200)}});
 installMobileHeaderV156();
 
