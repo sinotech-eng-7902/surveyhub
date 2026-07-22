@@ -87,7 +87,7 @@ function allowedDepartmentNames(f){let selected=Array.isArray(f.targetDepartment
 
 
 function closeTopNavGroups(){document.querySelectorAll('.topNavGroup[open]').forEach(d=>d.removeAttribute('open'))}
-async function showPanel(id,button){let active=document.querySelector('.panel.active');if(active?.id==='editorPanel'&&id!=='editorPanel'&&formDirty&&!await confirmDialog('問卷內容尚未儲存，確定要離開編輯頁面？','尚未儲存'))return;document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));if(button)button.classList.add('active');else{let nav=[...document.querySelectorAll('.nav')].find(n=>(n.getAttribute('onclick')||'').includes("'"+id+"'"));if(nav)nav.classList.add('active')}$('panelTitle').textContent=({dashboardPanel:'儀表板',formsPanel:'問卷總覽',editorPanel:'問卷編輯',membersPanel:'人員管理',trashPanel:'垃圾桶',permissionsPanel:'權限管理',resultsPanel:'回覆與分析',progressPanel:'填寫進度'})[id]||'通用問卷後台';if(id==='dashboardPanel')renderDashboard();if(id==='resultsPanel')renderResults();if(id==='progressPanel')renderProgressPanelV171();if(id==='membersPanel')renderMemberPanel();if(id==='trashPanel')renderTrash();if(id==='permissionsPanel')loadFormManagers();closeTopNavGroups()}
+async function showPanel(id,button){let active=document.querySelector('.panel.active');if(active?.id==='editorPanel'&&id!=='editorPanel'&&formDirty&&!await confirmDialog('問卷內容尚未儲存，確定要離開編輯頁面？','尚未儲存'))return;document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));if(button)button.classList.add('active');else{let nav=[...document.querySelectorAll('.nav')].find(n=>(n.getAttribute('onclick')||'').includes("'"+id+"'"));if(nav)nav.classList.add('active')}$('panelTitle').textContent=({dashboardPanel:'儀表板',formsPanel:'問卷總覽',editorPanel:'問卷編輯',membersPanel:'人員管理',trashPanel:'垃圾桶',permissionsPanel:'權限管理',resultsPanel:'填寫結果',progressPanel:'填寫追蹤'})[id]||'通用問卷後台';if(id==='dashboardPanel')renderDashboard();if(id==='resultsPanel')renderResults();if(id==='progressPanel')renderProgressPanelV171();if(id==='membersPanel')renderMemberPanel();if(id==='trashPanel')renderTrash();if(id==='permissionsPanel')loadFormManagers();closeTopNavGroups()}
 function emptyState(title='尚無資料',desc='目前沒有可顯示的資料。',action=''){return `<div class="emptyState"><span>i</span><b>${esc(title)}</b><p>${esc(desc)}</p>${action}</div>`}
 function table(headers,rows,emptyHtml=''){return `<div class="tableWrap dataTable"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.join('')||`<tr><td class="emptyCell" colspan="${headers.length}">${emptyHtml||emptyState()}</td></tr>`}</tbody></table></div>`}
 function effectiveState(form){if(!form?.deleted&&form?.state==='open'&&deadlinePassed(form.deadline))return'expired';return form?.deleted?'deleted':form?.state||'draft'}
@@ -395,7 +395,7 @@ async function openPermissions(id){await selectForm(id);showPanel('permissionsPa
 function closeCreatorDialog(value=''){let mask=$('creatorDialogMask');if(!mask)return;let resolver=mask._resolve;mask.remove();if(resolver)resolver(value)}
 function creatorDialog(f){return new Promise(resolve=>{let current=formCreatedByEmail(f);document.body.insertAdjacentHTML('beforeend',`<div id="creatorDialogMask" class="modalMask creatorDialogMask" style="display:grid"><div class="dialogCard" role="dialog" aria-modal="true"><div class="modalHeader"><h3>變更問卷建立者</h3><button class="modalClose" type="button" onclick="closeCreatorDialog('')">×</button></div><p class="dialogMessage">問卷：${esc(f.title||'未命名問卷')}</p><label class="dialogInputWrap">建立者<select id="creatorEmailSelect"><option value="">請選擇建立者</option>${creatorSelectOptions(current)}</select></label><div class="modalActions"><button class="btn" type="button" onclick="closeCreatorDialog('')">取消</button><button class="btn primary" type="button" onclick="closeCreatorDialog(document.getElementById('creatorEmailSelect').value)">儲存</button></div></div></div>`);$('creatorDialogMask')._resolve=resolve})}
 async function changeFormCreator(id){if(!isSystemAdmin)return toast('只有系統管理員可以變更建立者','error');let f=forms.find(x=>x.id===id);if(!f)return;let email=normalizeEmail(await creatorDialog(f));if(!email)return;let member=findMemberByGoogleEmail(email);if(!member)return toast('請從人員名單選擇建立者','warn');setPageLoading(true,'正在更新問卷建立者…');try{await doc('universalForms',id).set({createdByEmail:email,createdByName:memberDisplayName(member),creatorEmail:firebase.firestore.FieldValue.delete(),ownerEmail:firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByEmail:normalizeEmail(currentUser?.email||'')},{merge:true});let managerId=managerDocumentId(id,email),managerDoc=await doc('universalFormManagers',managerId).get();if(managerDoc.exists)await doc('universalFormManagers',managerId).delete();await loadAdminData();toast('問卷建立者已更新','success')}catch(e){console.error(e);notify('建立者更新失敗，請確認權限或網路狀態','error')}finally{setPageLoading(false)}}
-async function openMissingList(button){var form=activeForm();if(!form||!formUsesMemberDatabaseV141(form))return notify('目前問卷無法計算填寫進度','warn');await showPanel('progressPanel',button);renderProgressPanelV171()}
+async function openMissingList(button){var form=activeForm();if(!form||!formUsesMemberDatabaseV141(form))return notify('目前問卷無法使用填寫追蹤','warn');await showPanel('progressPanel',button);renderProgressPanelV171()}
 async function copyAdminLink(id=activeFormId){if(!id)return notify('請先選擇問卷');let url=location.href.split('#')[0]+'#admin/'+encodeURIComponent(id);if(navigator.clipboard?.writeText)try{await navigator.clipboard.writeText(url);toast('專屬後台網址已複製','success');return}catch(e){}await showCopyDialog('複製專屬後台網址',url)}
 
 
@@ -774,15 +774,15 @@ function ensureFormMembersNavV140(){
   if($('formMembersNav'))return;
   var menu=$('surveyWorkMenu');
   if(!menu)return;
-  var before=[].slice.call(menu.querySelectorAll('button')).find(function(btn){return /回覆與分析/.test(btn.textContent)});
-  var html='<button id="formMembersNav" class="nav" onclick="showPanel(\'formMembersPanel\',this);renderFormMembersPanel()">應填人員</button>';
+  var before=[].slice.call(menu.querySelectorAll('button')).find(function(btn){return /填寫結果|回覆與分析/.test(btn.textContent)});
+  var html='<button id="formMembersNav" class="nav" onclick="showPanel(\'formMembersPanel\',this);renderFormMembersPanel()">填寫對象</button>';
   if(before)before.insertAdjacentHTML('beforebegin',html);else menu.insertAdjacentHTML('beforeend',html);
 }
 function ensureFormMembersPanelV140(){
   if($('formMembersPanel'))return;
   var anchor=$('resultsPanel')||$('permissionsPanel')||$('membersPanel');
   if(!anchor)return;
-  anchor.insertAdjacentHTML('beforebegin','<section id="formMembersPanel" class="panel"><div class="card"><div class="sectionHead"><div><h2>問卷應填人員</h2><p>針對使用公司人員資料庫的問卷，指定實際應填寫的人員名單。</p></div><button class="btn primary" type="button" onclick="saveFormMemberSettingsV140()">儲存應填人員</button></div><div id="formMembersBody"></div></div></section>');
+  anchor.insertAdjacentHTML('beforebegin','<section id="formMembersPanel" class="panel"><div class="card"><div class="sectionHead"><div><h2>填寫對象</h2><p>選擇可在前台填寫本問卷的人員；已選人員會納入應填、已填及未填統計。</p></div><button class="btn primary" type="button" onclick="saveFormMemberSettingsV140()">儲存填寫對象</button></div><div id="formMembersBody"></div></div></section>');
 }
 function resetFormMemberSelectionIfNeededV140(form){
   if(!form)return;
@@ -804,17 +804,17 @@ function renderFormMembersPanel(){
   var body=$('formMembersBody'),form=activeForm();
   if(!body)return;
   if(!form){body.innerHTML=emptyState('尚未選擇問卷','請先從右上角選擇要設定人員的問卷。');return}
-  if(form.identityMode!=='member'){body.innerHTML=emptyState('此問卷未使用公司人員資料庫','自由填寫或自行設計填寫者資料的問卷，不需要設定應填人員。');return}
-  if(!canManageForm(form.id)){body.innerHTML=emptyState('沒有管理權限','只有系統管理員、問卷建立者或問卷管理者可以維護應填人員。');return}
+  if(form.identityMode!=='member'){body.innerHTML=emptyState('此問卷未使用公司人員資料庫','自由填寫或自行設計填寫者資料的問卷，不需要設定填寫對象。');return}
+  if(!canManageForm(form.id)){body.innerHTML=emptyState('沒有管理權限','只有系統管理員、問卷建立者或問卷管理者可以維護填寫對象。');return}
   resetFormMemberSelectionIfNeededV140(form);
   var all=departmentTargetMembersForFormV140(form),deps=Array.from(new Set(all.map(memberDepartmentName).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'zh-Hant')}),list=formMemberFilteredListV140(form),data=completionData(form);
-  body.innerHTML='<div class="formMemberIntroV140"><div><b>'+esc(form.title||'未命名問卷')+'</b><p>未另外設定時，系統會依「開放填寫部門」納入所有啟用同仁；儲存後則以此清單作為應填名單。</p></div><div class="formMemberStatsV140"><span>候選 '+all.length+' 人</span><span>已選 '+formMemberSelectionSetV140.size+' 人</span><span>已填 '+data.filled.length+' 人</span></div></div><div class="formMemberToolsV140"><label>部門<select id="formMemberDepartmentFilter" onchange="formMemberFilterStateV140.department=this.value;renderFormMembersTableV140(formMemberFilteredListV140(activeForm()))"><option value="">全部部門</option>'+deps.map(function(dep){return '<option value="'+attr(dep)+'" '+(formMemberFilterStateV140.department===dep?'selected':'')+'>'+esc(dep)+'</option>'}).join('')+'</select></label><label>搜尋<input id="formMemberSearch" type="search" placeholder="姓名、部門、員工編號" value="'+attr(formMemberFilterStateV140.search||'')+'" oninput="formMemberFilterStateV140.search=this.value;renderFormMembersTableV140(formMemberFilteredListV140(activeForm()))"></label><button class="btn" type="button" onclick="selectFilteredFormMembersV140(true)">全選目前篩選</button><button class="btn" type="button" onclick="selectFilteredFormMembersV140(false)">取消目前篩選</button><button class="btn" type="button" onclick="useDepartmentMembersV140()">依部門全部帶入</button></div><div id="formMemberTableV140"></div>';
+  body.innerHTML='<div class="formMemberIntroV140"><div><b>'+esc(form.title||'未命名問卷')+'</b><p>未另外設定時，系統會依「開放填寫部門」納入所有啟用同仁；儲存後僅開放已選人員填寫，並納入填寫進度統計。</p></div><div class="formMemberStatsV140"><span>候選 '+all.length+' 人</span><span>已選 '+formMemberSelectionSetV140.size+' 人</span><span>已填 '+data.filled.length+' 人</span></div></div><div class="formMemberToolsV140"><label>部門<select id="formMemberDepartmentFilter" onchange="formMemberFilterStateV140.department=this.value;renderFormMembersTableV140(formMemberFilteredListV140(activeForm()))"><option value="">全部部門</option>'+deps.map(function(dep){return '<option value="'+attr(dep)+'" '+(formMemberFilterStateV140.department===dep?'selected':'')+'>'+esc(dep)+'</option>'}).join('')+'</select></label><label>搜尋<input id="formMemberSearch" type="search" placeholder="姓名、部門、員工編號" value="'+attr(formMemberFilterStateV140.search||'')+'" oninput="formMemberFilterStateV140.search=this.value;renderFormMembersTableV140(formMemberFilteredListV140(activeForm()))"></label><button class="btn" type="button" onclick="selectFilteredFormMembersV140(true)">全選目前篩選</button><button class="btn" type="button" onclick="selectFilteredFormMembersV140(false)">取消目前篩選</button><button class="btn" type="button" onclick="useDepartmentMembersV140()">依部門全部帶入</button></div><div id="formMemberTableV140"></div>';
   renderFormMembersTableV140(list);
 }
 function renderFormMembersTableV140(list){
   var target=$('formMemberTableV140');
   if(!target)return;
-  target.innerHTML=list.length?table(['選取','部門','姓名','員工編號','狀態'],list.map(function(member){
+  target.innerHTML=list.length?table(['開放填寫','部門','姓名','員工編號','狀態'],list.map(function(member){
     var checked=formMemberSelectionSetV140.has(String(member.id||'')),filled=responses.some(function(response){return responseBelongsToMember(response,member)});
     return '<tr><td><label class="memberPickV140"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleFormMemberV140(\''+attr(member.id)+'\',this.checked)"><span></span></label></td><td>'+esc(memberDepartmentName(member))+'</td><td><b>'+esc(member.name||'')+'</b></td><td>'+esc(memberEmployeeNo(member))+'</td><td><span class="statePill '+(filled?'state-open':'state-draft')+'">'+(filled?'已填寫':'未填寫')+'</span></td></tr>';
   }),emptyState('查無人員','請調整部門或搜尋條件。')):emptyState('查無人員','目前開放部門沒有可選擇的啟用人員。');
@@ -840,10 +840,10 @@ function useDepartmentMembersV140(){
 async function saveFormMemberSettingsV140(){
   var form=activeForm();
   if(!form||form.identityMode!=='member')return notify('此問卷未使用公司人員資料庫','warn');
-  if(!canManageForm(form.id))return notify('您沒有維護此問卷應填人員的權限','error');
+  if(!canManageForm(form.id))return notify('您沒有維護此問卷填寫對象的權限','error');
   var allowed=new Set(departmentTargetMembersForFormV140(form).map(function(member){return String(member.id||'')})),ids=Array.from(formMemberSelectionSetV140).filter(function(id){return allowed.has(String(id))});
-  if(!ids.length)return notify('請至少選擇一位應填人員','warn');
-  setPageLoading(true,'正在儲存應填人員');
+  if(!ids.length)return notify('請至少選擇一位填寫對象','warn');
+  setPageLoading(true,'正在儲存填寫對象');
   try{
     await doc('universalForms',form.id).set({targetMemberIds:ids,targetMemberMode:'custom',targetMemberUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),targetMemberUpdatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),targetMemberUpdatedByName:adminDisplayName()}, {merge:true});
     await loadAdminData();
@@ -851,8 +851,8 @@ async function saveFormMemberSettingsV140(){
     renderFormMembersPanel();
     renderDashboard();
     renderResults();
-    toast('應填人員已儲存','success');
-  }catch(e){console.error(e);notify('應填人員儲存失敗，請確認權限或網路狀態','error')}
+    toast('填寫對象已儲存','success');
+  }catch(e){console.error(e);notify('填寫對象儲存失敗，請確認權限或網路狀態','error')}
   finally{setPageLoading(false)}
 }
 var ensureAdminExtensionsV140Base=typeof ensureAdminExtensions==='function'?ensureAdminExtensions:null;
@@ -867,7 +867,7 @@ if(showPanelV140Base){
     ensureFormMembersPanelV140();ensureFormMembersNavV140();
     await showPanelV140Base(id,button);
     if(id==='formMembersPanel'){
-      if($('panelTitle'))$('panelTitle').textContent='應填人員';
+      if($('panelTitle'))$('panelTitle').textContent='填寫對象';
       renderFormMembersPanel();
     }
   };
@@ -1015,7 +1015,7 @@ function exportResults(){
   finally{setPageLoading(false)}
 }
 function exportCompletionProgressV169(){
-  var f=activeForm();if(!f)return notify('請先選擇問卷');if(!formUsesMemberDatabaseV141(f))return notify('此問卷沒有公司應填人員資料','warn');
+  var f=activeForm();if(!f)return notify('請先選擇問卷');if(!formUsesMemberDatabaseV141(f))return notify('此問卷沒有公司填寫對象資料','warn');
   setPageLoading(true,'正在匯出填寫進度');
   try{var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,completionProgressSheet(f),'填寫進度');XLSX.writeFile(wb,(f.title||'問卷')+'_填寫進度.xlsx');toast('填寫進度已匯出','success')}catch(e){console.error(e);notify('填寫進度匯出失敗','error')}finally{setPageLoading(false)}
 }

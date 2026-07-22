@@ -4350,3 +4350,17 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   .progressMissingPanelV171{padding:13px}
 }
 @media(prefers-reduced-motion:reduce){.questionCard.conditionVisibleV171{animation:none}}
+
+/* v1.72: align the response-detail view with the other result cards. */
+#resultDetailViewV171{margin-top:2px;padding:18px;border:1px solid #dce5ed;border-radius:14px;background:#fbfdfe}
+#resultDetailViewV171 .resultDetailHead{display:block;margin:0 0 14px;padding:0 0 12px;border-top:0;border-bottom:1px solid #e1e8ee}
+#resultDetailViewV171 .resultDetailHead h3{font-size:18px;line-height:1.45}
+#resultDetailViewV171 .resultDetailHead p{margin:4px 0 0;line-height:1.6}
+#resultDetailViewV171 .resultDetailTools{margin-bottom:14px;background:#f5f9fc}
+#resultDetailViewV171 #resultsTable .dataTable{overflow:auto;border:1px solid #dce5ed;border-radius:12px;background:#fff}
+@media(max-width:680px){
+  #resultDetailViewV171{padding:13px}
+  #resultDetailViewV171 .resultDetailHead{display:block}
+  #resultDetailViewV171 .resultDetailHead h3{white-space:normal}
+  #resultDetailViewV171 .resultDetailTools{padding:11px}
+}
