@@ -1431,10 +1431,6 @@ body{
   text-align:left;
 }
 
-.navExport{
-  color:#176b67!important;
-}
-
 .dashboardMetrics{
   grid-template-columns:repeat(4,minmax(0,1fr))!important;
 }
@@ -2383,14 +2379,6 @@ body{
 .compactAdminToolbar #panelTitle{
   font-size:28px;
 }
-.navExport,
-.adminShell .topNav .nav.navExport{
-  color:#34465e!important;
-}
-.adminShell .topNav .nav.navExport:hover,
-.adminShell .topNav .nav.navExport.active{
-  color:#174f98!important;
-}
 .adminShell .dashboardMetrics{
   grid-template-columns:repeat(4,minmax(0,1fr))!important;
   gap:14px;
@@ -3290,7 +3278,7 @@ body[data-front-theme="sakura"] .formHero p,body[data-front-theme="sakura"] .for
 /* v1.33 填寫管理與介面修正 */
 .resultDetailTools{
   display:grid;
-  grid-template-columns:minmax(220px,1.2fr) minmax(160px,.8fr) minmax(190px,.8fr) auto;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
   align-items:end;
   gap:12px;
   margin:0 0 14px;
@@ -3315,10 +3303,16 @@ body[data-front-theme="sakura"] .formHero p,body[data-front-theme="sakura"] .for
   border-radius:10px;
   background:#fff;
 }
-.resultDetailTools .btn{
-  min-height:44px;
-  white-space:nowrap;
-}
+.resultHeaderActionsV169{align-items:stretch;overflow:visible}
+.resultExportMenuV169{position:relative;flex:0 0 auto}
+.resultExportMenuV169>summary{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;list-style:none;cursor:pointer;white-space:nowrap}
+.resultExportMenuV169>summary::-webkit-details-marker{display:none}
+.resultExportMenuV169[open]>summary{box-shadow:0 0 0 3px rgba(40,124,120,.14)}
+.resultExportMenuPanelV169{position:absolute;top:calc(100% + 8px);right:0;z-index:95;display:grid;width:min(340px,calc(100vw - 48px));padding:8px;border:1px solid #d7e2ed;border-radius:12px;background:#fff;box-shadow:0 18px 42px rgba(30,55,85,.18)}
+.resultExportMenuPanelV169 button{display:grid;gap:2px;width:100%;padding:11px 12px;border:0;border-radius:8px;background:#fff;color:#253b53;text-align:left}
+.resultExportMenuPanelV169 button:hover,.resultExportMenuPanelV169 button:focus-visible{outline:none;background:#eef5ff;color:#174f98}
+.resultExportMenuPanelV169 button b{font-size:14px}.resultExportMenuPanelV169 button small{color:#718096;font-size:12px;line-height:1.5}
+.resultExportMenuPanelV169 button[hidden]{display:none!important}
 .creatorNameButton{
   display:inline-flex;
   align-items:center;
@@ -3359,9 +3353,7 @@ body[data-front-theme="sakura"] .formHero p,body[data-front-theme="sakura"] .for
   .resultDetailTools{
     grid-template-columns:1fr;
   }
-  .resultDetailTools .btn{
-    width:100%;
-  }
+  .resultHeaderActionsV169{width:100%}.resultHeaderActionsV169>.btn,.resultExportMenuV169{flex:1 1 0}.resultExportMenuV169>summary{width:100%}
 }
 
 /* v1.33 問卷列表操作列修正 */
