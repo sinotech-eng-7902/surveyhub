@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>公司通用問卷調查系統 v1.69</title>
+  <title>公司通用問卷調查系統 v1.70</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.69">
+  <link rel="stylesheet" href="css/app.css?v=1.70">
 </head>
 <body class="appBooting" aria-busy="true">
   <div id="appBootScreen" class="appBootScreen" role="status" aria-live="polite">
@@ -37,7 +37,7 @@
           <summary>問卷作業 <span class="navChevron topNavChevron"></span></summary>
           <div id="surveyWorkMenu" class="navMenu topNavMenu">
             <button class="nav" onclick="showPanel('formsPanel',this)">問卷總覽</button>
-            <button class="nav" onclick="openNewFormSafely(this)">＋ 建立新問卷</button>
+            <button class="nav" onclick="openNewFormSafely(this)">建立問卷</button>
             <button class="nav" onclick="showPanel('resultsPanel',this)">回覆與分析</button>
             <button class="nav" onclick="openMissingList(this)">填寫進度</button>
           </div>
@@ -45,7 +45,7 @@
         <details id="systemManagementNavGroup" class="navGroup topNavGroup">
           <summary>系統管理 <span class="navChevron topNavChevron"></span></summary>
           <div class="navMenu topNavMenu">
-            <button id="membersNav" class="nav" onclick="showPanel('membersPanel',this)">公司人員管理</button>
+            <button id="membersNav" class="nav" onclick="showPanel('membersPanel',this)">人員管理</button>
             <button id="permissionsNav" class="nav" onclick="showPanel('permissionsPanel',this);loadFormManagers()">權限管理</button>
           </div>
         </details>
@@ -103,14 +103,14 @@
       </section>
 
       <section id="membersPanel" class="panel">
-        <div class="card"><div class="sectionHead"><div><h2>公司人員管理</h2><p>與行政部活動調查系統共用同一份公司人員名單；此處異動會同步反映到兩套系統。</p></div><div class="buttonRow"><button class="btn" onclick="downloadMemberTemplate()">下載標準範本</button><button class="btn" onclick="chooseMemberImport()">匯入 Excel</button><button class="btn success" onclick="exportMembers()">匯出名單</button><button class="btn primary" onclick="startNewMember()">＋ 新增人員</button><input id="memberImportInput" class="hiddenFileInput" type="file" accept=".xlsx,.xls,.csv" onchange="importMembers(this.files[0]);this.value=''" aria-label="匯入人員名單"></div></div>
+        <div class="card"><div class="sectionHead"><div><h2>人員管理</h2><p>與行政部活動調查系統共用同一份公司人員名單；此處異動會同步反映到兩套系統。</p></div><div class="buttonRow"><button class="btn" onclick="downloadMemberTemplate()">下載標準範本</button><button class="btn" onclick="chooseMemberImport()">匯入 Excel</button><button class="btn success" onclick="exportMembers()">匯出名單</button><button class="btn primary" onclick="startNewMember()">＋ 新增人員</button><input id="memberImportInput" class="hiddenFileInput" type="file" accept=".xlsx,.xls,.csv" onchange="importMembers(this.files[0]);this.value=''" aria-label="匯入人員名單"></div></div>
           <div id="memberEditor" class="memberEditor"><div class="sectionHead"><div><h3 id="memberEditorHeading">新增人員</h3><p id="memberEditorMode">新增模式</p></div></div><div class="memberFormGrid"><label>部門<select id="memberDepartment"></select></label><label>姓名<input id="memberName"></label><label>員工編號<input id="memberEmployeeNo"></label><label>Google 帳號<input id="memberGoogleEmail" type="email" placeholder="name@gmail.com"></label><label>狀態<select id="memberActive"><option value="true">啟用</option><option value="false">停用</option></select></label></div><div class="buttonRow"><button id="saveMemberBtn" class="btn primary" onclick="saveMember()">新增人員</button><button class="btn" onclick="cancelMemberEdit()">取消</button></div></div>
           <div id="memberImportResult" class="memberImportResult"></div><div class="memberListTools"><input id="memberSearch" placeholder="搜尋部門、姓名或員工編號" oninput="renderMemberPanel()"><span id="memberCountLabel"></span></div><div id="membersTable"></div>
         </div>
       </section>
 
       <section id="resultsPanel" class="panel">
-        <div class="card"><div class="sectionHead"><div><h2>回覆與分析</h2><p id="resultCaption">請先選擇問卷。</p></div><div class="buttonRow resultHeaderActionsV169"><button class="btn" onclick="copyFormLink()">複製問卷網址</button><details id="resultExportMenuV169" class="resultExportMenuV169"><summary class="btn success">匯出 Excel <span aria-hidden="true">⌄</span></summary><div class="resultExportMenuPanelV169"><button type="button" onclick="document.getElementById('resultExportMenuV169').open=false;exportResults()"><b>完整統計報表</b><small>統計、進度、未填名單與回覆明細</small></button><button type="button" onclick="document.getElementById('resultExportMenuV169').open=false;exportFilteredResults()"><b>目前篩選明細</b><small>依搜尋、部門與排序條件匯出</small></button><button data-member-export-v169 type="button" hidden onclick="document.getElementById('resultExportMenuV169').open=false;exportCompletionProgressV169()"><b>填寫進度</b><small>應填、已填、未填與完成率</small></button><button data-member-export-v169 type="button" hidden onclick="document.getElementById('resultExportMenuV169').open=false;exportMissingMembers()"><b>未填寫名單</b><small>依目前部門篩選匯出</small></button></div></details></div></div><div id="resultAnalysis"></div><div class="resultDetailHead"><h3>回覆明細</h3><p>管理員可修正或刪除個別回覆。</p></div><div id="resultsTable"></div></div>
+        <div class="card"><div class="sectionHead"><div><h2>回覆與分析</h2><p id="resultCaption">請先選擇問卷。</p></div><div class="buttonRow resultHeaderActionsV169"><button class="btn" onclick="copyFormLink()">複製問卷網址</button><details id="resultExportMenuV169" class="resultExportMenuV169"><summary class="btn success">匯出 Excel <span aria-hidden="true">⌄</span></summary><div class="resultExportMenuPanelV169"><button type="button" onclick="document.getElementById('resultExportMenuV169').open=false;exportResults()"><b>完整統計報表</b><small>統計、選項填答名單、進度與回覆明細</small></button><button type="button" onclick="document.getElementById('resultExportMenuV169').open=false;exportFilteredResults()"><b>目前篩選明細</b><small>依搜尋、部門與排序條件匯出</small></button><button data-member-export-v169 type="button" hidden onclick="document.getElementById('resultExportMenuV169').open=false;exportCompletionProgressV169()"><b>填寫進度</b><small>應填、已填、未填與完成率</small></button><button data-member-export-v169 type="button" hidden onclick="document.getElementById('resultExportMenuV169').open=false;exportMissingMembers()"><b>未填寫名單</b><small>依目前部門篩選匯出</small></button></div></details></div></div><div id="resultViewTabsV170" class="resultViewTabsV170" role="tablist" aria-label="結果檢視方式"><button type="button" role="tab" data-result-view-v170="summary" aria-selected="true" onclick="setResultViewV170('summary',this)">統計摘要</button><button type="button" role="tab" data-result-view-v170="question" aria-selected="false" onclick="setResultViewV170('question',this)">依題查看</button><button type="button" role="tab" data-result-view-v170="individual" aria-selected="false" onclick="setResultViewV170('individual',this)">個別回覆</button></div><div id="resultAnalysis" class="resultViewPanelV170" role="tabpanel"></div><div id="resultQuestionViewV170" class="resultViewPanelV170" role="tabpanel" hidden></div><div id="resultIndividualViewV170" class="resultViewPanelV170" role="tabpanel" hidden><div id="resultIndividualNavigatorV170"></div><div class="resultDetailHead"><h3>回覆明細</h3><p>管理員可修正或刪除個別回覆。</p></div><div id="resultsTable"></div></div></div>
       </section>
     </main>
     </div>
@@ -155,7 +155,7 @@
   </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
   <script src="js/config.js?v=1.58"></script>
-  <script src="js/app.js?v=1.69"></script>
+  <script src="js/app.js?v=1.70"></script>
   <script src="js/app-guards.js?v=1.58"></script>
 </body>
 </html>
