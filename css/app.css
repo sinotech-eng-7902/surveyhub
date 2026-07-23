@@ -4251,10 +4251,10 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   gap:8px;
 }
 .legendRow{
-  display:flex;
+  display:grid;
+  grid-template-columns:10px minmax(0,1fr) max-content;
   align-items:center;
-  justify-content:space-between;
-  gap:10px;
+  column-gap:10px;
   font-size:13px;
 }
 .legendDot{
@@ -4328,6 +4328,46 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   .individualAnswerV170{grid-template-columns:1fr;gap:5px}
   .individualResponseNavV170{grid-template-columns:1fr 1fr}
   .individualResponseNavV170>div{grid-column:1/-1;grid-row:1}
+}
+
+/* v1.73: aligned result metrics and compact chart legends. */
+.analysisSummary .analysisMetric{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:138px;
+  padding:22px 24px;
+}
+.analysisSummary .analysisMetric span{
+  margin:0;
+}
+.analysisSummary .analysisMetric b,
+.analysisSummary .analysisMetric .analysisMetricTimeV173{
+  margin-top:8px;
+  color:#14233b;
+  font-size:clamp(24px,2vw,32px);
+  font-weight:800;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}
+.chartLegend{
+  align-content:center;
+}
+.legendRow{
+  width:100%;
+  min-width:0;
+}
+.legendRow>span:nth-child(2){
+  text-align:left;
+}
+.legendRow strong{
+  text-align:right;
+}
+@media(max-width:520px){
+  .analysisSummary .analysisMetric{
+    min-height:112px;
+    padding:18px 20px;
+  }
 }
 
 /* v1.71 conditional questions, independent progress and result-detail views */
