@@ -4364,54 +4364,7 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   #resultDetailViewV171 .resultDetailHead h3{white-space:normal}
   #resultDetailViewV171 .resultDetailTools{padding:11px}
 }
-/* v1.73 section-based questionnaire flow */
-.completionSettingsV173{align-items:start}
-.completionMessageV173{grid-column:span 2}
-.completionMessageV173 textarea{min-height:92px;resize:vertical}
-.checkLineV173{display:flex!important;flex-direction:row!important;align-items:center;gap:9px;padding-top:30px}
-.checkLineV173 input{width:18px!important;height:18px}
-.questionHeadV173{align-items:flex-start;gap:16px;margin-top:24px}
-.questionHeadV173>div:first-child p{margin:5px 0 0;color:var(--muted)}
-.sectionLogicSummaryV173{margin:12px 0 18px;padding:14px 16px;border:1px solid #b9d8d4;border-radius:12px;background:#f2fbfa;color:#185e59}
-.sectionLogicSummaryV173.hasWarning{border-color:#e5ca80;background:#fff9e8;color:#765510}
-.sectionLogicSummaryV173.hasError{border-color:#efb2b2;background:#fff4f4;color:#962b2b}
-.sectionLogicSummaryV173 p{margin:6px 0 0}
-.sectionEditorV173{margin:18px 0 28px;border:2px solid #c9dce3;border-radius:18px;background:#f7fafb;overflow:hidden;box-shadow:0 6px 20px rgba(26,57,77,.06)}
-.sectionEditorHeadV173{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:16px;align-items:start;padding:18px;background:linear-gradient(135deg,#eaf6f4,#f4f8fb);border-bottom:1px solid #d4e2e7}
-.sectionBadgeV173{padding:7px 11px;border-radius:999px;background:#176f69;color:#fff;font-weight:800;white-space:nowrap}
-.sectionEditorFieldsV173{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(240px,1.2fr);gap:12px}
-.sectionEditorFieldsV173 label{font-weight:750}
-.sectionEditorFieldsV173 input,.sectionEditorFieldsV173 textarea{margin-top:6px;background:#fff}
-.sectionEditorFieldsV173 textarea{resize:vertical}
-.sectionActionsV173{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px;max-width:280px}
-.subtleDangerV173{background:#fff}
-.sectionQuestionListV173{padding:18px}
-.sectionQuestionListV173 .questionEdit{margin-top:0;margin-bottom:16px;background:#fff}
-.sectionEmptyV173{padding:28px;text-align:center;border:1px dashed #afc4cd;border-radius:12px;background:#fff;color:var(--muted)}
-.sectionEditorFootV173{display:flex;flex-wrap:wrap;gap:10px;padding:0 18px 18px}
-.sectionBranchV173{flex:1 1 100%;margin-top:6px;padding:15px;border:1px solid #cadde2;border-radius:12px;background:#fff}
-.sectionBranchV173>label{max-width:520px;font-weight:800}
-.sectionBranchV173>p{margin:7px 0 0;color:var(--muted)}
-.sectionRouteGridV173{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:12px}
-.sectionRouteGridV173 label{display:grid;grid-template-columns:minmax(120px,1fr) minmax(140px,.8fr);align-items:center;gap:10px;padding:10px;border-radius:9px;background:#f6f9fa}
-.questionSectionMoveV173{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:6px;margin-left:auto;font-size:13px}
-.questionSectionMoveV173 select{width:auto;min-width:150px;padding:6px 28px 6px 8px}
-.flowTestMaskV173{z-index:10020}
-.flowTestModalV173{width:min(920px,calc(100vw - 30px));max-height:92vh;overflow:auto}
-.flowTestBannerV173{position:sticky;top:0;z-index:4;margin-bottom:12px;padding:9px 13px;border-radius:9px;background:#fff3c6;color:#745412;text-align:center;font-weight:800}
-.sectionPagesV173{display:grid;gap:18px}
-.sectionPageV173[hidden]{display:none!important}
-.sectionPageHeadV173{padding:20px 22px;border-left:5px solid var(--theme-accent,#176f69);border-radius:13px;background:linear-gradient(135deg,#edf8f6,#f8fbfc);box-shadow:0 3px 12px rgba(26,57,77,.05)}
-.sectionPageHeadV173 span{display:block;margin-bottom:6px;color:var(--theme-accent,#176f69);font-size:13px;font-weight:850}
-.sectionPageHeadV173 h2{margin:0;color:#17324d}
-.sectionPageHeadV173 p{margin:8px 0 0;color:#5e7282;white-space:pre-wrap}
-.sectionProgressV173{margin:4px 0 18px}
-.sectionProgressV173>div{height:8px;border-radius:999px;background:#dce8eb;overflow:hidden}
-.sectionProgressV173 span{display:block;height:100%;border-radius:inherit;background:var(--theme-accent,#176f69);transition:width .28s ease}
-.sectionProgressV173 p{margin:7px 0 0;text-align:right;color:#5f7280;font-size:13px;font-weight:750}
-.sectionNavV173{display:flex;justify-content:space-between;gap:12px;margin-top:18px;padding-top:16px;border-top:1px solid #dce5e8}
-.sectionNavV173 .sectionNextV173{margin-left:auto}
-.submitSuccessActionsV173{justify-content:center}
+/* v1.73: simplified front attachments with a consistent paperclip icon. */
 .paperclipIconV173{width:22px;height:22px;flex:0 0 22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--theme-accent,#176f69)}
 .frontFilesOnlyV173{margin-top:16px}
 .frontFilesOnlyV173>div{display:flex;flex-wrap:wrap;gap:9px}
@@ -4419,26 +4372,3 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
 .frontFilesOnlyV173 button:hover,.frontFilesOnlyV173 button:focus-visible{transform:translateY(-1px);border-color:var(--theme-accent,#176f69);box-shadow:0 5px 14px rgba(27,67,82,.11)}
 .frontFilesOnlyV173 button span{overflow-wrap:anywhere}
 .referenceFileItemV156>.paperclipIconV173{margin-inline:2px 5px}
-@media(max-width:900px){
-  .sectionEditorHeadV173{grid-template-columns:1fr}
-  .sectionBadgeV173{justify-self:start}
-  .sectionActionsV173{justify-content:flex-start;max-width:none}
-}
-@media(max-width:700px){
-  .completionMessageV173{grid-column:auto}
-  .checkLineV173{padding-top:5px}
-  .questionHeadV173{display:grid}
-  .questionHeadV173 .buttonRow{display:grid;grid-template-columns:1fr}
-  .sectionEditorV173{margin-inline:-4px;border-radius:14px}
-  .sectionEditorHeadV173,.sectionQuestionListV173{padding:14px}
-  .sectionEditorFieldsV173,.sectionRouteGridV173{grid-template-columns:1fr}
-  .sectionActionsV173{display:grid;grid-template-columns:1fr 1fr}
-  .sectionActionsV173 .btn{min-height:40px}
-  .sectionRouteGridV173 label{grid-template-columns:1fr}
-  .questionSectionMoveV173{width:100%;margin:8px 0 0}
-  .questionSectionMoveV173 select{flex:1;min-width:0}
-  .sectionEditorFootV173{padding:0 14px 14px}
-  .sectionEditorFootV173>.btn{flex:1}
-  .sectionPageHeadV173{padding:17px}
-  .sectionNavV173{position:sticky;bottom:8px;z-index:5;padding:10px;border:1px solid #d7e3e7;border-radius:12px;background:rgba(255,255,255,.96);box-shadow:0 8px 25px rgba(21,48,68,.15)}
-}

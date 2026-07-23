@@ -452,7 +452,7 @@ function questionDescription(q){return String((q&&q.description)!==undefined?q.d
 function splitLines(value){return String(value||'').split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
 function uniqueLines(value){var seen={},dupes=[],items=[];splitLines(value).forEach(function(x){var k=x.toLowerCase();if(seen[k])dupes.push(x);else{seen[k]=true;items.push(x)}});if(dupes.length)toast('已略過重複項目：'+dupes.join('、'),'warn');return items}
 function normalizeQuestionVisibilityV171(value){value=value&&typeof value==='object'?value:{};return{enabled:value.enabled===true,sourceQuestionId:String(value.sourceQuestionId||''),operator:value.operator==='isNotAnyOf'?'isNotAnyOf':'isAnyOf',values:Array.from(new Set((Array.isArray(value.values)?value.values:[]).map(function(item){return String(item)}).filter(Boolean)))}}
-function normalizeQuestion(q){q=q||{};var next={id:q.id||('q_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)),type:q.type||'short',title:q.title||'',description:questionDescription(q),help:questionDescription(q),required:!!q.required,options:Array.isArray(q.options)?q.options:[],rows:Array.isArray(q.rows)?q.rows:[],columns:Array.isArray(q.columns)?q.columns:[],imageUrl:q.imageUrl||'',imageStoragePath:q.imageStoragePath||'',settings:Object.assign({},q.settings||{}),validation:Object.assign({},q.validation||{}),visibility:normalizeQuestionVisibilityV171(q.visibility),sectionIdV173:String(q.sectionIdV173||'')};if(next.type==='linearScale')next.settings={min:Number(next.settings.min!=null?next.settings.min:1),max:Number(next.settings.max!=null?next.settings.max:5),minLabel:next.settings.minLabel||'',maxLabel:next.settings.maxLabel||''};if(next.type==='rating')next.settings={max:Number(next.settings.max||5),minLabel:next.settings.minLabel||'',maxLabel:next.settings.maxLabel||''};if(next.type==='file')next.settings={fileKind:['all','image','document'].includes(next.settings.fileKind)?next.settings.fileKind:'all',multiple:next.settings.multiple===true,maxFiles:Math.max(1,Math.min(5,Number(next.settings.maxFiles||1)))};if(MATRIX_TYPES_V132.includes(next.type)){if(!next.rows.length)next.rows=['項目一'];if(!next.columns.length)next.columns=['選項一']}return next}
+function normalizeQuestion(q){q=q||{};var next={id:q.id||('q_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)),type:q.type||'short',title:q.title||'',description:questionDescription(q),help:questionDescription(q),required:!!q.required,options:Array.isArray(q.options)?q.options:[],rows:Array.isArray(q.rows)?q.rows:[],columns:Array.isArray(q.columns)?q.columns:[],imageUrl:q.imageUrl||'',imageStoragePath:q.imageStoragePath||'',settings:Object.assign({},q.settings||{}),validation:Object.assign({},q.validation||{}),visibility:normalizeQuestionVisibilityV171(q.visibility)};if(next.type==='linearScale')next.settings={min:Number(next.settings.min!=null?next.settings.min:1),max:Number(next.settings.max!=null?next.settings.max:5),minLabel:next.settings.minLabel||'',maxLabel:next.settings.maxLabel||''};if(next.type==='rating')next.settings={max:Number(next.settings.max||5),minLabel:next.settings.minLabel||'',maxLabel:next.settings.maxLabel||''};if(next.type==='file')next.settings={fileKind:['all','image','document'].includes(next.settings.fileKind)?next.settings.fileKind:'all',multiple:next.settings.multiple===true,maxFiles:Math.max(1,Math.min(5,Number(next.settings.maxFiles||1)))};if(MATRIX_TYPES_V132.includes(next.type)){if(!next.rows.length)next.rows=['項目一'];if(!next.columns.length)next.columns=['選項一']}return next}
 function normalizeQuestions(list){return (Array.isArray(list)?list:[]).map(normalizeQuestion)}
 function newQuestion(type){type=type||'short';var q=normalizeQuestion({type:type,title:'',required:false,description:'',imageUrl:'',imageStoragePath:''});if(['single','multiple','dropdown'].includes(type))q.options=['選項一'];if(type==='linearScale')q.settings={min:1,max:5,minLabel:'非常不滿意',maxLabel:'非常滿意'};if(type==='rating')q.settings={max:5,minLabel:'',maxLabel:''};if(type==='file')q.settings={fileKind:'all',multiple:false,maxFiles:1};if(MATRIX_TYPES_V132.includes(type)){q.rows=['項目一','項目二'];q.columns=['非常不滿意','不滿意','普通','滿意','非常滿意']}return q}
 function answerEmpty(value){return Array.isArray(value)?!value.length:(value&&typeof value==='object'?!Object.keys(value).length:!String(value==null?'':value).trim())}
@@ -705,7 +705,7 @@ function updateIdentityMembers(department){
   var select=$('identityMember'),form=activeForm();
   if(!select)return;
   var list=targetMembersForForm(form).filter(function(member){return memberDepartmentName(member)===department});
-  select.innerHTML='<option value="">請選擇姓名</option>'+list.map(function(member){return '<option value="'+attr(member.id)+'">'+esc(member.name||'')+'</option>'}).join('');
+  select.innerHTML='<option value="">請選擇姓名</option>'+list.map(function(member){var employeeNo=memberEmployeeNo(member);return '<option value="'+attr(member.id)+'">'+(employeeNo?esc(employeeNo)+' ':'')+esc(member.name||'')+'</option>'}).join('');
   select.disabled=!department;
 }
 async function submitResponse(event){
@@ -733,8 +733,8 @@ async function submitResponse(event){
     answers=prepared.answers;uploaded=prepared.uploaded;
     var payload=Object.assign({formId:f.id,formTitle:f.title},identity,{answers:answers,submissionMethod:'self',submittedAt:firebase.firestore.FieldValue.serverTimestamp(),submittedAtText:new Date().toLocaleString('zh-TW')});
     await writeResponseWithLock(f,responseKey,payload,responseKey?{formId:f.id,memberId:identity.memberId,submissionMethod:'self',createdAt:firebase.firestore.FieldValue.serverTimestamp()}:null);
-    var completion=completionSettingsV173(f),successText=completion.message||(formUsesMemberDatabaseV141(f)?'已收到您的填寫內容。每位同仁限填一次；'+formCorrectionContactText(f):'已收到您的填寫內容，感謝您的填寫。'),resultButton=completion.showMyResult&&formUsesMemberDatabaseV141(f)?'<button class="btn" onclick="startMyResponseView()">查看我的填寫結果</button>':'';
-    frontMain.innerHTML='<div class="successCard submitSuccessCard"><h2>'+esc(completion.title)+'</h2><p>'+esc(successText)+'</p><div class="buttonRow submitSuccessActionsV173">'+resultButton+'<button class="btn primary" onclick="location.reload()">返回問卷</button></div></div>';
+    var successText=formUsesMemberDatabaseV141(f)?'已收到您的填寫內容。每位同仁限填一次；'+formCorrectionContactText(f):'已收到您的填寫內容，感謝您的填寫。';
+    frontMain.innerHTML='<div class="successCard submitSuccessCard"><h2>填寫成功</h2><p>'+esc(successText)+'</p><button class="btn primary" onclick="location.reload()">返回問卷</button></div>';
     toast('填寫成功','success');
   }catch(e){
     console.error(e);
@@ -1183,7 +1183,7 @@ async function saveForm(){
   var err=formQuestionsValid();if(err)return notify(err);
   var identityMode=$('identityMode').value,targetDepartments=identityMode==='member'?[].slice.call(document.querySelectorAll('.targetDepartment:checked')).map(function(x){return x.value}):[];
   if(identityMode==='member'&&!targetDepartments.length)return notify('請至少選擇一個開放填寫部門');
-  var id=editMode==='edit'?editingId:'form_'+Date.now(),existing=editMode==='edit'?forms.find(function(f){return f.id===editingId}):null,descriptionData=descriptionDataV156(),data={title:title,description:descriptionData.description,descriptionHtml:descriptionData.descriptionHtml,descriptionFontSize:descriptionData.descriptionFontSize,descriptionAlign:descriptionData.descriptionAlign,deadline:$('formDeadline').value,state:$('formState').value,imageUrl:$('formImageUrl').value.trim(),imageStoragePath:'',theme:formTheme({theme:($('formTheme')||{}).value}),identityMode:identityMode,targetDepartments:targetDepartments,questions:draftQuestions,sectionsV173:normalizeSectionsV173(draftSectionsV173,draftQuestions),completionV173:completionSettingsFromEditorV173(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByUid:(currentUser&&currentUser.uid)||'',updatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),updatedByName:adminDisplayName()};
+  var id=editMode==='edit'?editingId:'form_'+Date.now(),existing=editMode==='edit'?forms.find(function(f){return f.id===editingId}):null,descriptionData=descriptionDataV156(),data={title:title,description:descriptionData.description,descriptionHtml:descriptionData.descriptionHtml,descriptionFontSize:descriptionData.descriptionFontSize,descriptionAlign:descriptionData.descriptionAlign,deadline:$('formDeadline').value,state:$('formState').value,imageUrl:$('formImageUrl').value.trim(),imageStoragePath:'',theme:formTheme({theme:($('formTheme')||{}).value}),identityMode:identityMode,targetDepartments:targetDepartments,questions:draftQuestions,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedByUid:(currentUser&&currentUser.uid)||'',updatedByEmail:normalizeEmail((currentUser&&currentUser.email)||''),updatedByName:adminDisplayName()};
   if(identityMode!=='member'){data.targetMemberIds=firebase.firestore.FieldValue.delete();data.targetMemberMode=firebase.firestore.FieldValue.delete();data.targetMemberUpdatedAt=firebase.firestore.FieldValue.delete();data.targetMemberUpdatedByEmail=firebase.firestore.FieldValue.delete();data.targetMemberUpdatedByName=firebase.firestore.FieldValue.delete()}
   if(editMode==='new'){data.createdAt=firebase.firestore.FieldValue.serverTimestamp();data.createdByUid=(currentUser&&currentUser.uid)||'';data.createdByEmail=normalizeEmail((currentUser&&currentUser.email)||'');data.createdByName=adminDisplayName()||(currentUser&&currentUser.displayName)||(currentUser&&currentUser.email)||''}
   var btn=$('saveFormBtn');btn.disabled=true;btn.textContent='儲存中';setPageLoading(true,'正在儲存問卷');
@@ -1706,9 +1706,7 @@ window.addEventListener('resize',function(){if(activeChartTooltipTargetV166)hide
 if(document.body)new MutationObserver(function(){if(activeChartTooltipTargetV166&&!activeChartTooltipTargetV166.isConnected)hideChartTooltipV165()}).observe(document.body,{childList:true,subtree:true});
 installMobileHeaderV156();
 
-/* v1.73: section editor, multi-page answering, answer routing and flow checks. */
-var draftSectionsV173=[];
-var currentSectionIdV173='';
+/* v1.73: semantic alignment for exported Excel reports. */
 function formatPercentColumnV173(sheet,column,startRow){
   if(!sheet||!sheet['!ref'])return;var range=XLSX.utils.decode_range(sheet['!ref']);
   for(var row=Math.max(Number(startRow||0),range.s.r);row<=range.e.r;row++){var cell=sheet[XLSX.utils.encode_cell({r:row,c:Number(column)})];if(cell&&cell.t==='n')cell.z='0.0%'}
@@ -1719,201 +1717,4 @@ function applySemanticSheetAlignmentV173(sheet){
   for(var row=range.s.r;row<=range.e.r;row++)for(var column=range.s.c;column<=range.e.c;column++){var cell=sheet[XLSX.utils.encode_cell({r:row,c:column})];if(!cell)continue;var horizontal=row===range.s.r?'center':centerColumns.has(column)?'center':cell.t==='n'?'right':'left';cell.s=Object.assign({},cell.s||{},{alignment:Object.assign({},cell.s&&cell.s.alignment||{},{horizontal:horizontal,vertical:'center',wrapText:true})})}
   return sheet;
 }
-function newSectionIdV173(){return 'section_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
-function normalizeSectionNavigationV173(value){
-  value=value&&typeof value==='object'?value:{};
-  var routes={};Object.keys(value.routes&&typeof value.routes==='object'?value.routes:{}).forEach(function(key){routes[String(key)]=String(value.routes[key]||'next')});
-  return {sourceQuestionId:String(value.sourceQuestionId||''),routes:routes};
-}
-function normalizeSectionsV173(list,questions){
-  questions=normalizeQuestions(questions||[]);
-  var seen=new Set(),sections=(Array.isArray(list)?list:[]).map(function(item,index){
-    item=item||{};var id=String(item.id||newSectionIdV173());if(seen.has(id))id=newSectionIdV173();seen.add(id);
-    return {id:id,title:String(item.title||('第 '+(index+1)+' 區段')),description:String(item.description||''),navigation:normalizeSectionNavigationV173(item.navigation)};
-  });
-  if(!sections.length)sections=[{id:'section_legacy',title:'問卷內容',description:'',navigation:normalizeSectionNavigationV173({})}];
-  var ids=new Set(sections.map(function(section){return section.id})),first=sections[0].id;
-  questions.forEach(function(q){if(!ids.has(String(q.sectionIdV173||'')))q.sectionIdV173=first});
-  return sections;
-}
-function completionSettingsV173(form){
-  var value=form&&form.completionV173&&typeof form.completionV173==='object'?form.completionV173:{};
-  return {title:String(value.title||'填寫成功'),message:String(value.message||''),showMyResult:value.showMyResult!==false};
-}
-function completionSettingsFromEditorV173(){
-  return {title:String(($('formSuccessTitle')||{}).value||'').trim()||'填寫成功',message:String(($('formSuccessMessage')||{}).value||'').trim(),showMyResult:!!(($('formSuccessShowResult')||{}).checked)};
-}
-function setCompletionEditorV173(form){
-  var value=completionSettingsV173(form);
-  if($('formSuccessTitle'))$('formSuccessTitle').value=value.title;
-  if($('formSuccessMessage'))$('formSuccessMessage').value=value.message;
-  if($('formSuccessShowResult'))$('formSuccessShowResult').checked=value.showMyResult;
-}
-function prepareDraftSectionsV173(form){
-  draftQuestions=normalizeQuestions(draftQuestions);
-  draftSectionsV173=normalizeSectionsV173(form&&form.sectionsV173,draftQuestions);
-  var first=draftSectionsV173[0].id,ids=new Set(draftSectionsV173.map(function(section){return section.id}));
-  draftQuestions.forEach(function(q){if(!ids.has(q.sectionIdV173))q.sectionIdV173=first});
-  currentSectionIdV173=first;
-}
-function sectionIndexV173(id){return draftSectionsV173.findIndex(function(section){return section.id===String(id||'')})}
-function sectionQuestionsV173(id){return draftQuestions.filter(function(q){return q.sectionIdV173===String(id||'')})}
-function setSectionFieldV173(id,key,value){
-  var section=draftSectionsV173[sectionIndexV173(id)];if(!section)return;section[key]=String(value||'');markFormDirty();
-}
-function addSectionV173(afterId){
-  var section={id:newSectionIdV173(),title:'第 '+(draftSectionsV173.length+1)+' 區段',description:'',navigation:normalizeSectionNavigationV173({})},index=afterId?sectionIndexV173(afterId)+1:draftSectionsV173.length;
-  draftSectionsV173.splice(Math.max(0,index),0,section);currentSectionIdV173=section.id;markFormDirty();renderQuestionEditor();
-  setTimeout(function(){var input=document.querySelector('[data-section-id-v173="'+CSS.escape(section.id)+'"] .sectionTitleInputV173');if(input){input.scrollIntoView({behavior:'smooth',block:'center'});input.select()}},60);
-}
-function moveSectionV173(id,delta){
-  var index=sectionIndexV173(id),target=index+Number(delta);if(index<0||target<0||target>=draftSectionsV173.length)return;
-  var item=draftSectionsV173.splice(index,1)[0];draftSectionsV173.splice(target,0,item);markFormDirty();renderQuestionEditor();
-}
-async function removeSectionV173(id,withQuestions){
-  if(draftSectionsV173.length<=1)return notify('問卷至少需要保留一個區段','warn');
-  var index=sectionIndexV173(id),section=draftSectionsV173[index];if(!section)return;
-  var count=sectionQuestionsV173(id).length,message=withQuestions?'確定刪除「'+section.title+'」及其中 '+count+' 題嗎？':'確定移除此區段標題，並將其中題目移至相鄰區段嗎？';
-  if(!await confirmDialog(message,withQuestions?'刪除整個區段':'移除區段',true))return;
-  var target=(draftSectionsV173[index-1]||draftSectionsV173[index+1]).id;
-  if(withQuestions)draftQuestions=draftQuestions.filter(function(q){return q.sectionIdV173!==id});
-  else draftQuestions.forEach(function(q){if(q.sectionIdV173===id)q.sectionIdV173=target});
-  draftSectionsV173.splice(index,1);draftSectionsV173.forEach(function(item){if(item.navigation&&Object.values(item.navigation.routes||{}).includes(id))Object.keys(item.navigation.routes).forEach(function(key){if(item.navigation.routes[key]===id)item.navigation.routes[key]='next'})});
-  currentSectionIdV173=target;markFormDirty();renderQuestionEditor();
-}
-function duplicateSectionV173(id){
-  var index=sectionIndexV173(id),source=draftSectionsV173[index];if(!source)return;
-  var copied=JSON.parse(JSON.stringify(source)),idMap={};copied.id=newSectionIdV173();copied.title=(source.title||'未命名區段')+'（複製）';
-  var sourceQuestions=sectionQuestionsV173(id),insertAt=draftQuestions.reduce(function(last,q,i){return q.sectionIdV173===id?i+1:last},draftQuestions.length);
-  var copies=sourceQuestions.map(function(q){var next=JSON.parse(JSON.stringify(q)),old=next.id;next.id='q_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);idMap[old]=next.id;next.sectionIdV173=copied.id;return normalizeQuestion(next)});
-  copies.forEach(function(q){if(q.visibility&&idMap[q.visibility.sourceQuestionId])q.visibility.sourceQuestionId=idMap[q.visibility.sourceQuestionId]});
-  if(idMap[copied.navigation.sourceQuestionId])copied.navigation.sourceQuestionId=idMap[copied.navigation.sourceQuestionId];else copied.navigation=normalizeSectionNavigationV173({});
-  draftQuestions.splice.apply(draftQuestions,[insertAt,0].concat(copies));draftSectionsV173.splice(index+1,0,copied);currentSectionIdV173=copied.id;markFormDirty();renderQuestionEditor();toast('已複製區段與其中題目','success');
-}
-function moveQuestionToSectionV173(index,sectionId){
-  var q=draftQuestions[Number(index)];if(!q||sectionIndexV173(sectionId)<0)return;q.sectionIdV173=sectionId;currentSectionIdV173=sectionId;markFormDirty();renderQuestionEditor();focusQuestionByIdV144(q.id);
-}
-function setSectionBranchSourceV173(id,questionId){
-  var section=draftSectionsV173[sectionIndexV173(id)];if(!section)return;section.navigation={sourceQuestionId:String(questionId||''),routes:{}};markFormDirty();renderQuestionEditor();
-}
-function setSectionRouteV173(id,encodedOption,target){
-  var section=draftSectionsV173[sectionIndexV173(id)];if(!section)return;section.navigation.routes[decodeURIComponent(encodedOption)]=String(target||'next');markFormDirty();
-}
-function branchSourceOptionsV173(question){
-  if(!question)return[];return question.type==='department'?departments.map(function(item){return item.name||item.departmentName||item.department||''}).filter(Boolean):(question.options||[]).map(String).filter(Boolean);
-}
-function sectionBranchEditorHtmlV173(section,index){
-  var eligible=sectionQuestionsV173(section.id).filter(function(q){return ['single','dropdown','department'].includes(q.type)}),source=eligible.find(function(q){return q.id===section.navigation.sourceQuestionId}),later=draftSectionsV173.slice(index+1);
-  var sourceSelect='<label>依回答跳至區段<select onchange="setSectionBranchSourceV173(\''+attr(section.id)+'\',this.value)"><option value="">不設定（依序前往下一區段）</option>'+eligible.map(function(q){return '<option value="'+attr(q.id)+'" '+(source&&source.id===q.id?'selected':'')+'>'+esc(q.title||'未命名題目')+'</option>'}).join('')+'</select></label>';
-  if(!source)return '<div class="sectionBranchV173">'+sourceSelect+'<p>可使用本區段內的單選、下拉或部門題目設定分流。</p></div>';
-  var targets='<option value="next">下一區段</option>'+later.map(function(target){return '<option value="'+attr(target.id)+'">'+esc(target.title)+'</option>'}).join('')+'<option value="submit">直接送出</option>';
-  return '<div class="sectionBranchV173">'+sourceSelect+'<div class="sectionRouteGridV173">'+branchSourceOptionsV173(source).map(function(option){var selected=section.navigation.routes[option]||'next';return '<label><span>回答「'+esc(option)+'」時</span><select onchange="setSectionRouteV173(\''+attr(section.id)+'\',\''+encodeURIComponent(option)+'\',this.value)">'+targets.replace('value="'+attr(selected)+'"','value="'+attr(selected)+'" selected')+'</select></label>'}).join('')+'</div></div>';
-}
-function enhanceQuestionEditorV173(){
-  var editor=$('questionEditor');if(!editor)return;
-  draftQuestions=normalizeQuestions(draftQuestions);draftSectionsV173=normalizeSectionsV173(draftSectionsV173,draftQuestions);
-  var cards=Array.from(editor.querySelectorAll(':scope > .questionEdit')),bottom=editor.querySelector(':scope > .questionAddBottom');if(bottom)bottom.remove();
-  var cardMap={};cards.forEach(function(card){cardMap[Number(card.dataset.questionIndex)]=card});
-  editor.innerHTML='';
-  draftSectionsV173.forEach(function(section,sectionIndex){
-    var shell=document.createElement('section');shell.className='sectionEditorV173';shell.dataset.sectionIdV173=section.id;
-    shell.innerHTML='<div class="sectionEditorHeadV173"><div class="sectionBadgeV173">區段 '+(sectionIndex+1)+'</div><div class="sectionEditorFieldsV173"><label>區段標題<input class="sectionTitleInputV173" value="'+attr(section.title)+'" oninput="setSectionFieldV173(\''+attr(section.id)+'\',\'title\',this.value)"></label><label>區段說明<textarea rows="2" oninput="setSectionFieldV173(\''+attr(section.id)+'\',\'description\',this.value)">'+esc(section.description)+'</textarea></label></div><div class="sectionActionsV173"><button class="btn" type="button" onclick="moveSectionV173(\''+attr(section.id)+'\',-1)" '+(sectionIndex===0?'disabled':'')+'>上移</button><button class="btn" type="button" onclick="moveSectionV173(\''+attr(section.id)+'\',1)" '+(sectionIndex===draftSectionsV173.length-1?'disabled':'')+'>下移</button><button class="btn" type="button" onclick="duplicateSectionV173(\''+attr(section.id)+'\')">複製區段</button><button class="btn danger" type="button" onclick="removeSectionV173(\''+attr(section.id)+'\',false)">移除區段</button><button class="btn danger subtleDangerV173" type="button" onclick="removeSectionV173(\''+attr(section.id)+'\',true)">刪除整區</button></div></div>';
-    var questionArea=document.createElement('div');questionArea.className='sectionQuestionListV173';
-    draftQuestions.forEach(function(q,index){if(q.sectionIdV173!==section.id||!cardMap[index])return;var card=cardMap[index],header=card.querySelector('.questionEditHeader'),jump=header&&header.querySelector('.questionJumpControlV140');if(jump)jump.remove();if(header&&!header.querySelector('.questionSectionMoveV173'))header.insertAdjacentHTML('beforeend','<label class="questionSectionMoveV173">移至區段<select onchange="moveQuestionToSectionV173('+index+',this.value)">'+draftSectionsV173.map(function(item,i){return '<option value="'+attr(item.id)+'" '+(item.id===section.id?'selected':'')+'>'+(i+1)+'．'+esc(item.title)+'</option>'}).join('')+'</select></label>');questionArea.appendChild(card)});
-    if(!questionArea.children.length)questionArea.innerHTML='<div class="sectionEmptyV173">此區段尚無題目，可先新增題目或保留為說明頁。</div>';
-    shell.appendChild(questionArea);
-    var foot=document.createElement('div');foot.className='sectionEditorFootV173';foot.innerHTML='<button class="btn primary" type="button" onclick="addQuestionToSectionV173(\''+attr(section.id)+'\')">新增題目</button><button class="btn" type="button" onclick="addSectionV173(\''+attr(section.id)+'\')">在下方新增區段</button>'+sectionBranchEditorHtmlV173(section,sectionIndex);shell.appendChild(foot);editor.appendChild(shell);
-  });
-}
-function addQuestionToSectionV173(sectionId,type){
-  currentSectionIdV173=sectionId;var q=newQuestion(type||'short');q.sectionIdV173=sectionId;
-  var last=-1;draftQuestions.forEach(function(item,index){if(item.sectionIdV173===sectionId)last=index});draftQuestions.splice(last<0?draftQuestions.length:last+1,0,q);
-  activeQuestionIdV144=q.id;window.__scrollToQuestionIndex=questionIndexByIdV144(q.id);markFormDirty();renderQuestionEditor();focusQuestionByIdV144(q.id);
-}
-function sectionLogicReportV173(sections,questions){
-  sections=normalizeSectionsV173(sections,questions);questions=normalizeQuestions(questions);var errors=[],warnings=[],ids=new Set(sections.map(function(s){return s.id}));
-  sections.forEach(function(section,index){
-    var own=questions.filter(function(q){return (q.sectionIdV173||sections[0].id)===section.id});
-    if(!section.title.trim())errors.push('區段 '+(index+1)+' 缺少標題');
-    if(!own.length)warnings.push('「'+section.title+'」沒有題目，將作為說明頁顯示');
-    var navigation=section.navigation||{},source=own.find(function(q){return q.id===navigation.sourceQuestionId});
-    if(navigation.sourceQuestionId&&!source)errors.push('「'+section.title+'」的跳題來源不在此區段');
-    if(source&&!['single','dropdown','department'].includes(source.type))errors.push('「'+section.title+'」的跳題來源必須是單選、下拉或部門題目');
-    Object.keys(navigation.routes||{}).forEach(function(option){var target=navigation.routes[option];if(['next','submit'].includes(target))return;var targetIndex=sections.findIndex(function(item){return item.id===target});if(!ids.has(target))errors.push('「'+section.title+'」的答案「'+option+'」指向不存在的區段');else if(targetIndex<=index)errors.push('「'+section.title+'」不可跳回目前或前方區段')});
-  });
-  var reachable=new Set([sections[0].id]);
-  sections.forEach(function(section,index){if(!reachable.has(section.id))return;var navigation=section.navigation||{},routes=Object.values(navigation.routes||{}),source=questions.find(function(q){return q.id===navigation.sourceQuestionId}),options=branchSourceOptionsV173(source),next=sections[index+1],hasFallback=!source||!source.required||!routes.length||routes.includes('next')||options.some(function(option){return !(option in (navigation.routes||{}))});if(hasFallback&&next)reachable.add(next.id);routes.forEach(function(target){if(ids.has(target))reachable.add(target)})});
-  sections.forEach(function(section,index){if(index&&!reachable.has(section.id))warnings.push('「'+section.title+'」目前沒有可到達的填寫路徑')});
-  return {errors:errors,warnings:warnings};
-}
-function showSectionLogicReportV173(){
-  var report=sectionLogicReportV173(draftSectionsV173,draftQuestions),box=$('sectionLogicSummaryV173');if(!box)return report;
-  box.hidden=false;box.className='sectionLogicSummaryV173 '+(report.errors.length?'hasError':report.warnings.length?'hasWarning':'isOk');
-  box.innerHTML='<b>'+(report.errors.length?'發現 '+report.errors.length+' 個需要修正的問題':report.warnings.length?'邏輯可執行，另有 '+report.warnings.length+' 項提醒':'區段與跳題邏輯檢查通過')+'</b>'+report.errors.map(function(item){return '<p>錯誤：'+esc(item)+'</p>'}).join('')+report.warnings.map(function(item){return '<p>提醒：'+esc(item)+'</p>'}).join('');
-  box.scrollIntoView({behavior:'smooth',block:'nearest'});return report;
-}
-function editorPreviewFormV173(){
-  return {id:'flow_test_v173',title:String(($('formTitle')||{}).value||'').trim()||'未命名問卷',description:'',identityMode:'none',questions:normalizeQuestions(JSON.parse(JSON.stringify(draftQuestions))),sectionsV173:JSON.parse(JSON.stringify(draftSectionsV173)),completionV173:completionSettingsFromEditorV173()};
-}
-function ensureFlowTestModalV173(){
-  if($('flowTestMaskV173'))return;
-  document.body.insertAdjacentHTML('beforeend','<div id="flowTestMaskV173" class="modalMask flowTestMaskV173" style="display:none"><div class="modalBox flowTestModalV173" role="dialog" aria-modal="true" aria-labelledby="flowTestTitleV173"><div class="sectionHead"><div><h2 id="flowTestTitleV173">測試填寫流程</h2><p>僅供預覽，不會儲存問卷或建立填寫紀錄。</p></div><button class="btn" type="button" onclick="closeSectionFlowTestV173()">關閉</button></div><div id="flowTestBodyV173"></div></div></div>');
-}
-function openSectionFlowTestV173(){
-  var report=sectionLogicReportV173(draftSectionsV173,draftQuestions);if(report.errors.length){showSectionLogicReportV173();return notify('請先修正區段跳題邏輯，再測試填寫流程','warn')}
-  ensureFlowTestModalV173();var form=editorPreviewFormV173(),body=$('flowTestBodyV173');
-  body.innerHTML='<div class="flowTestBannerV173">測試模式｜不會送出資料</div><form id="flowTestFormV173" class="questionList frontFormStack"><div class="frontFormHeading"><h2>'+esc(form.title)+'</h2></div>'+form.questions.map(function(q){return renderPublicQuestion(q,'test_q_')}).join('')+'<div class="submitArea"><button id="flowTestSubmitV173" class="btn primary" type="button">完成測試</button></div></form>';
-  $('flowTestMaskV173').style.display='grid';enhanceSectionedFormV173($('flowTestFormV173'),form,'test_q_',true);
-}
-function closeSectionFlowTestV173(){if($('flowTestMaskV173'))$('flowTestMaskV173').style.display='none'}
-function sectionFormValueV173(formEl,question,prefix){
-  var data=new FormData(formEl),name=prefix+question.id;return String(data.get(name)||'');
-}
-function validateSectionPageV173(page){
-  var controls=Array.from(page.querySelectorAll('input,select,textarea')).filter(function(control){return !control.disabled&&!control.closest('[hidden]')});
-  for(var i=0;i<controls.length;i++)if(!controls[i].checkValidity()){controls[i].reportValidity();return false}return true;
-}
-function enhanceSectionedFormV173(formEl,form,prefix,isTest){
-  if(!formEl||formEl.dataset.sectionsReadyV173)return;prefix=prefix||'q_';var questions=normalizeQuestions(form.questions||[]),sections=normalizeSectionsV173(form.sectionsV173,questions);
-  if(!sections.length)return;formEl.dataset.sectionsReadyV173='true';formEl.noValidate=true;
-  var pages=document.createElement('div');pages.className='sectionPagesV173';var questionNodes={};
-  formEl.querySelectorAll('[data-question-id-v171]').forEach(function(node){questionNodes[node.dataset.questionIdV171]=node});
-  sections.forEach(function(section,index){var page=document.createElement('section');page.className='sectionPageV173';page.dataset.sectionIdV173=section.id;page.hidden=index!==0;page.innerHTML='<div class="sectionPageHeadV173"><span>區段 '+(index+1)+'／'+sections.length+'</span><h2>'+esc(section.title)+'</h2>'+(section.description?'<p>'+esc(section.description)+'</p>':'')+'</div>';questions.forEach(function(q){if((q.sectionIdV173||sections[0].id)===section.id&&questionNodes[q.id])page.appendChild(questionNodes[q.id])});pages.appendChild(page)});
-  var heading=formEl.querySelector('.frontFormHeading');if(heading)heading.insertAdjacentHTML('afterend','<div class="sectionProgressV173" aria-live="polite"><div><span></span></div><p></p></div>');
-  var submitArea=formEl.querySelector('.submitArea'),submitButton=submitArea&&submitArea.querySelector('button');if(submitArea)submitArea.remove();formEl.appendChild(pages);
-  var nav=document.createElement('div');nav.className='sectionNavV173';nav.innerHTML='<button class="btn sectionBackV173" type="button">上一頁</button><button class="btn primary sectionNextV173" type="button">下一頁</button>';if(submitButton){var placeholder=nav.querySelector('.sectionNextV173');submitButton.type='button';submitButton.classList.add('sectionNextV173');submitButton.textContent='下一頁';placeholder.replaceWith(submitButton)}formEl.appendChild(nav);
-  var state={index:0,history:[],skipped:new Set()};
-  function applyFlowVisibility(){applyConditionalVisibilityV171(formEl,form,prefix);questions.forEach(function(q){var node=questionNodes[q.id];if(node&&state.skipped.has(q.sectionIdV173||sections[0].id)){node.hidden=true;node.dataset.sectionSkipV173='true';node.querySelectorAll('input,select,textarea').forEach(function(control){control.disabled=true})}})}
-  function restoreQuestionVisibility(){state.skipped.clear();questions.forEach(function(q){var node=questionNodes[q.id];if(node&&node.dataset.sectionSkipV173==='true'){node.hidden=false;node.querySelectorAll('input,select,textarea').forEach(function(control){control.disabled=false});delete node.dataset.sectionSkipV173}});applyFlowVisibility()}
-  function skipBetween(from,to){if(to<=from+1)return;for(var i=from+1;i<to;i++)state.skipped.add(sections[i].id);applyFlowVisibility()}
-  function targetFor(index){var section=sections[index],source=questions.find(function(q){return q.id===(section.navigation||{}).sourceQuestionId}),answer=source?sectionFormValueV173(formEl,source,prefix):'',target=source?((section.navigation.routes||{})[answer]||'next'):'next';if(target==='submit')return'submit';if(target!=='next'){var found=sections.findIndex(function(item){return item.id===target});if(found>index)return found}return index+1}
-  function show(index,back){index=Math.max(0,Math.min(sections.length-1,index));Array.from(pages.children).forEach(function(page,i){page.hidden=i!==index});state.index=index;if(back)restoreQuestionVisibility();var progress=formEl.querySelector('.sectionProgressV173'),percent=Math.round((index+1)/sections.length*100);if(progress){progress.querySelector('span').style.width=percent+'%';progress.querySelector('p').textContent='填寫進度 '+(index+1)+'／'+sections.length+'（'+percent+'%）'}nav.querySelector('.sectionBackV173').disabled=!state.history.length;var next=nav.querySelector('.sectionNextV173');next.textContent=index===sections.length-1?(isTest?'完成測試':'確認並送出'):'下一頁';pages.children[index].scrollIntoView({behavior:'smooth',block:'start'});applyFlowVisibility()}
-  nav.querySelector('.sectionBackV173').addEventListener('click',function(){if(!state.history.length)return;show(state.history.pop(),true)});
-  nav.querySelector('.sectionNextV173').addEventListener('click',function(){var page=pages.children[state.index],identity=state.index===0?formEl.querySelector('.identityCard'):null;applyFlowVisibility();if(identity&&!validateSectionPageV173(identity))return;if(!validateSectionPageV173(page))return;var target=targetFor(state.index);if(target==='submit'||state.index===sections.length-1){if(isTest){bodySuccessV173();return}if(target==='submit')skipBetween(state.index,sections.length);applyFlowVisibility();formEl.requestSubmit();return}state.history.push(state.index);skipBetween(state.index,target);show(target,false)});
-  function bodySuccessV173(){var completion=completionSettingsV173(form);formEl.innerHTML='<div class="successCard"><h2>'+esc(completion.title)+'</h2><p>'+esc(completion.message||'測試流程已完成；本次內容未送出、未儲存。')+'</p><button class="btn primary" type="button" onclick="closeSectionFlowTestV173()">結束測試</button></div>'}
-  formEl.addEventListener('input',applyFlowVisibility);formEl.addEventListener('change',applyFlowVisibility);show(0,false);
-}
-var renderQuestionEditorV173Base=renderQuestionEditor;
-renderQuestionEditor=function(){renderQuestionEditorV173Base();enhanceQuestionEditorV173()};
-var startNewFormV173Base=startNewForm;
-startNewForm=function(){startNewFormV173Base();prepareDraftSectionsV173(null);setCompletionEditorV173(null);renderQuestionEditor()};
-var editFormV173Base=editForm;
-editForm=function(id){editFormV173Base(id);var form=forms.find(function(item){return item.id===id});prepareDraftSectionsV173(form);setCompletionEditorV173(form);renderQuestionEditor()};
-var addQuestionV173Base=addQuestion;
-addQuestion=function(type){if(draftSectionsV173.length)return addQuestionToSectionV173(currentSectionIdV173||draftSectionsV173[0].id,type);return addQuestionV173Base(type)};
-addQuestionAfterV143=function(index,type){var source=draftQuestions[Number(index)];if(!source)return addQuestion(type);var q=newQuestion(type||'short');q.sectionIdV173=source.sectionIdV173;draftQuestions.splice(Number(index)+1,0,q);activeQuestionIdV144=q.id;window.__scrollToQuestionIndex=Number(index)+1;markFormDirty();renderQuestionEditor();focusQuestionByIdV144(q.id)};
-moveQuestion=function(index,delta){index=Number(index);var q=draftQuestions[index];if(!q)return;var indexes=draftQuestions.map(function(item,i){return item.sectionIdV173===q.sectionIdV173?i:-1}).filter(function(i){return i>=0}),position=indexes.indexOf(index),target=indexes[position+Number(delta)];if(target==null)return;draftQuestions.splice(target,0,draftQuestions.splice(index,1)[0]);activeQuestionIdV144=q.id;markFormDirty();renderQuestionEditor();focusQuestionByIdV144(q.id)};
-var formQuestionsValidV173Base=formQuestionsValid;
-formQuestionsValid=function(){var base=formQuestionsValidV173Base();if(base)return base;var report=sectionLogicReportV173(draftSectionsV173,draftQuestions);return report.errors[0]||''};
-var renderFrontV173Base=renderFront;
-renderFront=function(){renderFrontV173Base();var form=activeForm(),formEl=$('publicForm');if(form&&formEl)enhanceSectionedFormV173(formEl,form,'q_',false)};
-var openAssistedFillV173Base=openAssistedFill;
-openAssistedFill=function(memberId){openAssistedFillV173Base(memberId);var form=activeForm(),formEl=$('assistedForm');if(form&&formEl)enhanceSectionedFormV173(formEl,form,'assist_q_',false)};
-var duplicateFormV173Base=duplicateForm;
-duplicateForm=async function(id){
-  var source=forms.find(function(item){return item.id===id});if(!source||!source.sectionsV173)return duplicateFormV173Base(id);
-  var originalSections=source.sectionsV173,originalCompletion=source.completionV173;
-  await duplicateFormV173Base(id);
-  var created=activeForm();if(created&&created.id!==id)try{await doc('universalForms',created.id).set({sectionsV173:JSON.parse(JSON.stringify(originalSections)),completionV173:JSON.parse(JSON.stringify(originalCompletion||{}))},{merge:true});created.sectionsV173=JSON.parse(JSON.stringify(originalSections));created.completionV173=JSON.parse(JSON.stringify(originalCompletion||{}));prepareDraftSectionsV173(created);setCompletionEditorV173(created);renderQuestionEditor()}catch(error){console.error(error);notify('問卷已複製，但區段設定同步失敗，請重新確認','warn')}
-};
 
