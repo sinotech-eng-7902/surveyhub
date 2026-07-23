@@ -10,8 +10,8 @@ if(submitResponseV144Base){
       };
       try{
         await submitResponseV144Base(event);
-        var card=document.querySelector('.submitSuccessCard p');
-        if(card)card.textContent='已收到您的填寫內容，感謝您的填寫。';
+        var card=document.querySelector('.submitSuccessCard p'),completion=typeof completionSettingsV173==='function'?completionSettingsV173(f):null;
+        if(card&&!completion?.message)card.textContent='已收到您的填寫內容，感謝您的填寫。';
       }finally{
         confirmDialog=oldConfirm;
       }
