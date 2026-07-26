@@ -155,7 +155,7 @@ if(selectFormRawV145){
     }
     formDirty=false;
     activeFormId=id;
-    history.replaceState(null,'','#admin/'+encodeURIComponent(id));
+    history.replaceState(null,'','#manage/'+encodeURIComponent(id));
     await loadResponses();
     renderAdmin();
     if(inEditor){
