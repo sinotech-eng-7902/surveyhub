@@ -4612,3 +4612,317 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
     font-size:19px;
   }
 }
+
+/* v1.76: dedicated C-style management login landing page. */
+.homeLoginActiveV176{
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 16% 72%,rgba(47,196,207,.17),transparent 34%),
+    radial-gradient(circle at 88% 16%,rgba(71,143,197,.12),transparent 31%),
+    linear-gradient(135deg,#eef8fc 0%,#f8fbfd 52%,#f5f8fa 100%);
+}
+.homeLoginActiveV176 .frontShell{
+  min-height:100vh;
+}
+.homeLoginActiveV176 .frontMain{
+  width:100%;
+  max-width:none;
+  min-height:100vh;
+  margin:0;
+  padding:0;
+}
+.homeLoginV176{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:minmax(410px,1fr) minmax(470px,560px);
+  align-items:center;
+  gap:clamp(36px,6vw,96px);
+  width:min(1380px,100%);
+  min-height:100vh;
+  margin:auto;
+  padding:clamp(56px,7vw,104px);
+}
+.homeLoginV176::before,
+.homeLoginV176::after{
+  position:absolute;
+  z-index:-1;
+  border:1px solid rgba(80,156,190,.15);
+  border-radius:44px;
+  content:"";
+  pointer-events:none;
+}
+.homeLoginV176::before{
+  top:7%;
+  right:-10%;
+  width:370px;
+  height:175px;
+}
+.homeLoginV176::after{
+  bottom:-6%;
+  left:-11%;
+  width:330px;
+  height:190px;
+}
+.homeLoginVisualV176{
+  position:relative;
+  width:min(100%,600px);
+  height:520px;
+  margin-inline:auto;
+}
+.visualGlowV176{
+  position:absolute;
+  inset:10% 4% 4%;
+  z-index:-1;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(50,188,199,.27) 0%,rgba(50,188,199,.08) 44%,transparent 72%);
+  filter:blur(14px);
+}
+.visualCardV176{
+  position:absolute;
+  border:1px solid rgba(255,255,255,.92);
+  background:rgba(255,255,255,.49);
+  box-shadow:0 24px 55px rgba(34,87,112,.09);
+  backdrop-filter:blur(7px);
+}
+.visualCardMainV176{
+  top:3%;
+  left:13%;
+  width:68%;
+  height:54%;
+  padding:42px 34px;
+  border-radius:26px;
+  transform:rotate(4deg);
+}
+.visualCardMainV176 span{
+  display:block;
+  width:64px;
+  height:64px;
+  margin-bottom:26px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#8dd6de,#dff5f6);
+}
+.visualCardMainV176 i{
+  display:block;
+  width:74%;
+  height:12px;
+  margin:16px 0;
+  border-radius:999px;
+  background:rgba(76,148,175,.18);
+}
+.visualCardMainV176 i:nth-of-type(2){width:88%}
+.visualCardMainV176 i:nth-of-type(3){width:58%}
+.visualCardChartV176{
+  right:2%;
+  top:42%;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:18px;
+  width:49%;
+  height:31%;
+  padding:34px 36px;
+  border-radius:22px;
+  transform:rotate(-2deg);
+}
+.visualCardChartV176 b{
+  display:block;
+  width:24px;
+  height:36%;
+  border-radius:7px 7px 2px 2px;
+  background:linear-gradient(180deg,#88d2dc,#b9e4e8);
+}
+.visualCardChartV176 b:nth-child(2){height:68%}
+.visualCardChartV176 b:nth-child(3){height:49%}
+.visualCardChartV176 b:nth-child(4){height:86%}
+.visualCardRingV176{
+  left:1%;
+  bottom:3%;
+  display:grid;
+  place-items:center;
+  width:38%;
+  aspect-ratio:1.45;
+  border-radius:22px;
+  transform:rotate(2deg);
+}
+.visualCardRingV176 span{
+  width:88px;
+  height:88px;
+  border:18px solid rgba(69,175,187,.33);
+  border-right-color:rgba(24,114,142,.12);
+  border-radius:50%;
+}
+.homeLoginCardV176{
+  position:relative;
+  padding:clamp(36px,4vw,54px);
+  border:1px solid rgba(196,216,226,.78);
+  border-radius:25px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 28px 70px rgba(35,68,90,.13);
+  text-align:center;
+}
+.homeLoginCardV176::before{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:5px;
+  border-radius:25px 0 0 25px;
+  background:linear-gradient(180deg,#184c77,#228f96);
+  content:"";
+}
+.homeLoginCardV176>img{
+  display:block;
+  width:min(100%,410px);
+  max-height:90px;
+  margin:0 auto 30px;
+  object-fit:contain;
+}
+.homeLoginDividerV176{
+  height:1px;
+  margin:0 0 32px;
+  background:linear-gradient(90deg,transparent,#cfdee6 18%,#cfdee6 82%,transparent);
+}
+.homeLoginCardV176 h1{
+  margin:0;
+  color:#123b63;
+  font-size:clamp(30px,2.45vw,42px);
+  line-height:1.35;
+  letter-spacing:.035em;
+}
+.homeLoginCardV176>p{
+  margin:14px 0 32px;
+  color:#27828a;
+  font-size:clamp(17px,1.35vw,21px);
+  font-weight:750;
+  letter-spacing:.07em;
+}
+.homeGoogleButtonV176,
+.loginCard .btn.primary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  width:100%;
+  min-height:62px;
+  border:0;
+  border-radius:13px;
+  background:linear-gradient(110deg,#123f70 0%,#17608a 55%,#228d94 100%);
+  box-shadow:0 11px 24px rgba(21,75,109,.2);
+  color:#fff;
+  font-size:19px;
+  font-weight:850;
+  letter-spacing:.025em;
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;
+}
+.homeGoogleButtonV176:hover,
+.homeGoogleButtonV176:focus-visible,
+.loginCard .btn.primary:hover,
+.loginCard .btn.primary:focus-visible{
+  filter:saturate(1.12) brightness(1.04);
+  outline:3px solid rgba(46,144,160,.2);
+  outline-offset:3px;
+  box-shadow:0 15px 30px rgba(21,75,109,.25);
+  transform:translateY(-2px);
+}
+.googleMarkV176{
+  display:grid;
+  place-items:center;
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#fff;
+  color:#4285f4;
+  font-family:Arial,sans-serif;
+  font-size:23px;
+  font-weight:900;
+  line-height:1;
+}
+.homeLoginMessageV176{
+  min-height:1.7em;
+  margin:16px 0 -12px!important;
+  color:#ad3328!important;
+  font-size:14px!important;
+  font-weight:650!important;
+  letter-spacing:0!important;
+}
+.homeGoogleButtonV176.isLoadingV176,
+.loginCard .btn.primary.isLoadingV176{
+  cursor:wait;
+  filter:grayscale(.15);
+  opacity:.7;
+  transform:none;
+}
+.loginCard .btn.primary{
+  min-height:54px;
+  font-size:16px;
+}
+@media(max-width:900px){
+  .homeLoginV176{
+    grid-template-columns:minmax(0,1fr) minmax(390px,520px);
+    gap:30px;
+    padding:48px 38px;
+  }
+  .homeLoginVisualV176{
+    height:430px;
+  }
+}
+@media(max-width:760px){
+  .homeLoginV176{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100svh;
+    padding:32px 20px;
+  }
+  .homeLoginVisualV176{
+    display:none;
+  }
+  .homeLoginCardV176{
+    width:min(100%,520px);
+  }
+}
+@media(max-width:480px){
+  .homeLoginV176{
+    padding:20px 14px;
+  }
+  .homeLoginCardV176{
+    padding:32px 22px 28px;
+    border-radius:20px;
+  }
+  .homeLoginCardV176::before{
+    border-radius:20px 0 0 20px;
+  }
+  .homeLoginCardV176>img{
+    width:min(100%,330px);
+    margin-bottom:24px;
+  }
+  .homeLoginDividerV176{
+    margin-bottom:26px;
+  }
+  .homeLoginCardV176 h1{
+    font-size:27px;
+    letter-spacing:0;
+  }
+  .homeLoginCardV176>p{
+    margin:12px 0 26px;
+    font-size:16px;
+    letter-spacing:.025em;
+  }
+  .homeGoogleButtonV176{
+    min-height:58px;
+    font-size:17px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .homeGoogleButtonV176,
+  .loginCard .btn.primary{
+    transition:none;
+  }
+  .homeGoogleButtonV176:hover,
+  .homeGoogleButtonV176:focus-visible,
+  .loginCard .btn.primary:hover,
+  .loginCard .btn.primary:focus-visible{
+    transform:none;
+  }
+}
