@@ -1145,6 +1145,7 @@ function removeReferenceFileV156(key){
 }
 function fileSizeTextV156(size){size=Number(size||0);if(size>=1048576)return (size/1048576).toFixed(size>=10485760?0:1)+' MB';if(size>=1024)return Math.round(size/1024)+' KB';return size+' B'}
 function paperclipIconV173(){return '<svg class="paperclipIconV173" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 12.9 14.6 6.5a3 3 0 0 1 4.2 4.2l-8.1 8.1a5 5 0 0 1-7.1-7.1l8.2-8.2"></path><path d="m7.5 14.8 7.8-7.8a1.5 1.5 0 0 1 2.1 2.1l-7.8 7.8a2.7 2.7 0 0 1-3.8-3.8l7.5-7.5"></path></svg>'}
+function frontPaperclipIconV174(){return '<svg class="frontPaperclipIconV174" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"></path></svg>'}
 function renderReferenceFilesV156(){
   var list=$('referenceFileListV156'),status=$('referenceFileStatusV156');if(!list||!status)return;
   var existing=retainedReferenceFilesV156.map(function(file){return {key:referenceFileKeyV156(file),name:file.name||'檔案',size:file.size||0,pending:false}}),pending=pendingReferenceFilesV156.map(function(item){return {key:referenceFileKeyV156(item),name:item.file.name,size:item.file.size,pending:true}}),all=existing.concat(pending);
@@ -1166,7 +1167,7 @@ function frontDescriptionHtmlV156(form){
 }
 function frontReferenceFilesHtmlV156(form){
   var files=[].concat(form.referenceFiles||[]).filter(function(file){return file&&file.path});if(!files.length)return '';
-  return '<div class="frontReferenceFilesV156 frontFilesOnlyV173"><div>'+files.map(function(file){return '<button type="button" onclick="openReferenceFileV156(\''+attr(file.path)+'\')">'+paperclipIconV173()+'<span>'+esc(file.name||'檔案')+'</span></button>'}).join('')+'</div></div>';
+  return '<div class="frontReferenceFilesV156 frontFilesOnlyV173 frontAttachmentsV174"><div>'+files.map(function(file){var name=String(file.name||'檔案');return '<button type="button" title="'+attr('開啟附件：'+name)+'" aria-label="'+attr('開啟附件：'+name)+'" onclick="openReferenceFileV156(\''+attr(file.path)+'\')">'+frontPaperclipIconV174()+'<span>'+esc(name)+'</span></button>'}).join('')+'</div></div>';
 }
 async function openReferenceFileV156(path){try{var url=await storage.ref().child(path).getDownloadURL();window.open(url,'_blank','noopener')}catch(e){console.error(e);notify('檔案目前無法開啟','error')}}
 function installMobileHeaderV156(){

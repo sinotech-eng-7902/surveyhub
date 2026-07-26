@@ -4412,3 +4412,87 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
 .frontFilesOnlyV173 button:hover,.frontFilesOnlyV173 button:focus-visible{transform:translateY(-1px);border-color:var(--theme-accent,#176f69);box-shadow:0 5px 14px rgba(27,67,82,.11)}
 .frontFilesOnlyV173 button span{overflow-wrap:anywhere}
 .referenceFileItemV156>.paperclipIconV173{margin-inline:2px 5px}
+
+/* v1.74: compact front attachment chips without the former full-width frame. */
+.frontAttachmentsV174{
+  display:block;
+  width:auto;
+  max-width:100%;
+  margin-top:16px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.frontAttachmentsV174>div{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px;
+}
+.frontAttachmentsV174 button{
+  display:inline-flex;
+  width:auto;
+  min-width:0;
+  max-width:min(100%,520px);
+  min-height:44px;
+  align-items:center;
+  gap:9px;
+  padding:9px 13px;
+  border:1px solid #d7dde3;
+  border-radius:10px;
+  background:#fff;
+  color:#23465d;
+  box-shadow:0 2px 7px rgba(27,46,61,.06);
+  font-weight:750;
+  text-align:left;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.frontAttachmentsV174 button:hover,
+.frontAttachmentsV174 button:focus-visible{
+  transform:translateY(-1px);
+  border-color:#aeb6bf;
+  box-shadow:0 7px 17px rgba(27,46,61,.12);
+}
+.frontAttachmentsV174 button span{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.frontPaperclipIconV174{
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  fill:none;
+  stroke:#8b8f96;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:stroke .16s ease;
+}
+.frontAttachmentsV174 button:hover .frontPaperclipIconV174,
+.frontAttachmentsV174 button:focus-visible .frontPaperclipIconV174{
+  stroke:#676d75;
+}
+@media(max-width:560px){
+  .frontAttachmentsV174>div{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+  }
+  .frontAttachmentsV174 button{
+    width:100%;
+    max-width:100%;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .frontAttachmentsV174 button,
+  .frontPaperclipIconV174{
+    transition:none;
+  }
+  .frontAttachmentsV174 button:hover,
+  .frontAttachmentsV174 button:focus-visible{
+    transform:none;
+  }
+}
