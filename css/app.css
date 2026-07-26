@@ -4496,3 +4496,119 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
     transform:none;
   }
 }
+
+/* v1.75: sortable content blocks with administrator-provided attachments. */
+.contentBlockEditorV175{
+  border-left:5px solid #5a90ad;
+  background:linear-gradient(180deg,#fbfdff 0%,#f5f9fc 100%);
+}
+.questionAddBottom{
+  flex-wrap:wrap;
+  gap:10px;
+}
+.contentBlockEditorV175 .questionNumber{
+  color:#255f7d;
+}
+.contentBlockMainGridV175{
+  grid-template-columns:minmax(0,2fr) minmax(180px,1fr);
+}
+.contentBlockFileFieldV175{
+  margin-top:14px;
+  padding:15px;
+  border:1px solid #d4e0e8;
+  border-radius:12px;
+  background:#fff;
+}
+.contentBlockFileHeadingV175{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.contentBlockFileHeadingV175>div{
+  display:grid;
+  gap:4px;
+}
+.contentBlockFileHeadingV175 small{
+  color:#647789;
+  line-height:1.5;
+}
+.contentBlockFileListV175{
+  display:grid;
+  gap:8px;
+  margin-top:12px;
+}
+.contentBlockFileListV175>p{
+  margin:0;
+  color:#7b8996;
+}
+.contentBlockFileItemV175{
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:9px;
+  min-height:46px;
+  padding:7px 8px 7px 12px;
+  border:1px solid #dce5eb;
+  border-radius:10px;
+  background:#f8fbfd;
+}
+.contentBlockFileItemV175>span{
+  overflow:hidden;
+  color:#27475c;
+  font-weight:750;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.contentBlockFileItemV175>small{
+  color:#6b7d8b;
+}
+.contentBlockV175{
+  border-color:#bed5e2;
+  background:linear-gradient(145deg,#f9fcfe 0%,#edf6fa 100%);
+}
+.contentBlockV175 h3{
+  margin:0 0 9px;
+  color:#173e58;
+  font-size:21px;
+  line-height:1.45;
+}
+.contentBlockDescriptionV175{
+  color:#425c6e;
+  line-height:1.75;
+  white-space:pre-wrap;
+}
+.contentBlockV175 .questionImage{
+  margin-top:15px;
+}
+.contentBlockAttachmentsV175{
+  margin-top:15px;
+}
+@media(max-width:680px){
+  .questionAddBottom{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .contentBlockMainGridV175{
+    grid-template-columns:1fr;
+  }
+  .contentBlockFileHeadingV175{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .contentBlockFileHeadingV175>.btn{
+    width:100%;
+  }
+  .contentBlockFileItemV175{
+    grid-template-columns:22px minmax(0,1fr) auto;
+  }
+  .contentBlockFileItemV175>small{
+    display:none;
+  }
+  .contentBlockV175{
+    padding:18px;
+  }
+  .contentBlockV175 h3{
+    font-size:19px;
+  }
+}
