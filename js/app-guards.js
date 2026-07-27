@@ -154,10 +154,8 @@ if(selectFormRawV145){
       return;
     }
     formDirty=false;
-    activeFormId=id;
-    history.replaceState(null,'','#manage/'+encodeURIComponent(id));
-    await loadResponses();
-    renderAdmin();
+    await switchActiveFormV178(id);
+    if(activeFormId!==id)return;
     if(inEditor){
       if(canManageForm(id)&&editFormRawV145)editFormRawV145(id);
       else await showPanel('dashboardPanel');
