@@ -4990,3 +4990,44 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
   .contentPurposeHelpV180{margin-top:2px}
   .contentPurposeBadgeV180{justify-self:start}
 }
+
+/* v1.81: focused survey editor with content, settings and appearance workspaces. */
+.editorCardV181{position:relative;padding:0;overflow:visible}
+.editorHeadV181{margin:0;padding:24px 26px 20px;border-bottom:1px solid #e1e8f0;align-items:center}
+.editorHeadV181 h2{margin-bottom:5px}.editorHeadV181 p{margin:0}
+.editorHeadActionsV181{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.editorStateBadgeV181{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid #d9e3ed;border-radius:999px;background:#f5f8fb;color:#4b6075;font-size:13px;font-weight:800}
+.editorStateBadgeV181.state-open{border-color:#b9e3cc;background:#edf9f2;color:#147342}
+.editorStateBadgeV181.state-scheduled{border-color:#bcd6f4;background:#eef6ff;color:#245f9e}
+.editorStateBadgeV181.state-expired,.editorStateBadgeV181.state-closed{border-color:#e3d8d8;background:#faf4f4;color:#8a4e4e}
+.editorToolbarV181{position:relative;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 26px;border-bottom:1px solid #e3eaf1;background:#f9fbfd}
+.editorTabsV181{display:flex;align-items:center;gap:5px;padding:4px;border:1px solid #dce6ef;border-radius:12px;background:#fff}
+.editorTabsV181 button{min-height:40px;padding:0 17px;border:0;border-radius:9px;background:transparent;color:#52677d;font:inherit;font-weight:800;cursor:pointer}
+.editorTabsV181 button:hover,.editorTabsV181 button:focus-visible{background:#eef5fd;color:#1f5fa6;outline:0}
+.editorTabsV181 button.active{background:#e8f2ff;color:#185a9f;box-shadow:inset 0 0 0 1px #cbdff5}
+.editorAttachmentsV181{position:relative}.editorAttachmentsV181>summary{list-style:none;cursor:pointer;white-space:nowrap}.editorAttachmentsV181>summary::-webkit-details-marker{display:none}
+.editorAttachmentsV181>summary span{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;margin-left:5px;padding:0 6px;border-radius:999px;background:#e7eef6;color:#405b78;font-size:12px}
+.editorAttachmentPanelV181{position:absolute;top:calc(100% + 10px);right:0;width:min(520px,calc(100vw - 48px));padding:20px;border:1px solid #d8e3ed;border-radius:14px;background:#fff;box-shadow:0 16px 36px rgba(25,53,83,.16)}
+.editorAttachmentPanelV181 h3{margin:0 0 6px}.editorAttachmentPanelV181 .formBlockHelpV156{margin:0 0 14px}
+.editorPaneV181{padding:24px 26px 8px}.editorPaneV181[hidden]{display:none!important}
+.editorPaneV181>.formBlock:first-child{margin-top:0}
+.editorContentIntroV181{display:grid;gap:14px;padding:20px;margin-bottom:22px;background:#fbfcfe}
+.editorContentIntroV181>label{font-size:15px;font-weight:800}.editorContentIntroV181>label>input{margin-top:8px;font-size:18px;font-weight:700}
+.editorDescriptionV181{border-top:1px solid #e5ebf1;padding-top:13px}.editorDescriptionV181>summary{cursor:pointer;color:#32506f;font-weight:800}
+.editorDescriptionV181[open]>summary{margin-bottom:14px}
+.editorSettingsGridV181{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;margin-bottom:18px}
+.editorSettingsGridV181 label{display:grid;gap:7px}.editorSettingsGridV181 small{color:#6a7c90;font-size:13px;font-weight:400;line-height:1.5}
+.appearanceImageV181{margin-top:24px;padding-top:18px;border-top:1px solid #e3eaf1}
+.editorSaveActionsV181{margin:14px 26px 0;padding:18px 0 24px;border-top:1px solid #e3eaf1;background:#fff}
+.frontScheduleNoticeV181 p{margin-top:8px;color:#587087}
+.statePill.state-scheduled{border-color:#bdd8f1;background:#eef6ff;color:#245f9e}
+@media(max-width:760px){
+  .editorHeadV181{align-items:flex-start;padding:20px 18px 17px}.editorHeadActionsV181{justify-content:flex-start}
+  .editorToolbarV181{align-items:stretch;padding:12px 18px;flex-direction:column}
+  .editorTabsV181{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.editorTabsV181 button{padding:0 8px;font-size:14px}
+  .editorAttachmentsV181>summary{width:100%;justify-content:center}
+  .editorAttachmentPanelV181{position:static;width:auto;margin-top:10px;box-shadow:none}
+  .editorPaneV181{padding:18px 18px 6px}.editorSettingsGridV181{grid-template-columns:1fr}
+  .editorSaveActionsV181{margin:10px 18px 0;padding-bottom:20px}
+}
+@media(max-width:430px){.editorTabsV181 button{font-size:13px}.editorHeadActionsV181 .modeBadge{display:none}}
