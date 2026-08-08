@@ -5197,3 +5197,65 @@ body[data-front-theme="freshIllustration"] .formHero:after{content:'';position:a
   .frontShell .answerQuestionV188>label.title{gap:8px;padding-right:26px}.frontQuestionNumberV188{flex-basis:24px;width:24px;height:24px}.frontShell .submitArea{justify-content:stretch}.frontShell .submitArea .btn.primary{width:100%}.completionVisualV188{margin:22px auto;padding:38px 20px}
 }
 @media(prefers-reduced-motion:reduce){.themePreviewV188,.frontMain>.formHero{transition:none}}
+
+/* === v1.89 full theme contrast and editor disclosure consistency === */
+body[data-front-theme]{
+  --front-action-bg:var(--front-accent);
+  --front-action-text:#fff;
+  --front-pill-bg:color-mix(in srgb,var(--front-accent) 10%,white);
+  --front-pill-text:var(--front-accent);
+  --front-deadline-bg:rgba(255,255,255,.94);
+  --front-deadline-border:rgba(255,255,255,.38);
+  --front-deadline-text:var(--front-text);
+}
+body[data-front-theme="appleWhite"]{--front-action-bg:#245f9e;--front-pill-bg:#eef5ff;--front-pill-text:#174f8a;--front-deadline-border:#d8e2ef;--front-deadline-text:#08264a}
+body[data-front-theme="oceanBlue"]{--front-action-bg:#126f75;--front-pill-bg:#e6f6f5;--front-pill-text:#12666a;--front-deadline-text:#124d55}
+body[data-front-theme="sunnyOrange"]{--front-action-bg:#92531f;--front-pill-bg:#fff0dc;--front-pill-text:#824516;--front-deadline-border:#e8caa8;--front-deadline-text:#643a18}
+body[data-front-theme="forestGreen"]{--front-action-bg:#2d6b54;--front-pill-bg:#e7f4eb;--front-pill-text:#235c45;--front-deadline-text:#204f3e}
+body[data-front-theme="sinotechRed"]{--front-action-bg:#aa3029;--front-pill-bg:#fff0ed;--front-pill-text:#912a25;--front-deadline-text:#77231f}
+body[data-front-theme="sakura"]{--front-action-bg:#326fa8;--front-pill-bg:#eaf2fa;--front-pill-text:#285f91;--front-deadline-text:#234f78}
+body[data-front-theme="mistGray"]{--front-action-bg:#425c75;--front-pill-bg:#eaf0f5;--front-pill-text:#3d566e;--front-deadline-text:#33495e}
+body[data-front-theme="navyGold"]{--front-accent:#8b621c;--front-action-bg:#17355c;--front-pill-bg:#f8efd9;--front-pill-text:#755117;--front-deadline-text:#17355c}
+body[data-front-theme="lavenderCare"]{--front-hero-bg:linear-gradient(135deg,#594776,#725e91);--front-action-bg:#655485;--front-pill-bg:#f0eafb;--front-pill-text:#624f83;--front-deadline-text:#4d3e68}
+body[data-front-theme="paperWarm"]{--front-action-bg:#765333;--front-pill-bg:#f5eadb;--front-pill-text:#6f4d2e;--front-deadline-border:#decdb7;--front-deadline-text:#574535}
+body[data-front-theme="techGradient"]{--front-action-bg:#4847a9;--front-pill-bg:#ecebff;--front-pill-text:#49479f;--front-deadline-text:#34326e}
+body[data-front-theme="freshIllustration"]{--front-hero-bg:linear-gradient(135deg,#1c6865,#2d7f75);--front-action-bg:#1f6e6a;--front-pill-bg:#e5f6f1;--front-pill-text:#21645f;--front-deadline-text:#205a57}
+body[data-front-theme="brandCustom"]{--front-action-bg:var(--front-accent);--front-pill-bg:color-mix(in srgb,var(--front-accent) 11%,white);--front-pill-text:var(--front-text);--front-deadline-text:var(--front-text)}
+
+body[data-front-theme] .frontShell .btn.primary{background:var(--front-action-bg);border-color:var(--front-action-bg);color:var(--front-action-text)}
+body[data-front-theme] .frontActions .statusPill{background:var(--front-pill-bg);border-color:color-mix(in srgb,var(--front-pill-text) 25%,#d8e2ef);color:var(--front-pill-text)}
+body[data-front-theme] .frontMain>.formHero .deadlineBadge{background:var(--front-deadline-bg);border:1px solid var(--front-deadline-border);color:var(--front-deadline-text)}
+body[data-front-theme] .frontMain>.formHero.heroStyleBannerV188 h1,
+body[data-front-theme] .frontMain>.formHero.heroStyleBannerV188>p,
+body[data-front-theme] .frontMain>.formHero.heroStyleBannerV188 .frontDescriptionV156,
+body[data-front-theme] .frontMain>.formHero.heroStyleBannerV188 .frontDescriptionV156 *{color:var(--front-hero-text)}
+body[data-front-theme] .frontMain>.formHero.heroStyleCompactV188 h1,
+body[data-front-theme] .frontMain>.formHero.heroStyleCompactV188>p,
+body[data-front-theme] .frontMain>.formHero.heroStyleCompactV188 .frontDescriptionV156,
+body[data-front-theme] .frontMain>.formHero.heroStyleCompactV188 .frontDescriptionV156 *,
+body[data-front-theme] .frontMain>.formHero.heroStyleSideV188 h1,
+body[data-front-theme] .frontMain>.formHero.heroStyleSideV188>p,
+body[data-front-theme] .frontMain>.formHero.heroStyleSideV188 .frontDescriptionV156,
+body[data-front-theme] .frontMain>.formHero.heroStyleSideV188 .frontDescriptionV156 *{color:var(--front-text)}
+body[data-front-theme] .frontMain>.formHero.heroStyleImageV188 h1,
+body[data-front-theme] .frontMain>.formHero.heroStyleImageV188>p,
+body[data-front-theme] .frontMain>.formHero.heroStyleImageV188 .frontDescriptionV156,
+body[data-front-theme] .frontMain>.formHero.heroStyleImageV188 .frontDescriptionV156 *{color:#fff}
+body[data-front-theme] .frontMain>.formHero{overflow:hidden}
+
+.previewHeroV188{background:var(--preview-hero-bg,linear-gradient(135deg,var(--preview-accent),color-mix(in srgb,var(--preview-accent) 72%,#50a99f)));color:var(--preview-hero-text,#fff)}
+.themePreviewV188[data-preview-hero=compact] .previewHeroV188,.themePreviewV188[data-preview-hero=sideAccent] .previewHeroV188{color:var(--preview-text)}
+
+.editorDescriptionV181>summary,.editorAttachmentsInlineV182>summary{
+  position:relative;display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:9px 38px 9px 0;
+  list-style:none;cursor:pointer;color:#164d7a;font-weight:800;
+}
+.editorDescriptionV181>summary::-webkit-details-marker,.editorAttachmentsInlineV182>summary::-webkit-details-marker{display:none}
+.editorDescriptionV181>summary:after,.editorAttachmentsInlineV182>summary:after{
+  content:'';position:absolute;right:7px;top:50%;width:8px;height:8px;margin-top:-6px;
+  border-right:2px solid #66809a;border-bottom:2px solid #66809a;transform:rotate(45deg);transition:transform .16s ease,margin .16s ease;
+}
+.editorDescriptionV181[open]>summary:after,.editorAttachmentsInlineV182[open]>summary:after{margin-top:-2px;transform:rotate(225deg)}
+.editorDescriptionV181>summary:hover,.editorAttachmentsInlineV182>summary:hover{color:#0f5f9d}
+.editorDescriptionV181>summary:focus-visible,.editorAttachmentsInlineV182>summary:focus-visible{outline:2px solid #6da5d3;outline-offset:4px;border-radius:6px}
+.editorAttachmentsInlineV182>summary:after,.editorAttachmentsInlineV182[open]>summary:after{content:''}

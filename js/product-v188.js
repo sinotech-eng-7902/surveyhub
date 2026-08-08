@@ -20,6 +20,7 @@
     appleWhite:['#f4f7fa','#ffffff','#245f9e','#17324d'],oceanBlue:['#eff8fa','#157b82','#168a87','#17324d'],sunnyOrange:['#fbf6ee','#f1dfc8','#a8672e','#563719'],forestGreen:['#f0f7f3','#33705c','#3c8068','#173f34'],sinotechRed:['#fff7f2','#d85835','#c44731','#55241d'],sakura:['#eef3f9','#416b92','#326fa8','#17324d'],mistGray:['#f2f4f6','#ffffff','#536f8a','#2c3e50'],navyGold:['#f5f1e8','#17355c','#aa7b28','#142e52'],lavenderCare:['#f5f1fa','#e7def4','#7d68aa','#433a5c'],paperWarm:['#faf6ed','#fffdf8','#916b42','#574535'],techGradient:['#edf2ff','#4c61bd','#5856c8','#25355f'],freshIllustration:['#eff9f6','#e1f4ef','#df7969','#205a57'],brandCustom:['#f3f6fa','#ffffff','#245f9e','#17324d']
   };
   var DEFAULT_CUSTOM_V188={accent:'#245f9e',background:'#f3f6fa',card:'#ffffff',text:'#17324d'};
+  var currentThemeFilterV188='all';
 
   function safeColorV188(value,fallback){value=String(value||'').trim();return /^#[0-9a-f]{6}$/i.test(value)?value:fallback}
   function heroStyleForV188(form){var value=form&&form.heroStyle;return ['compact','banner','image','sideAccent'].includes(value)?value:'banner'}
@@ -41,9 +42,10 @@
       if(!card.querySelector('small'))card.insertAdjacentHTML('beforeend','<small>'+esc(meta.description)+'</small>');
       card.setAttribute('aria-label',theme.label+'：'+meta.description);
     });
-    updateThemePreviewV188();
+    window.filterThemeGalleryV188(currentThemeFilterV188);updateThemePreviewV188();
   }
   window.filterThemeGalleryV188=function(group){
+    currentThemeFilterV188=['all','formal','fresh','soft','active','custom'].includes(group)?group:'all';group=currentThemeFilterV188;
     document.querySelectorAll('.themeFiltersV188 button').forEach(function(button){button.classList.toggle('active',button.dataset.filter===group)});
     document.querySelectorAll('#themeChoices .themeCard').forEach(function(card){card.hidden=group!=='all'&&card.dataset.group!==group});
   };
@@ -75,9 +77,9 @@
   var baseSelectThemeV188=selectTheme;
   selectTheme=function(id){var result=baseSelectThemeV188(id);decorateThemeCardsV188();updateThemePreviewV188();return result};
   var baseStartNewFormV188=startNewForm;
-  startNewForm=function(){var result=baseStartNewFormV188();setThemeStudioFieldsV188(null);return result};
+  startNewForm=function(){currentThemeFilterV188='all';var result=baseStartNewFormV188();setThemeStudioFieldsV188(null);return result};
   var baseEditFormV188=editForm;
-  editForm=function(id){var result=baseEditFormV188(id),form=forms.find(function(item){return item.id===id});setThemeStudioFieldsV188(form);return result};
+  editForm=function(id){currentThemeFilterV188='all';var result=baseEditFormV188(id),form=forms.find(function(item){return item.id===id});setThemeStudioFieldsV188(form);return result};
   var baseSetEditorTabV188=setEditorTabV181;
   setEditorTabV181=function(name){var result=baseSetEditorTabV188(name);if(name==='appearance'){ensureThemeStudioV188();decorateThemeCardsV188()}return result};
 
