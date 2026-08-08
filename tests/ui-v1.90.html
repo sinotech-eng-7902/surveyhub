@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v1.90 標題區全主題視覺驗證</title>
+  <link rel="stylesheet" href="../css/app.css?v=1.90">
+  <style>
+    .fixtureTools{position:sticky;top:0;z-index:600;display:flex;justify-content:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.96);border-bottom:1px solid #d8e2ec}
+    .fixtureTools select{width:auto;margin:0;padding:7px 10px;border:1px solid #cbd9e6;border-radius:9px;background:#fff}
+    body.auditHeroOnly .fixtureTools,body.auditHeroOnly .frontHeader,body.auditHeroOnly #publicForm{display:none}
+    body.auditHeroOnly .frontShell{min-height:0;padding:12px;background:transparent}
+    body.auditHeroOnly .frontMain{width:100%;max-width:none;margin:0}
+    body.auditHeroOnly .formHero{margin:0}
+    body.auditHeroOnly *,body.auditHeroOnly *:before,body.auditHeroOnly *:after{transition:none!important;animation:none!important}
+  </style>
+</head>
+<body data-front-theme="techGradient">
+  <div class="fixtureTools">
+    <label>主題 <select id="fixtureTheme"><option value="appleWhite">企業簡約</option><option value="oceanBlue">清新藍綠</option><option value="sunnyOrange">暖米行政</option><option value="forestGreen">自然植感</option><option value="sinotechRed">活動活力</option><option value="sakura">清雅藍霧</option><option value="mistGray">霧灰極簡</option><option value="navyGold">深藍典雅</option><option value="lavenderCare">淡紫關懷</option><option value="paperWarm">紙張暖白</option><option value="techGradient" selected>科技漸層</option><option value="freshIllustration">清新插畫</option><option value="brandCustom">自訂品牌</option></select></label>
+    <label>標題區 <select id="fixtureHero"><option value="heroStyleCompactV188">精簡標題</option><option value="heroStyleBannerV188" selected>色塊橫幅</option><option value="heroStyleImageV188">圖片標題區</option><option value="heroStyleSideV188">側邊色帶</option></select></label>
+  </div>
+  <div class="frontShell">
+    <header class="frontHeader"><img src="../assets/company-logo.png" alt="環興科技股份有限公司"><div class="frontActions"><span class="statusPill">開放填寫</span></div></header>
+    <main class="frontMain">
+      <section id="fixtureHeroCard" class="formHero heroStyleBannerV188" style="--hero-image-v188:url('../assets/theme-cover-sample.svg')">
+        <h1>員工意見調查</h1>
+        <p>希望了解同仁目前的工作感受，作為後續改善參考。</p>
+        <div class="frontHeroMetaV190"><div class="frontReferenceFilesV156 frontFilesOnlyV173 frontAttachmentsV174"><div><button type="button" title="開啟附件：員工意見調查填寫說明與注意事項.pdf"><svg class="frontPaperclipIconV174" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 12.5 15 7a3 3 0 0 1 4.2 4.2l-7.1 7.1a5 5 0 0 1-7.1-7.1l7.4-7.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m7.8 14.2 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>員工意見調查填寫說明與注意事項.pdf</span></button></div></div><span class="deadlineBadge"><span class="frontDeadlineIconV190" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4.5 9h15M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><circle cx="15.5" cy="15" r="2.8"/><path d="M15.5 13.6v1.6l1.1.7"/></svg></span>請於 2026/08/31 23:59 前完成</span></div>
+      </section>
+      <form id="publicForm" class="questionList frontFormStack">
+        <section class="questionCard identityCard"><label class="title">填寫者資料 <span class="required">*</span></label><div class="identityGrid"><label>部門<select><option>請選擇部門</option></select></label><label>姓名<select disabled><option>請先選擇部門</option></select></label></div></section>
+        <section class="questionCard answerQuestionV188"><label class="title"><span class="frontQuestionNumberV188">1</span>您對目前整體工作體驗的滿意程度為何？ <span class="required">*</span></label><div class="scaleQuestion"><span class="scaleLabel">非常不滿意</span><div class="scaleOptions"><label class="scaleOption"><input type="radio" name="score"><span>1</span></label><label class="scaleOption"><input type="radio" name="score"><span>2</span></label><label class="scaleOption"><input type="radio" name="score"><span>3</span></label><label class="scaleOption"><input type="radio" name="score"><span>4</span></label><label class="scaleOption"><input type="radio" name="score"><span>5</span></label></div><span class="scaleLabel">非常滿意</span></div></section>
+        <section class="questionCard answerQuestionV188"><label class="title"><span class="frontQuestionNumberV188">2</span>您認為最值得改善的項目有哪些？</label><div class="choiceList"><label class="choice"><input type="checkbox">工作流程</label><label class="choice"><input type="checkbox">跨部門溝通</label><label class="choice"><input type="checkbox">辦公環境</label></div></section>
+        <section class="questionCard answerQuestionV188"><label class="title"><span class="frontQuestionNumberV188">3</span>其他建議</label><textarea placeholder="請輸入您的建議（選填）"></textarea></section>
+        <div class="submitArea"><button class="btn primary" type="button">確認並送出</button></div>
+      </form>
+    </main>
+  </div>
+  <script>
+    const theme=document.getElementById('fixtureTheme'),hero=document.getElementById('fixtureHero'),heroCard=document.getElementById('fixtureHeroCard');
+    const params=new URLSearchParams(location.search),heroMap={compact:'heroStyleCompactV188',banner:'heroStyleBannerV188',image:'heroStyleImageV188',sideAccent:'heroStyleSideV188'};
+    const applyFixture=()=>{document.body.dataset.frontTheme=theme.value;heroCard.classList.remove('heroStyleCompactV188','heroStyleBannerV188','heroStyleImageV188','heroStyleSideV188');heroCard.classList.add(hero.value)};
+    if([...theme.options].some(option=>option.value===params.get('theme')))theme.value=params.get('theme');
+    if(heroMap[params.get('hero')])hero.value=heroMap[params.get('hero')];
+    if(params.get('audit')==='1')document.body.classList.add('auditHeroOnly');
+    theme.onchange=applyFixture;hero.onchange=applyFixture;applyFixture();
+    document.querySelectorAll('.choice input,.scaleOption input').forEach(input=>input.onchange=()=>input.closest('.questionCard').classList.add('isAnsweredV187'));
+  </script>
+</body>
+</html>

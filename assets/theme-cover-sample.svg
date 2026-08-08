@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720" role="img" aria-labelledby="title desc">
+  <title id="title">問卷圖片標題區測試封面</title>
+  <desc id="desc">藍綠色辦公空間抽象構圖，用於驗證圖片標題區的文字對比。</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#8fd2d0"/>
+      <stop offset=".5" stop-color="#dbece7"/>
+      <stop offset="1" stop-color="#f3d3a4"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" x2="1">
+      <stop offset="0" stop-color="#164e63" stop-opacity=".82"/>
+      <stop offset="1" stop-color="#2f7d71" stop-opacity=".52"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="720" fill="url(#sky)"/>
+  <circle cx="1320" cy="105" r="170" fill="#fff" opacity=".45"/>
+  <path d="M0 500L340 278l245 148 330-238 245 180 440-230v582H0z" fill="#fff" opacity=".55"/>
+  <path d="M0 550L350 350l245 140 330-215 255 170 420-198v473H0z" fill="url(#glass)"/>
+  <g fill="none" stroke="#fff" stroke-width="10" opacity=".54">
+    <path d="M1020 154h330v220h-330z"/>
+    <path d="M1185 154v220M1020 264h330"/>
+  </g>
+  <g fill="#17485a" opacity=".55">
+    <circle cx="160" cy="150" r="24"/><circle cx="220" cy="195" r="15"/><circle cx="275" cy="142" r="32"/>
+  </g>
+</svg>

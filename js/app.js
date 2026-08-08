@@ -514,7 +514,7 @@ var FORM_THEMES_V132=[
   {id:'sunnyOrange',label:'暖米行政',a:'#9a5b25',b:'#fbf3e8',accent:'#b56c2f'},
   {id:'forestGreen',label:'自然植感',a:'#2f6d58',b:'#edf7f1',accent:'#3c8068'},
   {id:'sinotechRed',label:'活動活力',a:'#b8332c',b:'#fff0e8',accent:'#e06a3a'},
-  {id:'sakura',label:'自訂封面',a:'#385d85',b:'#edf3fa',accent:'#326fa8'},
+  {id:'sakura',label:'清雅藍霧',a:'#385d85',b:'#edf3fa',accent:'#326fa8'},
   {id:'mistGray',label:'霧灰極簡',a:'#34465a',b:'#f2f4f6',accent:'#536f8a'},
   {id:'navyGold',label:'深藍典雅',a:'#142e52',b:'#f7f2e6',accent:'#aa7b28'},
   {id:'lavenderCare',label:'淡紫關懷',a:'#695b8f',b:'#f5f1fa',accent:'#7d68aa'},

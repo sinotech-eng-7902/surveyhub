@@ -7,7 +7,7 @@
     sunnyOrange:{group:'warm',description:'溫暖親切的行政問卷'},
     forestGreen:{group:'fresh',description:'自然沉穩的綠色層次'},
     sinotechRed:{group:'active',description:'適合活動與意見募集'},
-    sakura:{group:'image',description:'以自訂圖片作為視覺焦點'},
+    sakura:{group:'soft',description:'清雅藍灰與柔和層次'},
     mistGray:{group:'formal',description:'低彩度、安靜而專業'},
     navyGold:{group:'formal',description:'深藍與淡金的正式質感'},
     lavenderCare:{group:'soft',description:'適合滿意度與關懷調查'},

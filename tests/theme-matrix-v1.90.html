@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v1.90｜13 款主題 × 4 種標題區視覺矩陣</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;padding:24px;font-family:"Microsoft JhengHei",system-ui,sans-serif;color:#17324d;background:#eef3f7}
+    h1{margin:0;font-size:28px}p{margin:5px 0 22px;color:#667b91}.matrix{display:grid;gap:24px}.themeRow{padding:18px;border:1px solid #d4e0ea;border-radius:18px;background:#fff;box-shadow:0 8px 22px rgba(23,50,77,.05)}
+    .themeRow h2{margin:0 0 13px;font-size:20px}.styles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.sample{min-width:0}.sample b{display:block;margin:0 0 6px;font-size:13px;color:#526b82}
+    iframe{display:block;width:100%;height:350px;border:1px solid #d8e2ec;border-radius:13px;background:#f5f8fb}
+    @media(max-width:1100px){.styles{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){body{padding:12px}.styles{grid-template-columns:1fr}.themeRow{padding:12px}iframe{height:330px}}
+  </style>
+</head>
+<body>
+  <h1>13 款主題 × 4 種標題區</h1>
+  <p>共 52 組實際 CSS 呈現；圖片標題區使用測試封面，不以空白色塊代替。</p>
+  <main id="matrix" class="matrix"></main>
+  <script>
+    const themes=[['appleWhite','企業簡約'],['oceanBlue','清新藍綠'],['sunnyOrange','暖米行政'],['forestGreen','自然植感'],['sinotechRed','活動活力'],['sakura','清雅藍霧'],['mistGray','霧灰極簡'],['navyGold','深藍典雅'],['lavenderCare','淡紫關懷'],['paperWarm','紙張暖白'],['techGradient','科技漸層'],['freshIllustration','清新插畫'],['brandCustom','自訂品牌']];
+    const styles=[['compact','精簡標題'],['banner','色塊橫幅'],['image','圖片標題區'],['sideAccent','側邊色帶']];
+    document.getElementById('matrix').innerHTML=themes.map(([theme,label])=>`<section class="themeRow" data-theme="${theme}"><h2>${label}</h2><div class="styles">${styles.map(([style,styleLabel])=>`<div class="sample"><b>${styleLabel}</b><iframe loading="lazy" title="${label}－${styleLabel}" src="ui-v1.90.html?theme=${theme}&hero=${style}&audit=1"></iframe></div>`).join('')}</div></section>`).join('');
+  </script>
+</body>
+</html>
