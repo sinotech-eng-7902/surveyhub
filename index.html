@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>公司通用問卷調查系統 v1.79</title>
+  <title>公司通用問卷調查系統 v1.80</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="css/app.css?v=1.79">
+  <link rel="stylesheet" href="css/app.css?v=1.80">
 </head>
 <body class="appBooting" aria-busy="true">
   <div id="appBootScreen" class="appBootScreen" role="status" aria-live="polite">
@@ -90,7 +90,7 @@
       </section>
 
       <section id="editorPanel" class="panel">
-        <div class="card"><div class="sectionHead"><div><h2 id="editorHeading">新增問卷</h2><p>可建立各式題目，並在題目之間加入文字、圖片或附件內容區塊。</p></div><span id="editorMode" class="modeBadge">新增模式</span></div>
+        <div class="card"><div class="sectionHead"><div><h2 id="editorHeading">新增問卷</h2><p>「作答題目」供填寫者回答；「說明內容」可在題目之間插入文字、圖片或附件，不需作答。</p></div><span id="editorMode" class="modeBadge">新增模式</span></div>
           <div class="formBlock"><h3>基本設定</h3><div class="formGrid"><label>問卷標題<span>*</span><input id="formTitle" placeholder="例如：員工制服尺寸調查"></label><label>截止時間<input id="formDeadline" type="datetime-local"></label><label>狀態<select id="formState"><option value="draft">草稿</option><option value="open">開放填寫</option><option value="closed">已關閉</option></select></label></div>
           <div class="richDescriptionFieldV156"><label for="formDescriptionEditor">問卷說明</label><div class="richDescriptionControlsV156"><div class="richToolbarV156" role="toolbar" aria-label="問卷說明格式"><button type="button" class="richToolButtonV156" data-command="bold" title="粗體">B</button><span class="richToolDividerV156"></span><button type="button" class="richToolButtonV156" data-command="insertUnorderedList">• 清單</button><button type="button" class="richToolButtonV156" data-command="insertOrderedList">1. 清單</button><span class="richToolDividerV156"></span><button type="button" class="richToolButtonV156" data-command="createLink">加入連結</button><button type="button" class="richToolButtonV156" data-command="removeFormat">清除格式</button></div><div id="formDescriptionEditor" class="richEditorV156" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="輸入問卷說明，可選取文字後套用格式"></div><textarea id="formDescription" hidden></textarea><div class="richSettingsV156"><label>文字大小<select id="formDescriptionFontSize"><option value="14">小（14px）</option><option value="16" selected>標準（16px）</option><option value="18">大（18px）</option><option value="20">特大（20px）</option></select></label><label>對齊方式<select id="formDescriptionAlign"><option value="left">靠左</option><option value="center">置中</option></select></label></div><p class="richHelpV156">可使用粗體、項目符號、編號及安全連結。</p></div></div><div class="themeSettings"><h4>問卷主題</h4><input id="formTheme" type="hidden" value="appleWhite"><div id="themeChoices" class="themeChoices"></div></div></div>
           <div class="formBlock"><h3>填寫對象</h3><div class="identitySettings"><label>填寫者身分資料<select id="identityMode" onchange="renderTargetDepartments()"><option value="member">使用公司人員資料庫</option><option value="none">不收集／自行設計題目</option></select></label><div><b>開放填寫部門</b><p>請至少選擇一個部門，避免問卷誤開放給非本次調查對象。</p><div id="targetDepartmentBox" class="departmentChoices"></div></div></div></div>
@@ -157,8 +157,8 @@
   </div>
   <div id="pageLoading" class="pageLoading" hidden><div>處理中…</div></div>
   <script src="js/config.js?v=1.58"></script>
-  <script src="js/app.js?v=1.79"></script>
-  <script src="js/app-guards.js?v=1.79"></script>
+  <script src="js/app.js?v=1.80"></script>
+  <script src="js/app-guards.js?v=1.80"></script>
 </body>
 </html>
 

@@ -4958,3 +4958,35 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
 .missingToolsV179 input,.missingToolsV179 select{width:100%;min-height:46px;margin:0}
 @media(max-width:900px){.surveyManagementCardV179>.sectionHead{align-items:flex-start}.missingToolsV179{grid-template-columns:1fr}}
 @media(max-width:640px){.adminShell .dashboardMetrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}.adminShell .dashboardMetrics .metric{min-height:112px;padding:17px 15px 15px}.adminShell .dashboardMetrics .metric b{font-size:27px}.adminShell .dashboardMetrics .metric span:not(.metricProgress){font-size:14px}}
+
+/* v1.80: clearly separate answer questions from non-answer explanatory content. */
+.contentBlockEditorV180{
+  border-color:#bfd8dc;
+  border-left:6px solid #21858a;
+  background:linear-gradient(180deg,#f7fcfc 0%,#eef8f8 100%);
+}
+.contentBlockEditorV180:focus-within,
+.contentBlockEditorV180.activeQuestion{
+  border-color:#73b7bb;
+  background:linear-gradient(180deg,#f5fbfb 0%,#eaf7f7 100%);
+  box-shadow:0 0 0 3px rgba(33,133,138,.1);
+}
+.contentBlockEditorV180:focus-within:before,
+.contentBlockEditorV180.activeQuestion:before{background:#21858a}
+.contentBlockEditorV180 .questionNumber{background:#dff3f3;color:#14686d}
+.contentPurposeBadgeV180{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border:1px solid #a9d5d7;border-radius:999px;background:#fff;color:#176f73;font-size:13px;font-weight:800}
+.contentPurposeHelpV180{margin:-2px 0 15px;padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.72);color:#55757b;font-size:14px;line-height:1.65}
+.contentBlockMainGridV180{grid-template-columns:minmax(0,1fr)}
+.questionAddBottomV180{display:grid;grid-template-columns:repeat(2,minmax(0,300px));justify-content:center;align-items:stretch;gap:12px;margin-top:20px}
+.questionAddChoiceV180{display:grid;grid-template-rows:auto 1fr;gap:7px;padding:13px;border:1px solid #d9e3ed;border-radius:13px;background:#fff;text-align:center}
+.questionAddChoiceV180 .btn{width:100%;min-width:0}
+.questionAddChoiceV180 small{color:#6a7c90;font-size:13px;line-height:1.5}
+.contentChoiceV180{border-color:#c8dfe1;background:#f6fbfb}
+.contentChoiceV180 .btn{border-color:#96c9cc;background:#fff;color:#176f73}
+.contentChoiceV180 .btn:hover,.contentChoiceV180 .btn:focus-visible{border-color:#21858a;background:#e5f5f5;color:#125c60}
+.questionEmptyHelpV180{text-align:center;padding:22px;border:1px dashed #cbd8e5;border-radius:12px;background:#f8fafc}
+@media(max-width:680px){
+  .questionAddBottomV180{grid-template-columns:1fr}
+  .contentPurposeHelpV180{margin-top:2px}
+  .contentPurposeBadgeV180{justify-self:start}
+}
