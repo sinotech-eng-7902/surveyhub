@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v1.88 主題與前台視覺驗證</title>
+  <link rel="stylesheet" href="../css/app.css?v=1.88">
+  <style>
+    .fixtureTools{position:sticky;top:0;z-index:600;display:flex;justify-content:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.96);border-bottom:1px solid #d8e2ec}
+    .fixtureTools select{width:auto;margin:0;padding:7px 10px;border:1px solid #cbd9e6;border-radius:9px;background:#fff}
+  </style>
+</head>
+<body data-front-theme="techGradient">
+  <div class="fixtureTools">
+    <label>主題 <select id="fixtureTheme"><option value="appleWhite">企業簡約</option><option value="oceanBlue">清新藍綠</option><option value="sunnyOrange">暖米行政</option><option value="forestGreen">自然植感</option><option value="sinotechRed">活動活力</option><option value="sakura">自訂封面</option><option value="mistGray">霧灰極簡</option><option value="navyGold">深藍典雅</option><option value="lavenderCare">淡紫關懷</option><option value="paperWarm">紙張暖白</option><option value="techGradient" selected>科技漸層</option><option value="freshIllustration">清新插畫</option><option value="brandCustom">自訂品牌</option></select></label>
+    <label>標題區 <select id="fixtureHero"><option value="heroStyleCompactV188">精簡標題</option><option value="heroStyleBannerV188" selected>色塊橫幅</option><option value="heroStyleImageV188">圖片封面</option><option value="heroStyleSideV188">側邊色帶</option></select></label>
+  </div>
+  <div class="frontShell">
+    <header class="frontHeader"><img src="../assets/company-logo.png" alt="環興科技股份有限公司"><div class="frontActions"><span class="statusPill">開放填寫</span></div></header>
+    <main class="frontMain">
+      <section id="fixtureHeroCard" class="formHero heroStyleBannerV188">
+        <h1>員工意見調查</h1>
+        <p>希望了解同仁目前的工作感受，作為後續改善參考。</p>
+        <span class="deadlineBadge">請於 2026/08/31 23:59 前完成</span>
+      </section>
+      <form id="publicForm" class="questionList frontFormStack">
+        <section class="questionCard identityCard"><label class="title">填寫者資料 <span class="required">*</span></label><div class="identityGrid"><label>部門<select><option>請選擇部門</option></select></label><label>姓名<select disabled><option>請先選擇部門</option></select></label></div></section>
+        <section class="questionCard answerQuestionV188"><label class="title"><span class="frontQuestionNumberV188">1</span>您對目前整體工作體驗的滿意程度為何？ <span class="required">*</span></label><div class="scaleQuestion"><span class="scaleLabel">非常不滿意</span><div class="scaleOptions"><label class="scaleOption"><input type="radio" name="score"><span>1</span></label><label class="scaleOption"><input type="radio" name="score"><span>2</span></label><label class="scaleOption"><input type="radio" name="score"><span>3</span></label><label class="scaleOption"><input type="radio" name="score"><span>4</span></label><label class="scaleOption"><input type="radio" name="score"><span>5</span></label></div><span class="scaleLabel">非常滿意</span></div></section>
+        <section class="questionCard answerQuestionV188"><label class="title"><span class="frontQuestionNumberV188">2</span>您認為最值得改善的項目有哪些？</label><div class="choiceList"><label class="choice"><input type="checkbox">工作流程</label><label class="choice"><input type="checkbox">跨部門溝通</label><label class="choice"><input type="checkbox">辦公環境</label></div></section>
+        <section class="questionCard answerQuestionV188"><label class="title"><span class="frontQuestionNumberV188">3</span>其他建議</label><textarea placeholder="請輸入您的建議（選填）"></textarea></section>
+        <div class="submitArea"><button class="btn primary" type="button">確認並送出</button></div>
+      </form>
+    </main>
+  </div>
+  <script>
+    const theme=document.getElementById('fixtureTheme'),hero=document.getElementById('fixtureHero'),heroCard=document.getElementById('fixtureHeroCard');
+    theme.onchange=()=>document.body.dataset.frontTheme=theme.value;
+    hero.onchange=()=>{heroCard.classList.remove('heroStyleCompactV188','heroStyleBannerV188','heroStyleImageV188','heroStyleSideV188');heroCard.classList.add(hero.value)};
+    document.querySelectorAll('.choice input,.scaleOption input').forEach(input=>input.onchange=()=>input.closest('.questionCard').classList.add('isAnsweredV187'));
+  </script>
+</body>
+</html>
