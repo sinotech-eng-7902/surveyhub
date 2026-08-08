@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v1.81 UI 驗證頁</title>
+  <link rel="stylesheet" href="../css/app.css?v=1.81">
+  <style>body{margin:0}.adminShell{display:block!important}.panel{display:block}.fixturePane[hidden]{display:none!important}</style>
+</head>
+<body>
+  <div class="adminShell admin"><div class="layout">
+    <aside class="sidebar side topNav"><div class="ab"><img class="topBrandLogo" src="../assets/company-logo.png" alt="環興科技股份有限公司"></div><div class="topNavLinks"><button class="nav">儀表板</button><details class="navGroup topNavGroup" open><summary>問卷作業 <span class="navChevron topNavChevron"></span></summary><div class="navMenu topNavMenu"><button class="nav">問卷管理</button><button class="nav active">建立問卷</button><button class="nav">填寫結果</button></div></details><details class="navGroup topNavGroup"><summary>系統管理 <span class="navChevron topNavChevron"></span></summary></details></div><div class="adminIdentity topUserArea"><div class="topUserLabels"><b>行政部 蔡雨鑫</b><small>系統管理員</small></div><button class="topLogout">登出</button></div></aside>
+    <main class="adminMain main"><header class="adminHead adminPageHead compactAdminToolbar"><div><h1>問卷編輯</h1></div><div class="adminTools headActions"><button class="toolBtn frontViewButton">預覽問卷</button></div></header>
+      <section class="panel active"><div class="card editorCardV181">
+        <div class="sectionHead editorHeadV181"><div><h2>編輯問卷：員工意見調查</h2><p>先編輯題目內容；填寫對象、開放期間與外觀可在需要時另外設定。</p></div><div class="editorHeadActionsV181"><span class="modeBadge">編輯模式</span><span class="editorStateBadgeV181 state-scheduled">排程開放</span><button class="btn danger">關閉問卷</button></div></div>
+        <div class="editorToolbarV181"><div class="editorTabsV181" role="tablist"><button id="tabContent" class="active" aria-selected="true">內容編輯</button><button id="tabSettings" aria-selected="false">填寫設定</button><button id="tabAppearance" aria-selected="false">外觀設計</button></div><details class="editorAttachmentsV181"><summary class="btn">問卷附件 <span>2</span></summary><div class="editorAttachmentPanelV181"><h3>問卷附件</h3><p>整份問卷共用的填寫須知、規格或範本。</p><button class="btn">選擇檔案</button></div></details></div>
+        <div id="paneContent" class="editorPaneV181 fixturePane active"><div class="formBlock editorContentIntroV181"><label>問卷標題<span>*</span><input value="員工意見調查"></label><details class="editorDescriptionV181"><summary>問卷說明（選填）</summary></details></div><div class="questionHead"><div><h3>題目內容</h3><p>新增需要回答的作答題目，或插入不需作答的說明內容。</p></div></div><div class="questionEdit answerQuestionEditorV180"><div class="questionEditHeader"><button class="dragHandle">⋮⋮</button><span class="questionNumber">題目 1</span></div><div class="questionGrid"><label>題目名稱<input value="您對目前辦公環境滿意嗎？"></label><label>題型<select><option>單選</option></select></label></div></div><div class="questionAddBottom questionAddBottomV180"><div class="questionAddChoiceV180"><button class="btn primary">新增作答題目</button><small>建立需要填寫者回答的題目</small></div><div class="questionAddChoiceV180 contentChoiceV180"><button class="btn">加入說明內容</button><small>插入文字、圖片或附件，不需作答</small></div></div></div>
+        <div id="paneSettings" class="editorPaneV181 fixturePane" hidden><div class="formBlock"><div class="sectionHead"><div><h3>填寫設定</h3><p>設定開放期間、填寫者身分與開放填寫部門。</p></div></div><div class="formGrid editorSettingsGridV181"><label>開啟問卷時間（選填）<input type="datetime-local" value="2026-08-10T09:00"><small>未設定時，問卷切換為開放後立即提供填寫。</small></label><label>截止時間（選填）<input type="datetime-local" value="2026-08-31T23:59"><small>到達截止時間後，系統會自動停止接受回覆。</small></label></div></div></div>
+        <div id="paneAppearance" class="editorPaneV181 fixturePane" hidden><div class="formBlock"><h3>外觀設計</h3><p>設定問卷主題、色彩與頁首圖片。</p></div></div>
+        <div class="buttonRow stickyActions editorSaveActionsV181"><button class="btn primary">儲存變更</button><button class="btn">取消</button></div>
+      </div></section>
+    </main>
+  </div></div>
+  <script>
+    const keys=['Content','Settings','Appearance'];
+    keys.forEach(key=>document.getElementById('tab'+key).addEventListener('click',()=>keys.forEach(item=>{const active=item===key;document.getElementById('tab'+item).classList.toggle('active',active);document.getElementById('tab'+item).setAttribute('aria-selected',String(active));document.getElementById('pane'+item).hidden=!active})));
+  </script>
+</body>
+</html>

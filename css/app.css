@@ -5098,3 +5098,64 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
 .sectionRouteValuesV186{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:12px;border:1px solid var(--line);border-radius:11px}.sectionRouteValuesV186 legend{padding:0 5px;color:var(--muted)}.sectionRouteValuesV186 label{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:9px;background:#f4f7fa}.sectionRouteValuesV186 input{width:18px;height:18px}
 .reminderActionsV186{margin-left:auto}.reminderComposerV186{width:min(720px,calc(100vw - 28px))}.reminderComposerV186>label{display:grid;gap:7px;margin-top:13px;font-weight:700}.reminderComposerV186 textarea{min-height:250px;resize:vertical;line-height:1.7}
 @media(max-width:620px){.sectionRoutingV186>div:first-child{flex-direction:column}.reminderActionsV186{width:100%;margin:8px 0 0}.reminderActionsV186 .btn{flex:1}}
+
+/* v1.87: front-end presentation modes, theme refinement, and responsive feedback */
+.fillLayoutSettingsV187{display:grid;gap:14px;margin:0 0 22px;padding:0 0 20px;border-bottom:1px solid var(--line,#d8e2ef)}
+.fillLayoutSettingsV187 h4{margin:0 0 5px;color:#08264a;font-size:18px}.fillLayoutSettingsV187 p{margin:0;color:#64788e;line-height:1.6}
+.fillLayoutChoicesV187{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fillLayoutChoicesV187 button{display:grid;grid-template-columns:76px 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;padding:15px;border:1px solid #d8e3ed;border-radius:15px;background:#fff;color:#17324d;font:inherit;cursor:pointer;transition:border-color .16s,background .16s,box-shadow .16s,transform .16s}
+.fillLayoutChoicesV187 button:hover,.fillLayoutChoicesV187 button:focus-visible{border-color:#8db5dd;background:#f7fbff;outline:0;transform:translateY(-1px)}
+.fillLayoutChoicesV187 button.active{border-color:#2c75ba;background:#eff7ff;box-shadow:0 0 0 2px rgba(44,117,186,.1)}
+.fillLayoutChoicesV187 button b{align-self:end;font-size:16px}.fillLayoutChoicesV187 button small{align-self:start;color:#667b90}
+.layoutPreviewV187{grid-row:1/3;display:grid;align-content:center;gap:5px;width:76px;height:54px;padding:8px;border-radius:10px;background:#edf4fb;border:1px solid #d6e4f1}
+.layoutPreviewV187 i{display:block;height:8px;border-radius:5px;background:#7aa6d0}.layoutPreviewV187.standard i:nth-child(2){width:82%}.layoutPreviewV187.standard i:nth-child(3){width:64%}.layoutPreviewV187.focus i{height:25px;background:linear-gradient(135deg,#73a4d2,#3b7fbb)}
+
+body[data-front-theme]{--front-card:#fff;--front-card-border:#d7e2ec;--front-choice:#fbfdff;--front-choice-hover:#edf6ff;--front-choice-selected:#e7f2ff;--front-shadow:0 8px 24px rgba(23,50,77,.045)}
+body[data-front-theme="appleWhite"]{--front-bg:radial-gradient(circle at 10% 8%,rgba(105,153,198,.10),transparent 25%),#f3f6fa;--front-hero-bg:linear-gradient(135deg,#fff,#f8fbfe);--front-hero-text:#08264a;--front-accent:#245f9e}
+body[data-front-theme="oceanBlue"]{--front-bg:radial-gradient(circle at 86% 10%,rgba(57,176,168,.15),transparent 28%),linear-gradient(180deg,#eff8fa,#f5f9fb);--front-hero-bg:linear-gradient(135deg,#135f75,#168a87);--front-hero-text:#fff;--front-accent:#168a87;--front-choice-selected:#e2f5f3;--front-choice-hover:#edf9f8}
+body[data-front-theme="sunnyOrange"]{--front-bg:radial-gradient(circle at 10% 12%,rgba(204,154,92,.15),transparent 26%),#fbf6ee;--front-hero-bg:linear-gradient(135deg,#fffaf2,#f3e3cb);--front-hero-text:#563719;--front-accent:#a8672e;--front-choice-selected:#fff0db;--front-choice-hover:#fff7eb}
+body[data-front-theme="forestGreen"]{--front-bg:radial-gradient(ellipse at 90% 6%,rgba(74,140,108,.16),transparent 27%),#f0f7f3;--front-hero-bg:linear-gradient(135deg,#285f4e,#3f8069);--front-hero-text:#fff;--front-accent:#3c8068;--front-choice-selected:#e5f4eb;--front-choice-hover:#eff8f2}
+body[data-front-theme="sinotechRed"]{--front-bg:radial-gradient(circle at 8% 10%,rgba(235,116,60,.16),transparent 27%),#fff7f2;--front-hero-bg:linear-gradient(135deg,#b8332c,#e46f3d);--front-hero-text:#fff;--front-accent:#c44731;--front-choice-selected:#ffebe5;--front-choice-hover:#fff3ef}
+body[data-front-theme="sakura"]{--front-bg:linear-gradient(180deg,rgba(230,238,247,.82),#f3f7fb);--front-hero-bg:linear-gradient(135deg,#315b82,#5c83a8);--front-hero-text:#fff;--front-accent:#326fa8}
+body[data-front-theme] .frontShell{background:var(--front-bg);background-attachment:fixed}
+body[data-front-theme] .frontShell .questionCard{position:relative;border-color:var(--front-card-border);background:var(--front-card);box-shadow:var(--front-shadow);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease,background .16s ease}
+body[data-front-theme] .frontShell .questionCard.isActiveV187{border-color:color-mix(in srgb,var(--front-accent) 58%,#d5e0ea);box-shadow:0 10px 30px color-mix(in srgb,var(--front-accent) 13%,transparent);transform:translateY(-1px)}
+body[data-front-theme] .frontShell .questionCard.isAnsweredV187:not(.identityCard):not(.contentBlockV175):before{content:'✓';position:absolute;top:18px;right:20px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--front-accent) 13%,white);color:var(--front-accent);font-size:13px;font-weight:900}
+body[data-front-theme] .frontShell .questionCard.hasErrorV187{border-color:#dc6b6b;box-shadow:0 0 0 3px rgba(220,70,70,.09)}
+body[data-front-theme] .frontShell .contentBlockV175{background:color-mix(in srgb,var(--front-accent) 4%,white);box-shadow:none}
+
+.formHero.heroCompactV187{min-height:0;padding-top:28px;padding-bottom:28px}.formHero.heroCompactV187 h1{margin:0}.formHero.heroMediumV187{padding-top:30px;padding-bottom:30px}.formHero.heroVisualV187{overflow:hidden}
+.frontFormStack{gap:14px}.frontFormStack>.questionCard{animation:frontCardEnterV187 .24s ease-out both}.frontFormStack>.questionCard:nth-of-type(2){animation-delay:.025s}.frontFormStack>.questionCard:nth-of-type(3){animation-delay:.05s}
+@keyframes frontCardEnterV187{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.frontShell .choiceList{gap:9px}.frontShell label.choice{border:1px solid #dce5ee;border-radius:13px;background:var(--front-choice);transition:background .14s,border-color .14s,transform .14s,box-shadow .14s}
+.frontShell label.choice:hover{background:var(--front-choice-hover);border-color:color-mix(in srgb,var(--front-accent) 35%,#dce5ee)}
+.frontShell label.choice:has(input:checked){background:var(--front-choice-selected);border-color:color-mix(in srgb,var(--front-accent) 65%,#dce5ee);box-shadow:0 0 0 2px color-mix(in srgb,var(--front-accent) 9%,transparent)}
+.frontShell label.choice:active,.frontShell .scaleOption:active,.frontShell .ratingStar:active{transform:scale(.985)}
+.frontShell .scaleOption:hover{background:var(--front-choice-hover);border-color:color-mix(in srgb,var(--front-accent) 48%,#d8e2ef)}
+.frontShell .scaleOption:has(input:checked),.frontShell .scaleOption.isSelected{background:var(--front-accent);border-color:var(--front-accent);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--front-accent) 28%,transparent)}
+.frontShell .ratingStar:hover{transform:translateY(-2px) scale(1.06)}
+
+.frontSectionStepsV187{display:flex;align-items:flex-start;justify-content:space-between;gap:0;margin:0 0 14px;padding:0;list-style:none;overflow:hidden}
+.frontSectionStepsV187 li{position:relative;display:grid;justify-items:center;gap:6px;flex:1;min-width:0;color:#8796a6;font-size:12px;text-align:center}
+.frontSectionStepsV187 li:not(:last-child):after{content:'';position:absolute;z-index:0;top:14px;left:calc(50% + 18px);right:calc(-50% + 18px);height:2px;background:#dce5ed}
+.frontSectionStepsV187 li.done:not(:last-child):after{background:color-mix(in srgb,var(--front-accent) 60%,#dce5ed)}
+.frontSectionStepsV187 li span{position:relative;z-index:1;display:grid;place-items:center;width:28px;height:28px;border:2px solid #d4dfe9;border-radius:50%;background:#fff;font-size:12px;font-weight:900}
+.frontSectionStepsV187 li b{display:block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.frontSectionStepsV187 li.current{color:var(--front-accent)}.frontSectionStepsV187 li.current span{border-color:var(--front-accent);background:var(--front-accent);color:#fff}.frontSectionStepsV187 li.done{color:#4d708f}.frontSectionStepsV187 li.done span{border-color:color-mix(in srgb,var(--front-accent) 60%,white);background:color-mix(in srgb,var(--front-accent) 13%,white);color:var(--front-accent)}
+.frontSectionHeaderV182{background:linear-gradient(135deg,color-mix(in srgb,var(--front-accent) 10%,white),#fff);border-color:color-mix(in srgb,var(--front-accent) 24%,white)}
+.frontSectionHeaderV182 span{color:var(--front-accent)}
+.frontFocusProgressV187{margin:0 0 14px}.frontFocusProgressV187>div{display:flex;align-items:center;gap:14px;color:#5f7388;font-size:14px;font-weight:800}.frontFocusProgressV187 b{display:block;flex:1;height:8px;border-radius:999px;background:#dfe7ee;overflow:hidden}.frontFocusProgressV187 i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--front-accent),color-mix(in srgb,var(--front-accent) 58%,#42bba7));transition:width .22s ease}
+#publicForm[data-layout-effective="focus"]>.focusStepV187{min-height:260px;display:grid;align-content:center;padding:38px 42px}#publicForm[data-layout-effective="focus"]>.focusStepV187[hidden]{display:none!important}#publicForm[data-layout-effective="focus"]>.submitArea{margin-top:0}
+.frontMobileActionsV187{display:none}
+
+@media(max-width:720px){
+  .fillLayoutChoicesV187{grid-template-columns:1fr}.fillLayoutChoicesV187 button{grid-template-columns:66px 1fr}.layoutPreviewV187{width:66px}
+  .frontMain{padding-left:14px;padding-right:14px}.frontHeader{padding-left:2px;padding-right:2px}
+  .formHero.heroCompactV187,.formHero.heroMediumV187{padding:22px 20px}.formHero.heroCompactV187 h1{font-size:25px}
+  .frontFormStack{gap:12px}.frontShell .questionCard{padding:22px 18px;border-radius:16px}.frontShell .identityGrid{grid-template-columns:1fr;gap:14px}
+  .frontShell label.choice{min-height:46px;padding:11px 13px}.frontShell .scaleQuestion{display:grid;grid-template-columns:1fr}.frontShell .scaleQuestion .scaleOptions{display:grid;grid-template-columns:repeat(auto-fit,minmax(38px,1fr));gap:7px}.frontShell .scaleOption{width:100%;height:42px}.frontShell .scaleQuestion>.scaleLabel:last-child{text-align:right}
+  .frontSectionStepsV187 li b{display:none}.frontSectionStepsV187{margin-bottom:10px}.frontSectionProgressV182>div{gap:9px}
+  #publicForm:has(.frontSectionPageV182)>.submitArea{display:none!important}.frontMobileActionsV187{position:fixed;z-index:450;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:10px max(14px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-top:1px solid #d7e2ec;background:rgba(255,255,255,.96);box-shadow:0 -8px 24px rgba(21,46,70,.1);backdrop-filter:blur(12px)}.frontMobileActionsV187 .btn{width:100%;min-height:46px}.frontMobileActionsV187 .btn[hidden]{display:none!important}body:has(.frontMobileActionsV187){padding-bottom:76px}
+  #publicForm[data-layout-effective="focus"]>.focusStepV187{min-height:230px;padding:28px 20px}
+}
+@media(prefers-reduced-motion:reduce){.frontFormStack>.questionCard{animation:none}.frontShell .questionCard,.frontShell label.choice,.frontShell .scaleOption,.frontShell .ratingStar{transition:none!important}}

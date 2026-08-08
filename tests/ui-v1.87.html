@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v1.87 前台填寫體驗驗證</title>
+  <link rel="stylesheet" href="../css/app.css?v=1.87">
+  <style>
+    .fixtureToolbar{position:sticky;top:0;z-index:500;display:flex;justify-content:center;gap:8px;padding:8px;background:rgba(255,255,255,.94);border-bottom:1px solid #dce5ed}
+    .fixtureToolbar button{border:1px solid #cbd9e6;border-radius:9px;padding:7px 12px;background:#fff;color:#173a5e;font-weight:700}
+    .fixtureToolbar button.active{background:#173a5e;color:#fff}
+  </style>
+</head>
+<body data-front-theme="oceanBlue">
+  <div class="fixtureToolbar" aria-label="測試模式">
+    <button class="active" data-mode="standard">標準模式</button>
+    <button data-mode="focus">專注模式</button>
+  </div>
+  <div class="frontShell">
+    <header class="frontHeader">
+      <img src="../assets/company-logo.png" alt="環興科技股份有限公司">
+      <div class="frontActions"><span class="statusPill">開放填寫</span></div>
+    </header>
+    <main class="frontMain">
+      <section class="formHero heroMediumV187">
+        <h1>員工意見調查</h1>
+        <p>希望了解同仁目前的工作感受，作為後續改善參考。</p>
+        <span class="deadlineBadge">請於 2026/08/31 23:59 前完成</span>
+      </section>
+      <form id="publicForm" class="questionList frontFormStack" data-layout-effective="standard">
+        <section class="questionCard identityCard focusStepV187">
+          <label class="title">填寫者資料 <span class="required">*</span></label>
+          <div class="identityGrid">
+            <label>部門<select required><option value="">請選擇部門</option><option>行政部</option></select></label>
+            <label>姓名<select required disabled><option>請先選擇部門</option></select></label>
+          </div>
+        </section>
+        <section class="questionCard focusStepV187">
+          <label class="title">您對目前整體工作體驗的滿意程度為何？ <span class="required">*</span></label>
+          <div class="scaleQuestion">
+            <span class="scaleLabel">非常不滿意</span>
+            <div class="scaleOptions">
+              <label class="scaleOption"><input type="radio" name="score" value="1" required><span>1</span></label>
+              <label class="scaleOption"><input type="radio" name="score" value="2"><span>2</span></label>
+              <label class="scaleOption"><input type="radio" name="score" value="3"><span>3</span></label>
+              <label class="scaleOption"><input type="radio" name="score" value="4"><span>4</span></label>
+              <label class="scaleOption"><input type="radio" name="score" value="5"><span>5</span></label>
+            </div>
+            <span class="scaleLabel">非常滿意</span>
+          </div>
+        </section>
+        <section class="questionCard focusStepV187">
+          <label class="title">您認為目前最值得改善的項目有哪些？</label>
+          <div class="choiceList">
+            <label class="choice"><input type="checkbox">工作流程</label>
+            <label class="choice"><input type="checkbox">跨部門溝通</label>
+            <label class="choice"><input type="checkbox">辦公環境</label>
+          </div>
+        </section>
+        <section class="questionCard focusStepV187">
+          <label class="title">其他建議</label>
+          <textarea placeholder="請輸入您的建議（選填）"></textarea>
+        </section>
+        <div class="submitArea">
+          <button id="frontFocusPrevV187" class="btn" type="button" hidden>上一步</button>
+          <button id="frontFocusNextV187" class="btn primary" type="button" hidden>下一步</button>
+          <button id="submitBtn" class="btn primary" type="submit">確認並送出</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  <script>
+    const form=document.getElementById('publicForm');
+    const steps=[...form.querySelectorAll('.focusStepV187')];
+    let current=0;
+    function setMode(mode){
+      document.querySelectorAll('.fixtureToolbar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+      form.dataset.layoutEffective=mode;
+      document.getElementById('frontFocusPrevV187').hidden=mode!=='focus'||current===0;
+      document.getElementById('frontFocusNextV187').hidden=mode!=='focus'||current===steps.length-1;
+      document.getElementById('submitBtn').hidden=mode==='focus'&&current!==steps.length-1;
+      let progress=document.getElementById('frontFocusProgressV187');
+      if(mode==='focus'&&!progress){form.insertAdjacentHTML('afterbegin','<div id="frontFocusProgressV187" class="frontFocusProgressV187"><div><span></span><b><i></i></b></div></div>');progress=document.getElementById('frontFocusProgressV187')}
+      if(progress)progress.hidden=mode!=='focus';
+      steps.forEach((step,index)=>step.hidden=mode==='focus'&&index!==current);
+      if(progress){progress.querySelector('span').textContent=`第 ${current+1}／${steps.length} 步`;progress.querySelector('i').style.width=`${(current+1)/steps.length*100}%`}
+    }
+    function move(delta){current=Math.max(0,Math.min(steps.length-1,current+delta));setMode('focus')}
+    document.querySelectorAll('.fixtureToolbar button').forEach(button=>button.onclick=()=>setMode(button.dataset.mode));
+    document.getElementById('frontFocusPrevV187').onclick=()=>move(-1);
+    document.getElementById('frontFocusNextV187').onclick=()=>move(1);
+    form.addEventListener('change',event=>{const card=event.target.closest('.questionCard');if(card)card.classList.toggle('isAnsweredV187',!!card.querySelector(':checked')||[...card.querySelectorAll('select,textarea')].some(x=>x.value))});
+    form.addEventListener('focusin',event=>event.target.closest('.questionCard')?.classList.add('isActiveV187'));
+    form.addEventListener('focusout',event=>setTimeout(()=>event.target.closest('.questionCard')?.classList.remove('isActiveV187'),0));
+    form.addEventListener('submit',event=>event.preventDefault());
+  </script>
+</body>
+</html>
