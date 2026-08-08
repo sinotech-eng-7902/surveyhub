@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>v1.94 信件通知驗證</title><link rel="stylesheet" href="../css/app.css?v=1.94"></head>
+<body><main style="padding:30px"><button class="btn primary" onclick="openNotificationCenterV192('invite')">開啟信件通知</button></main>
+<div id="toast" class="toast"></div>
+<script>
+const $=id=>document.getElementById(id),esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),attr=esc;
+const forms=[{id:'form_test',title:'員工意見調查',deadline:'2026-08-31T23:59'}],members=[{id:'m1',name:'蔡雨鑫',department:'行政部',companyEmail:'yuxin@mail.sinotech-eng.com'},{id:'m2',name:'王小明',department:'研資部',companyEmail:'ming@mail.sinotech-eng.com'}];
+function activeForm(){return forms[0]} function completionData(){return{expected:members,missing:[members[1]],filled:[members[0]]}} function memberCompanyEmail(m){return m.companyEmail} function memberDepartmentName(m){return m.department} function formatDeadline(){return'2026/08/31 23:59'} function notify(m){$('toast').textContent=m} function toast(m){$('toast').textContent=m} function syncAdminModalLockV138(){}
+</script>
+<script src="../js/modules/notification-tools.js?v=1.94"></script><script src="../js/modules/notification-center.js?v=1.94"></script>
+<script>openNotificationCenterV192('invite')</script></body></html>
