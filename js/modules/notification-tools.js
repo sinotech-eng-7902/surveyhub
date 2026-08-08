@@ -1,4 +1,4 @@
-/* v1.94 reusable UTF-8 HTML EML generation helpers. */
+/* v1.95 reusable UTF-8 HTML EML generation helpers. */
 (function(global){
   'use strict';
   function cleanHeader(value){return String(value||'').replace(/[\r\n]+/g,' ').trim()}
