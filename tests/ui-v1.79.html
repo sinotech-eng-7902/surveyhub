@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v1.79 UI 驗證頁</title>
+  <link rel="stylesheet" href="../css/app.css?v=1.79">
+  <style>body{margin:0}.adminShell{display:block!important}.panel{display:block}.fixtureNote{margin:0;color:#667085}.fixtureSpacer{height:18px}</style>
+</head>
+<body>
+  <div id="admin" class="adminShell admin">
+    <div class="layout">
+      <aside class="sidebar side topNav">
+        <div class="ab"><img class="topBrandLogo" src="../assets/company-logo.png" alt="環興科技股份有限公司"></div>
+        <div class="topNavLinks">
+          <button class="nav active">儀表板</button>
+          <details class="navGroup topNavGroup"><summary>問卷作業 <span class="navChevron topNavChevron"></span></summary><div class="navMenu topNavMenu"><button class="nav">問卷管理</button><button class="nav">建立問卷</button><button class="nav">填寫結果</button><button class="nav">填寫追蹤</button></div></details>
+          <details class="navGroup topNavGroup"><summary>系統管理 <span class="navChevron topNavChevron"></span></summary><div class="navMenu topNavMenu"><button class="nav">人員管理</button><button class="nav">權限管理</button></div></details>
+        </div>
+        <div class="adminIdentity topUserArea"><span class="topUserIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.6-4 3.1-6 7-6s6.4 2 7 6"></path></svg></span><div class="topUserLabels"><b id="adminUserName">行政部 蔡雨鑫</b><small id="adminUser">系統管理員</small></div><button class="topLogout">登出</button></div>
+      </aside>
+      <main class="adminMain main">
+        <header class="adminHead adminPageHead compactAdminToolbar"><div><h1 id="panelTitle">儀表板</h1></div><div class="adminTools headActions"><select><option>員工意見調查</option></select><button id="refreshAdminBtn" class="toolBtn iconOnlyButton" title="重新整理資料" aria-label="重新整理資料"><svg viewBox="0 0 24 24"><path d="M20 6v5h-5"></path><path d="M19 11a7.5 7.5 0 1 0 .2 3"></path></svg></button><details class="adminMoreMenu"><summary>•••</summary><div class="adminMoreMenuPanel"><button class="btn">複製問卷網址</button><button class="btn">複製管理網址</button></div></details><button class="toolBtn frontViewButton">預覽問卷</button></div></header>
+        <section class="panel active">
+          <div class="summaryGrid dashboardMetrics"><div class="metric"><b>19</b><span>填寫份數</span></div><div class="metric"><b>24</b><span>應填人數</span></div><div class="metric"><b>79%</b><span>完成率</span><span class="metricProgress"><i style="width:79%"></i></span></div><div class="metric"><b>5</b><span>未填人數</span></div></div>
+          <div class="card surveyManagementCardV179"><div class="sectionHead"><div><h2>問卷管理</h2><p>管理我建立、被分享及已關閉的問卷；系統管理員亦可查看系統內所有問卷。</p></div><button class="btn primary">建立問卷</button></div><div class="surveyTabs"><button class="active">我建立的問卷 <span>2</span></button><button>被分享的問卷 <span>1</span></button><button>已關閉的問卷 <span>3</span></button></div></div>
+          <div class="fixtureSpacer"></div>
+          <div class="card"><div class="sectionHead"><div><h2>填寫追蹤</h2><p class="fixtureNote">員工意見調查：應填 24 人，已填 19 人，未填 5 人</p></div><div class="buttonRow"><button class="btn success">匯出填寫進度</button><button class="btn">匯出未填名單</button></div></div><section class="missingPanel progressMissingPanelV171"><div class="missingPanelHead"><div><h3>未填寫人員名單</h3><p>全部部門：顯示 5 位未填寫人員</p></div></div><div class="missingTools missingToolsV179"><label>搜尋<input placeholder="搜尋姓名、部門或員工編號"></label><label>部門<select><option>全部部門</option></select></label></div><div class="completionStats"><div class="completionStat"><span>應填人數</span><strong>24 人</strong></div><div class="completionStat"><span>已填人數</span><strong>19 人</strong></div><div class="completionStat"><span>未填人數</span><strong>5 人</strong></div></div></section></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

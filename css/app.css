@@ -4926,3 +4926,35 @@ body[data-front-theme="oceanBlue"] .formHero h1,body[data-front-theme="oceanBlue
     transform:none;
   }
 }
+
+/* v1.79 final cascade overrides */
+.compactAdminToolbar #refreshAdminBtn,
+.compactAdminToolbar .adminMoreMenu>summary{border-color:#cfdbe6;background:#fff;color:#24415e;box-shadow:none}
+.compactAdminToolbar #refreshAdminBtn:hover,
+.compactAdminToolbar #refreshAdminBtn:focus-visible,
+.compactAdminToolbar .adminMoreMenu>summary:hover,
+.compactAdminToolbar .adminMoreMenu>summary:focus-visible,
+.compactAdminToolbar .adminMoreMenu[open]>summary{border-color:#b7c8d9;background:#eef5ff;color:#174f98;box-shadow:0 4px 12px rgba(34,73,115,.08);outline:0}
+.adminShell .topNavLinks>.nav.active:not(:hover):not(:focus-visible),
+.adminShell .topNavMenu .nav.active:not(:hover):not(:focus-visible),
+.adminShell .topNavGroup:has(.nav.active):not([open])>summary:not(:hover):not(:focus-visible){background:transparent;color:#34465e}
+.adminShell .topNavGroup[open]>summary,
+.adminShell .topNavGroup>summary:hover,
+.adminShell .topNavGroup>summary:focus-visible,
+.adminShell .topNavMenu .nav:hover,
+.adminShell .topNavMenu .nav:focus-visible{background:#eaf3ff;color:#2563eb;outline:0}
+.adminShell .topNavMenu{display:grid;gap:6px}.adminShell .topNavMenu .nav{margin:0}
+.adminShell .btn{box-sizing:border-box;border:1px solid transparent}
+.adminShell .btn.primary:hover,.adminShell .btn.primary:focus-visible{border-color:#1f56ad;background:#245fbd;color:#fff;box-shadow:0 5px 14px rgba(36,95,189,.18);outline:0}
+.adminShell .btn.primary:disabled{border-color:#d8e1ea;background:#e7edf4;color:#6f7f90;box-shadow:none;cursor:not-allowed}
+.adminShell .dashboardMetrics .metric{min-height:124px;padding:20px 22px 18px}
+.adminShell .dashboardMetrics .metric b{font-size:30px}
+.adminShell .dashboardMetrics .metric span:not(.metricProgress){margin-top:7px;font-size:15px}
+.adminShell .dashboardMetrics .metric .metricProgress{margin-top:10px}
+.surveyManagementCardV179>.sectionHead{align-items:center;padding-bottom:17px;border-bottom:1px solid #e5ebf1}
+.surveyManagementCardV179 .surveyTabs{margin-top:0}
+.missingToolsV179{display:grid;grid-template-columns:minmax(260px,1.4fr) minmax(190px,.7fr);gap:12px;margin:16px 0}
+.missingToolsV179 label{display:grid;gap:6px;margin:0;color:#34465e;font-size:14px;font-weight:800}
+.missingToolsV179 input,.missingToolsV179 select{width:100%;min-height:46px;margin:0}
+@media(max-width:900px){.surveyManagementCardV179>.sectionHead{align-items:flex-start}.missingToolsV179{grid-template-columns:1fr}}
+@media(max-width:640px){.adminShell .dashboardMetrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}.adminShell .dashboardMetrics .metric{min-height:112px;padding:17px 15px 15px}.adminShell .dashboardMetrics .metric b{font-size:27px}.adminShell .dashboardMetrics .metric span:not(.metricProgress){font-size:14px}}
