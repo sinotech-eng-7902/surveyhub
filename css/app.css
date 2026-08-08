@@ -5386,3 +5386,22 @@ body[data-front-theme] .frontMain>.formHero.heroStyleImageV188 .frontHeroMetaV19
 .editorDescriptionV181>summary:hover,.editorAttachmentsInlineV182>summary:hover{color:#0f5f9d}
 .editorDescriptionV181>summary:focus-visible,.editorAttachmentsInlineV182>summary:focus-visible{outline:2px solid #6da5d3;outline-offset:4px;border-radius:6px}
 .editorAttachmentsInlineV182>summary:after,.editorAttachmentsInlineV182[open]>summary:after{content:''}
+/* v1.91 - workflow, large-list, notification, version and sharing refinements */
+.listToolsV191{display:grid;grid-template-columns:minmax(260px,1fr) 190px 150px;gap:12px;align-items:end;margin:18px 0}
+.listToolsV191 label,.notificationGridV191 label{display:grid;gap:7px;font-weight:700;color:#173b67}
+.paginationV191{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:16px;color:#617896}
+.draftResumeV191{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 18px;margin-bottom:18px;border:1px solid #b9d8ef;border-radius:14px;background:#eef8ff;color:#173b67}
+.draftResumeV191 div:first-child{display:grid;gap:4px}.draftResumeV191 span{color:#647b98;font-size:14px}
+.questionCard.frontInvalidV191{border-color:#d54242!important;box-shadow:0 0 0 3px rgba(213,66,66,.1)!important}
+.inlineErrorV191{margin:12px 0 0;color:#c62828;font-weight:700}
+.notificationCenterV191,.formHistoryV191,.shareCenterV191{width:min(920px,calc(100vw - 32px));max-height:calc(100vh - 40px);overflow:auto}
+.notificationGridV191{display:grid;grid-template-columns:220px 1fr;gap:14px;margin-bottom:16px}
+.recipientPanelV191{border:1px solid #d8e3ee;border-radius:14px;background:#f8fbfe;padding:14px;margin:14px 0}
+.recipientHeadV191{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.recipientHeadV191>div:first-child{display:flex;gap:10px;align-items:center}.recipientHeadV191 span{color:#68809c}
+.recipientChipsV191{display:flex;flex-wrap:wrap;gap:8px;max-height:180px;overflow:auto}.recipientChipsV191 label{display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #d6e2ee;border-radius:999px;background:#fff;cursor:pointer}.recipientChipsV191 input{width:18px;height:18px}
+.notificationCenterV191 textarea{width:100%;resize:vertical;line-height:1.75}
+.historyListV191{display:grid;gap:10px;margin:16px 0}.historyListV191 article{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px;border:1px solid #dbe5ef;border-radius:12px;background:#f8fbfe}.historyListV191 article>div{display:grid;gap:5px}.historyListV191 article span{color:#657d99;font-size:14px}
+.emptyStateV191{padding:22px;text-align:center;color:#6e829a;background:#f7f9fc;border-radius:12px}
+.shareLayoutV191{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:24px;margin-top:18px}.copyFieldV191{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:7px}.shareScheduleV191{display:grid;gap:0;margin:18px 0;border:1px solid #dce6ef;border-radius:12px;overflow:hidden}.shareScheduleV191 div{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:12px 14px;border-bottom:1px solid #e6edf4}.shareScheduleV191 div:last-child{border-bottom:0}.shareScheduleV191 dt{font-weight:700;color:#315678}.shareScheduleV191 dd{margin:0}.shareQrV191{display:grid;justify-items:center;align-content:start;gap:8px;padding:16px;border:1px solid #dce6ef;border-radius:14px;background:#f8fbfe}.shareQrV191 img{width:200px;height:200px;background:#fff}.shareQrV191 small{color:#68809c}
+.memberFormGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:760px){.listToolsV191,.notificationGridV191,.shareLayoutV191{grid-template-columns:1fr}.paginationV191,.draftResumeV191,.recipientHeadV191{align-items:stretch;flex-direction:column}.copyFieldV191{grid-template-columns:1fr}.shareQrV191{order:-1}.memberFormGrid{grid-template-columns:1fr}.notificationCenterV191,.formHistoryV191,.shareCenterV191{width:min(100% - 16px,920px)}}

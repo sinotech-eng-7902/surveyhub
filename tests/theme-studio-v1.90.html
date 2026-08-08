@@ -10,4 +10,4 @@
   function renderThemeChoices(selected){formTheme({theme:selected});$('formTheme').value=selected;$('themeChoices').innerHTML=FORM_THEMES_V132.map(t=>`<button type="button" class="themeCard ${selected===t.id?'active':''}" onclick="selectTheme('${t.id}')"><span class="themeSwatch" style="--a:${t.a};--b:${t.b};--accent:${t.accent}"></span><b>${t.label}</b></button>`).join('')}
   function selectTheme(id){$('formTheme').value=id;renderThemeChoices(id);formDirty=true}
   function startNewForm(){} function editForm(){} function setEditorTabV181(){} function renderFront(){} async function submitResponse(){}
-</script><script src="../js/product-v188.js?v=1.90"></script><script src="../js/product-v189.js?v=1.90"></script><script src="../js/product-v190.js?v=1.90"></script><script>renderThemeChoices('appleWhite')</script></body></html>
+</script><script src="../js/modules/theme-studio.js?v=1.91"></script><script src="../js/modules/theme-contrast.js?v=1.91"></script><script src="../js/modules/front-theme-meta.js?v=1.91"></script><script>renderThemeChoices('appleWhite')</script></body></html>
