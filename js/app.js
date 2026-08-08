@@ -1,4 +1,4 @@
-﻿let app,auth,db,currentUser=null,isAdmin=false,isSystemAdmin=false,formAssignments=[],formManagers=[],forms=[],responses=[],departments=[],members=[],memberAccounts=[],activeFormId='',editMode='new',editingId='',draftQuestions=[],editingResponseId='',memberEditMode='view',editingMemberId='',submissionLocksPrepared=false,loginPurpose='admin',formDirty=false,activeFormSection='mine';
+let app,auth,db,currentUser=null,isAdmin=false,isSystemAdmin=false,formAssignments=[],formManagers=[],forms=[],responses=[],departments=[],members=[],memberAccounts=[],activeFormId='',editMode='new',editingId='',draftQuestions=[],editingResponseId='',memberEditMode='view',editingMemberId='',submissionLocksPrepared=false,loginPurpose='admin',formDirty=false,activeFormSection='mine';
 let responseLoadRequestV178=0,formSelectionRequestV178=0;
 let responseUnsubscribeV179=null,responseListenerFormIdV179='',responseListenerGenerationV179=0;
 let memberImportMode='partial',pendingMemberImport=null,storage=null;
@@ -52,8 +52,9 @@ function doc(name,id){return col(name).doc(id)}
 function attr(v){return esc(v)}
 function normalizeEmail(value){return String(value||'').trim().toLowerCase()}
 function memberDisplayName(member){return [member?.department||member?.departmentName||'',member?.name||''].filter(Boolean).join(' ')||member?.name||''}
-function memberGoogleEmail(member){let account=memberAccounts.find(a=>a.memberId===member?.id||a.id===member?.id);return normalizeEmail(account?.email||member?.googleEmail||member?.googleAccount||member?.email||member?.gmail||'')}
-function memberCompanyEmail(member){return normalizeEmail(member?.companyEmail||member?.workEmail||'')}
+function memberAccount(member){return memberAccounts.find(a=>String(a.memberId||a.id||'')===String(member?.id||''))||null}
+function memberGoogleEmail(member){let account=memberAccount(member);return normalizeEmail(account?.email||member?.googleEmail||member?.googleAccount||member?.email||member?.gmail||'')}
+function memberCompanyEmail(member){let account=memberAccount(member);return normalizeEmail(account?.companyEmail||member?.companyEmail||member?.workEmail||member?.corporateEmail||'')}
 function findMemberByGoogleEmail(email){let target=normalizeEmail(email);return target?members.find(m=>memberGoogleEmail(m)===target)||null:null}
 function toast(message,type='info'){let t=$('toast');t.textContent=message;t.className='toast '+type;t.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',2600)}
 function notify(message,type='warn'){toast(message,type);return false}
@@ -297,11 +298,12 @@ async function importMembersV152(file){
       if(companyEmail&&!/^\S+@\S+\.\S+$/.test(companyEmail)){errors.push(`第 ${line} 列：公司信箱格式不正確`);return}
       if(companyEmail&&seenCompanyEmails.has(companyEmail)){errors.push(`第 ${line} 列：公司信箱 ${companyEmail} 在檔案中重複`);return}
       if(companyEmail)seenCompanyEmails.add(companyEmail);
-      let existing=existingByNo.get(employeeNo)||null,owner=members.find(m=>memberGoogleEmail(m)===googleEmail&&m.id!==existing?.id);
+      let existing=existingByNo.get(employeeNo)||null,owner=members.find(m=>memberGoogleEmail(m)===googleEmail&&m.id!==existing?.id),companyOwner=members.find(m=>memberCompanyEmail(m)===companyEmail&&m.id!==existing?.id);
       if(googleEmail&&owner){errors.push(`第 ${line} 列：Google 帳號已由 ${owner.name||'其他人員'} 使用`);return}
+      if(companyEmail&&companyOwner){errors.push(`第 ${line} 列：公司信箱已由 ${companyOwner.name||'其他人員'} 使用`);return}
       let active=!['停用','否','false','0','no'].includes(status.toLowerCase());
-      let memberData={department,name,employeeNo,active,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};if(hasCompanyColumn)memberData.companyEmail=companyEmail;
-      items.push({existing,googleEmail,hasGoogleColumn,data:memberData});
+      let memberData={department,name,employeeNo,active,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+      items.push({existing,googleEmail,hasGoogleColumn,companyEmail,hasCompanyColumn,data:memberData});
     });
     let addCount=items.filter(item=>!item.existing).length,updateCount=items.length-addCount,missing=memberImportMode==='full'?members.filter(member=>member.active!==false&&!uploadedEmployeeNos.has(memberEmployeeNo(member))):[];
     if(!items.length){let summary=`沒有可匯入的資料${errors.length?'，共 '+errors.length+' 筆錯誤':''}`;result.className='memberImportResult error';result.textContent=summary;notify(summary,'warn');return}
@@ -324,9 +326,11 @@ async function confirmMemberImport(){
       let memberId;
       if(item.existing){memberId=item.existing.id;await doc('members',memberId).set(item.data,{merge:true})}
       else{item.data.createdAt=firebase.firestore.FieldValue.serverTimestamp();memberId=(await col('members').add(item.data)).id}
-      if(item.hasGoogleColumn){
-        if(item.googleEmail)await doc('memberAccounts',memberId).set({memberId,email:item.googleEmail,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-        else{let account=await doc('memberAccounts',memberId).get();if(account.exists)await doc('memberAccounts',memberId).delete()}
+      if(item.hasGoogleColumn||item.hasCompanyColumn){
+        let accountRef=doc('memberAccounts',memberId),account=await accountRef.get(),accountData=account.exists?account.data():{},nextGoogle=item.hasGoogleColumn?item.googleEmail:normalizeEmail(accountData.email||''),nextCompany=item.hasCompanyColumn?item.companyEmail:normalizeEmail(accountData.companyEmail||'');
+        if(nextGoogle||nextCompany)await accountRef.set({memberId,email:nextGoogle||firebase.firestore.FieldValue.delete(),companyEmail:nextCompany||firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        else if(account.exists)await accountRef.delete();
+        if(item.hasCompanyColumn)await doc('members',memberId).set({companyEmail:firebase.firestore.FieldValue.delete(),workEmail:firebase.firestore.FieldValue.delete(),corporateEmail:firebase.firestore.FieldValue.delete()},{merge:true});
       }
     }
     for(let memberId of disableIds){
@@ -408,7 +412,7 @@ function creatorSelectOptions(currentEmail=''){let current=normalizeEmail(curren
 
 
 function percentage(count,total){count=Number(count);total=Number(total);if(!Number.isFinite(count)||!Number.isFinite(total)||count<=0||total<=0)return 0;return Math.min(100,Math.round(count*1000/total)/10)}
-async function saveMember(){let department=$('memberDepartment').value,name=$('memberName').value.trim(),employeeNo=$('memberEmployeeNo').value.trim(),googleEmail=normalizeEmail($('memberGoogleEmail')?.value||''),companyEmail=normalizeEmail($('memberCompanyEmail')?.value||'');if(!department||!name||!employeeNo)return notify('請完整填寫部門、姓名與員工編號');if(googleEmail&&!/^\S+@\S+\.\S+$/.test(googleEmail))return notify('請輸入有效的 Google 帳號');if(companyEmail&&!/^\S+@\S+\.\S+$/.test(companyEmail))return notify('請輸入有效的公司信箱');let duplicate=members.find(m=>String(m.employeeNo||m.empNo||'').trim()===employeeNo&&m.id!==editingMemberId);if(duplicate)return notify(`員工編號 ${employeeNo} 已由 ${duplicate.name||'其他人員'} 使用`);let duplicateGoogle=members.find(m=>memberGoogleEmail(m)===googleEmail&&m.id!==editingMemberId);if(googleEmail&&duplicateGoogle)return notify(`Google 帳號已由 ${duplicateGoogle.name||'其他人員'} 使用`);let duplicateCompany=members.find(m=>memberCompanyEmail(m)===companyEmail&&m.id!==editingMemberId);if(companyEmail&&duplicateCompany)return notify(`公司信箱已由 ${duplicateCompany.name||'其他人員'} 使用`);let data={department,name,employeeNo,companyEmail,active:$('memberActive').value==='true',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},btn=$('saveMemberBtn');btn.disabled=true;btn.textContent='儲存中…';setPageLoading(true,'正在儲存人員資料…');try{let memberId=editingMemberId;if(memberEditMode==='new'){data.createdAt=firebase.firestore.FieldValue.serverTimestamp();memberId=(await col('members').add(data)).id}else await doc('members',memberId).set(data,{merge:true});if(googleEmail)await doc('memberAccounts',memberId).set({memberId,email:googleEmail,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});else{let account=await doc('memberAccounts',memberId).get();if(account.exists)await doc('memberAccounts',memberId).delete()}let wasNew=memberEditMode==='new';cancelMemberEdit();await loadAdminData();showPanel('membersPanel');toast(wasNew?'人員已新增，兩套系統將同步使用':'人員資料已更新','success')}catch(e){console.error(e);notify('人員資料儲存失敗，請確認權限或網路狀態','error')}finally{setPageLoading(false);btn.disabled=false;btn.textContent=memberEditMode==='edit'?'儲存變更':'新增人員'}}
+async function saveMember(){let department=$('memberDepartment').value,name=$('memberName').value.trim(),employeeNo=$('memberEmployeeNo').value.trim(),googleEmail=normalizeEmail($('memberGoogleEmail')?.value||''),companyEmail=normalizeEmail($('memberCompanyEmail')?.value||'');if(!department||!name||!employeeNo)return notify('請完整填寫部門、姓名與員工編號');if(googleEmail&&!/^\S+@\S+\.\S+$/.test(googleEmail))return notify('請輸入有效的 Google 帳號');if(companyEmail&&!/^\S+@\S+\.\S+$/.test(companyEmail))return notify('請輸入有效的公司信箱');let duplicate=members.find(m=>String(m.employeeNo||m.empNo||'').trim()===employeeNo&&m.id!==editingMemberId);if(duplicate)return notify(`員工編號 ${employeeNo} 已由 ${duplicate.name||'其他人員'} 使用`);let duplicateGoogle=members.find(m=>memberGoogleEmail(m)===googleEmail&&m.id!==editingMemberId);if(googleEmail&&duplicateGoogle)return notify(`Google 帳號已由 ${duplicateGoogle.name||'其他人員'} 使用`);let duplicateCompany=members.find(m=>memberCompanyEmail(m)===companyEmail&&m.id!==editingMemberId);if(companyEmail&&duplicateCompany)return notify(`公司信箱已由 ${duplicateCompany.name||'其他人員'} 使用`);let data={department,name,employeeNo,active:$('memberActive').value==='true',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},btn=$('saveMemberBtn');btn.disabled=true;btn.textContent='儲存中…';setPageLoading(true,'正在儲存人員資料…');try{let memberId=editingMemberId;if(memberEditMode==='new'){data.createdAt=firebase.firestore.FieldValue.serverTimestamp();memberId=(await col('members').add(data)).id}else await doc('members',memberId).set(data,{merge:true});await doc('members',memberId).set({companyEmail:firebase.firestore.FieldValue.delete(),workEmail:firebase.firestore.FieldValue.delete(),corporateEmail:firebase.firestore.FieldValue.delete()},{merge:true});let accountRef=doc('memberAccounts',memberId);if(googleEmail||companyEmail)await accountRef.set({memberId,email:googleEmail||firebase.firestore.FieldValue.delete(),companyEmail:companyEmail||firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});else{let account=await accountRef.get();if(account.exists)await accountRef.delete()}let wasNew=memberEditMode==='new';cancelMemberEdit();await loadAdminData();showPanel('membersPanel');toast(wasNew?'人員已新增，兩套系統將同步使用':'人員資料已更新','success')}catch(e){console.error(e);notify('人員資料儲存失敗，請確認權限或網路狀態','error')}finally{setPageLoading(false);btn.disabled=false;btn.textContent=memberEditMode==='edit'?'儲存變更':'新增人員'}}
 async function toggleMember(id,active){let m=members.find(x=>x.id===id);if(!m)return;if(!active&&!await confirmDialog(`確定停用 ${m.name||'這位人員'}？停用後兩套調查系統的前台都不會顯示。`,'停用人員',true))return;setPageLoading(true,'正在更新人員狀態…');try{await doc('members',id).set({active,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});await loadAdminData();showPanel('membersPanel');toast(active?'人員已啟用':'人員已停用','success')}catch(e){console.error(e);notify('人員狀態更新失敗','error')}finally{setPageLoading(false)}}
 async function loadPublicData(){let[fs,ds,ms]=await Promise.all([col('universalForms').get(),col('departments').get(),col('members').get()]);forms=fs.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));departments=ds.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(a.sortOrder??999)-(b.sortOrder??999));let depOrder=new Map(departments.map((d,i)=>[d.name||d.departmentName||d.department||'',i]));members=ms.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>{let ad=a.department||a.departmentName||'',bd=b.department||b.departmentName||'',diff=(depOrder.get(ad)??9999)-(depOrder.get(bd)??9999);if(diff)return diff;return String(a.employeeNo||a.empNo||'').localeCompare(String(b.employeeNo||b.empNo||''),'zh-Hant',{numeric:true})||String(a.name||'').localeCompare(String(b.name||''),'zh-Hant')});let publicForms=forms.filter(f=>f.deleted!==true),route=formRouteId(),adminId=adminRouteId(),allowed=isAdmin?accessibleForms():[];if(adminId&&allowed.some(f=>f.id===adminId))activeFormId=adminId;else if(route&&publicForms.some(f=>f.id===route))activeFormId=route;else if(isAdmin&&allowed.length&&!allowed.some(f=>f.id===activeFormId))activeFormId=allowed[0].id;else if(!isAdmin)activeFormId=''}
 function stopResponseListenerV179(){
@@ -813,7 +817,7 @@ async function submitResponse(event){
     identity={departmentName:departmentName,memberId:memberId,memberName:m.name||'',employeeNo:memberEmployeeNo(m),respondentMemberId:m.id,respondentEmployeeId:memberEmployeeNo(m),respondentName:m.name||'',respondentDepartment:departmentName};
   }
   var answers;
-  try{answers=collectAnswers(event.target,f)}catch(e){if(typeof focusFrontValidationErrorV191==='function')focusFrontValidationErrorV191(e);return notify(e.message||'請確認填寫內容','warn')}
+  try{answers=collectAnswers(event.target,f)}catch(e){if(typeof focusFrontValidationErrorV192==='function')focusFrontValidationErrorV192(e);return notify(e.message||'請確認填寫內容','warn')}
   var responseKey=f.identityMode==='member'?f.id+'__'+identity.memberId:'';
   if(!await confirmDialog('確認送出這份問卷嗎？送出後'+formCorrectionContactText(f),'確認送出'))return;
   var btn=$('submitBtn');btn.disabled=true;btn.textContent='送出中';setPageLoading(true,'正在送出問卷');
@@ -824,7 +828,7 @@ async function submitResponse(event){
     var payload=Object.assign({formId:f.id,formTitle:f.title},identity,{answers:answers,submissionMethod:'self',submittedAt:firebase.firestore.FieldValue.serverTimestamp(),submittedAtText:new Date().toLocaleString('zh-TW')});
     await writeResponseWithLock(f,responseKey,payload,responseKey?{formId:f.id,memberId:identity.memberId,submissionMethod:'self',createdAt:firebase.firestore.FieldValue.serverTimestamp()}:null);
     var successText=formUsesMemberDatabaseV141(f)?'已收到您的填寫內容。每位同仁限填一次；'+formCorrectionContactText(f):'已收到您的填寫內容，感謝您的填寫。';
-    if(typeof clearFrontDraftV191==='function')clearFrontDraftV191();
+    if(typeof clearFrontDraftV192==='function')clearFrontDraftV192();
     frontMain.innerHTML='<div class="successCard submitSuccessCard"><h2>填寫成功</h2><p>'+esc(successText)+'</p><button class="btn primary" onclick="location.reload()">返回問卷</button></div>';
     toast('填寫成功','success');
   }catch(e){
@@ -1054,8 +1058,8 @@ function renderAnalysis(f){
   var secondLabel=memberMode?'填寫部門數':'題目數',secondValue=memberMode?departmentsUsed.size:analysisQuestionsV170(f).length;
   return '<div class="analysisSummary"><div class="analysisMetric"><span>總填寫份數</span><b>'+total+'</b></div><div class="analysisMetric"><span>'+secondLabel+'</span><b>'+secondValue+'</b></div><div class="analysisMetric"><span>最近填寫時間</span><b class="analysisMetricTimeV173">'+esc(latest||'尚無紀錄')+'</b></div></div>'+(total?'<div class="analysisGrid">'+cards.join('')+'</div>':'<div class="emptyAnalysis">目前尚無填寫資料，收到回覆後會自動產生統計。</div>');
 }
-var resultViewModeV170='summary',resultQuestionIndexV170=0,resultIndividualIndexV170=0,resultDetailPageV191=1,resultDetailPageSizeV191=50;
-function setResultDetailPageV191(page){resultDetailPageV191=Math.max(1,Number(page)||1);renderResults()}
+var resultViewModeV170='summary',resultQuestionIndexV170=0,resultIndividualIndexV170=0,resultDetailPageV192=1,resultDetailPageSizeV192=50;
+function setResultDetailPageV192(page){resultDetailPageV192=Math.max(1,Number(page)||1);renderResults()}
 function updateResultViewVisibilityV170(){var map={summary:'resultAnalysis',question:'resultQuestionViewV170',individual:'resultIndividualViewV170',details:'resultDetailViewV171'};Object.keys(map).forEach(function(mode){var panel=$(map[mode]);if(panel)panel.hidden=resultViewModeV170!==mode});document.querySelectorAll('[data-result-view-v170]').forEach(function(button){var selected=button.dataset.resultViewV170===resultViewModeV170;button.setAttribute('aria-selected',selected?'true':'false');button.tabIndex=selected?0:-1;button.disabled=!activeForm()})}
 function setResultViewV170(mode,button){if(!['summary','question','individual','details'].includes(mode))return;resultViewModeV170=mode;updateResultViewVisibilityV170();if(button)button.focus()}
 function moveResultQuestionV170(step){var f=activeForm(),questions=f?analysisQuestionsV170(f):[];if(!questions.length)return;resultQuestionIndexV170=Math.max(0,Math.min(questions.length-1,resultQuestionIndexV170+Number(step||0)));renderQuestionViewV170(f)}
@@ -1079,9 +1083,9 @@ function renderResults(){
   $('resultAnalysis').innerHTML=renderAnalysis(f);
   renderQuestionViewV170(f);
   ensureResultDetailTools(f);
-  var qs=normalizeQuestions(f.questions||[]).filter(function(q){return q.type!=='image'}),identityHeaders=formUsesMemberDatabaseV141(f)?['部門','姓名','員工編號']:[],manage=canManageForm(f.id),allList=filteredResultResponses(f),pageCount=Math.max(1,Math.ceil(allList.length/resultDetailPageSizeV191));resultDetailPageV191=Math.min(resultDetailPageV191,pageCount);var list=allList.slice((resultDetailPageV191-1)*resultDetailPageSizeV191,resultDetailPageV191*resultDetailPageSizeV191);
+  var qs=normalizeQuestions(f.questions||[]).filter(function(q){return q.type!=='image'}),identityHeaders=formUsesMemberDatabaseV141(f)?['部門','姓名','員工編號']:[],manage=canManageForm(f.id),allList=filteredResultResponses(f),pageCount=Math.max(1,Math.ceil(allList.length/resultDetailPageSizeV192));resultDetailPageV192=Math.min(resultDetailPageV192,pageCount);var list=allList.slice((resultDetailPageV192-1)*resultDetailPageSizeV192,resultDetailPageV192*resultDetailPageSizeV192);
   renderIndividualNavigatorV170(f,resultIndividualResponsesV173());
-  resultsTable.innerHTML=table(identityHeaders.concat(qs.map(function(q){return q.title}),['送出時間','填寫方式','操作']),list.map(function(r){return responseDetailRow(f,qs,r,manage)}),emptyState('查無填寫明細','請調整搜尋或篩選條件。'))+(allList.length?'<div class="paginationV191"><span>第 '+resultDetailPageV191+'／'+pageCount+' 頁，共 '+allList.length+' 筆</span><div class="buttonRow"><button class="btn" type="button" onclick="setResultDetailPageV191('+(resultDetailPageV191-1)+')" '+(resultDetailPageV191<=1?'disabled':'')+'>上一頁</button><button class="btn" type="button" onclick="setResultDetailPageV191('+(resultDetailPageV191+1)+')" '+(resultDetailPageV191>=pageCount?'disabled':'')+'>下一頁</button></div></div>':'');
+  resultsTable.innerHTML=table(identityHeaders.concat(qs.map(function(q){return q.title}),['送出時間','填寫方式','操作']),list.map(function(r){return responseDetailRow(f,qs,r,manage)}),emptyState('查無填寫明細','請調整搜尋或篩選條件。'))+(allList.length?'<div class="paginationV192"><span>第 '+resultDetailPageV192+'／'+pageCount+' 頁，共 '+allList.length+' 筆</span><div class="buttonRow"><button class="btn" type="button" onclick="setResultDetailPageV192('+(resultDetailPageV192-1)+')" '+(resultDetailPageV192<=1?'disabled':'')+'>上一頁</button><button class="btn" type="button" onclick="setResultDetailPageV192('+(resultDetailPageV192+1)+')" '+(resultDetailPageV192>=pageCount?'disabled':'')+'>下一頁</button></div></div>':'');
   updateResultViewVisibilityV170();
 }
 function resultExportRowV141(f,qs,r){
@@ -1331,7 +1335,7 @@ async function saveForm(){
     data.imageUrl=prepared.headerUrl;data.imageStoragePath=prepared.headerPath;data.questions=prepared.questions;
     referencePrepared=await prepareReferenceFilesV156(id,existing);data.referenceFiles=referencePrepared.files;
     await doc('universalForms',id).set(data,{merge:true});
-    if(typeof saveFormVersionV191==='function')await saveFormVersionV191(id,editMode==='edit'?'save':'create');
+    if(typeof saveFormVersionV192==='function')await saveFormVersionV192(id,editMode==='edit'?'save':'create');
     await Promise.all(prepared.obsolete.concat(referencePrepared.obsolete).map(function(path){return deleteStoragePathV153(path).catch(function(e){console.warn('舊附件清理失敗',path,e)})}));
     resetPendingImages();resetReferenceFilesV156(data.referenceFiles);formDirty=false;activeFormId=id;await loadAdminData();showPanel('formsPanel');toast(editMode==='edit'?'問卷變更已儲存':'問卷已建立','success')
   }catch(e){console.error(e);if(prepared&&prepared.uploaded)await Promise.all(prepared.uploaded.map(function(path){return deleteStoragePathV153(path).catch(function(){})}));if(referencePrepared&&referencePrepared.uploaded)await Promise.all(referencePrepared.uploaded.map(function(path){return deleteStoragePathV153(path).catch(function(){})}));if(createdBase)await doc('universalForms',id).delete().catch(function(){});notify('問卷儲存失敗：'+(e&&e.message?e.message:'請確認 Storage 規則、權限或網路狀態'),'error')}finally{setPageLoading(false);btn.disabled=false;btn.textContent=editMode==='edit'?'儲存變更':'建立問卷'}
